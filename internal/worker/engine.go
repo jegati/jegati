@@ -79,6 +79,14 @@ func (e *Engine) Step(ctx context.Context) error {
 	if err != nil || !leader {
 		return err
 	}
+	for _, g := range e.Open() {
+		if err = e.Store.ReconcilePresence(ctx, g.ID, e.Config.Arrivals.ConfirmationCount, e.Config.Limits.CleanupBatchSize, int64(e.Config.Arrivals.ConfirmationStabilitySeconds)*1000, int64(e.Config.Matching.ReconciliationSeconds)*2000); err != nil {
+			return err
+		}
+	}
+	if err = e.Refresh(ctx, now); err != nil {
+		return err
+	}
 	due, err := e.Store.DueReservations(ctx, now, e.Config.Matching.CandidateBatchSize)
 	if err != nil {
 		return err

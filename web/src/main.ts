@@ -11,7 +11,12 @@ const form = el<HTMLFormElement>('willingness'), active = el('active'), status =
 const duration = el<HTMLSelectElement>('duration'), radius = el<HTMLSelectElement>('radius');
 const ready = el<HTMLButtonElement>('ready'), cancel = el<HTMLButtonElement>('cancel'), retry = el<HTMLButtonElement>('retry');
 let session = sessions.restore(), selected: string | null = null, busy = false;
-let pollSeconds = 30, nextPoll = 0, failures = 0;
+let pollSeconds = 30, nextPoll = 0, failures = 0, operations = 0, cancelling = false;
+let here = false, arrivalUntil = 0, nonceSeconds = 120;
+let currentGrid: Grid | undefined;
+let pendingNonce: { token: string; expires: number; issued: boolean } | null = null;
+function begin() { operations++; busy = true; render(); }
+function finish() { operations--; busy = operations > 0; render(); }
 let map: maplibregl.Map | undefined;
 let initialized = false;
 interface Invitation { id: string; crossing: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
@@ -20,6 +25,12 @@ let renderedDestination: string | null = null;
 function invitationView() {
   const card = el('invitation'); card.hidden = !invitation;
   if (!invitation) { destinationMap?.remove(); destinationMap = undefined; renderedDestination = null; return; }
+  el('collective-title').textContent = invitation.state === 'jemi_ketu' ? 'JEMI KËTU.' : 'JEMI GATI.';
+  el<HTMLButtonElement>('arrive').hidden = !going || here;
+  el<HTMLButtonElement>('arrive').disabled = busy;
+  el<HTMLButtonElement>('retract').hidden = !here;
+  el<HTMLButtonElement>('retract').disabled = busy;
+  el('arrival-status').textContent = here ? 'Mbërritja jote është konfirmuar përkohësisht.' : going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
   el('destination').textContent = invitation.crossing.label;
   el('gathering-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((invitation.ends_at - Date.now()) / 60_000))} minutash.`;
   el('going-status').textContent = going ? 'Ke zgjedhur të shkosh.' : 'Mund të zgjedhësh nëse do të shkosh.';
@@ -46,28 +57,28 @@ function invitationView() {
 const message = (text: string) => { status.textContent = text; };
 function render() {
   form.hidden = session !== null; active.hidden = session === null;
-  cancel.disabled = busy; retry.disabled = busy;
+  cancel.disabled = cancelling; retry.disabled = busy;
   ready.disabled = busy || !selected;
   retry.hidden = !session || session.confirmed;
-  el('active-title').textContent = session?.confirmed ? 'JAM GATI.' : 'Po kontrollojmë gatishmërinë…';
+  el('active-title').textContent = session?.confirmed ? (here ? 'JAM KËTU.' : 'JAM GATI.') : 'Po kontrollojmë gatishmërinë…';
   invitationView();
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
-  session = null; sessions.clear(); selected = null; invitation = null; going = false;
+  session = null; sessions.clear(); selected = null; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
   el('area-status').textContent = 'Ende nuk ke zgjedhur zonë.';
   render(); map?.resize(); message(text);
 }
-async function request(method: string, path: string, body?: unknown) {
+async function request(method: string, path: string, body?: unknown, extraHeaders: Record<string, string> = {}) {
   if (!session || session.expires <= Date.now()) { end('Gatishmëria përfundoi.'); throw new Error('expired'); }
   return fetch(path, { method, credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10_000),
-    headers: { Authorization: `Bearer ${session.token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    headers: { Authorization: `Bearer ${session.token}`, ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders },
     ...(body ? { body: JSON.stringify(body) } : {}) });
 }
 async function sync(create = false) {
   if (!session || busy) return;
-  busy = true; render();
+  begin();
   try {
     const response = await request(create ? 'POST' : 'GET', create ? '/api/signals' : '/api/signal', create ? session.request : undefined);
     if (response.status === 410) { end('Gatishmëria përfundoi.'); return; }
@@ -79,11 +90,11 @@ async function sync(create = false) {
       // own clock/deadline even if this browser's wall clock has been changed.
       session.expires = Math.min(session.expires, signal.expires_at);
       session.confirmed = true; sessions.save(session);
-      invitation = signal.invitation ?? null; going = signal.state === 'going';
+      applySignal(signal);
       failures = 0; message('Gatishmëria jote është aktive.');
     }
-  } catch { failures = Math.min(failures + 1, 4); message('Lidhja u ndërpre. Gatishmëria mund të jetë aktive; provo përsëri.'); }
-  finally { busy = false; nextPoll = Date.now() + pollSeconds * 1000 * 2 ** failures * (1 + Math.random() * .2); render(); }
+  } catch { if (!session) return; failures = Math.min(failures + 1, 4); message('Lidhja u ndërpre. Gatishmëria mund të jetë aktive; provo përsëri.'); }
+  finally { finish(); nextPoll = Date.now() + pollSeconds * 1000 * 2 ** failures * (1 + Math.random() * .2); render(); }
 }
 form.addEventListener('submit', event => {
   event.preventDefault();
@@ -93,39 +104,90 @@ form.addEventListener('submit', event => {
 });
 retry.onclick = () => { void sync(true); };
 cancel.onclick = async () => {
-  if (busy || !session) return;
-  busy = true; render();
+  if (cancelling || !session) return;
+  cancelling = true; begin();
   try {
     const response = await request('DELETE', '/api/signal');
     if (!response.ok && response.status !== 410) throw new Error('unavailable');
     end('Gatishmëria u mbyll.');
-  } catch { message('Mbyllja nuk u konfirmua. Provo përsëri; gatishmëria përfundon vetë në afatin e saj.'); }
-  finally { busy = false; render(); }
+  } catch { if (session) message('Mbyllja nuk u konfirmua. Provo përsëri; gatishmëria përfundon vetë në afatin e saj.'); }
+  finally { cancelling = false; finish(); }
 };
 
 async function intent(action: 'going' | 'decline') {
   if (!session || !invitation || busy) return;
-  busy = true; render();
+  begin();
   try {
     const response = await request('POST', `/api/${action}`, { gathering_id: invitation.id });
     if (response.status === 410) { invitation = null; going = false; message('Ky takim nuk është më i hapur për t’u bashkuar. Gatishmëria jote mund të vazhdojë.'); return; }
     if (!response.ok) throw new Error('unavailable');
     const signal = await response.json();
-    invitation = signal.invitation ?? null; going = signal.state === 'going';
-    message(action === 'going' ? 'Zgjedhja u ruajt.' : 'Në rregull. Gatishmëria jote vazhdon.');
-  } catch { message('Zgjedhja nuk u konfirmua. Provo përsëri.'); }
-  finally { busy = false; render(); }
+    applySignal(signal);
+    if (session) message(action === 'going' ? 'Zgjedhja u ruajt.' : 'Në rregull. Gatishmëria jote vazhdon.');
+  } catch { if (session) message('Zgjedhja nuk u konfirmua. Provo përsëri.'); }
+  finally { finish(); }
 }
 el<HTMLButtonElement>('going').onclick = () => { void intent('going'); };
 el<HTMLButtonElement>('decline').onclick = () => { void intent('decline'); };
+
+function applySignal(signal: { invitation?: Invitation; state: string; arrival_until?: number }) {
+  if (!session) return;
+  if (invitation?.id !== signal.invitation?.id) pendingNonce = null;
+  invitation = signal.invitation ?? null; going = signal.state === 'going' || signal.state === 'here';
+  here = signal.state === 'here'; arrivalUntil = signal.arrival_until ?? 0;
+}
+function locateOnce(): Promise<GeolocationPosition> {
+  return new Promise((resolve, reject) => {
+    // Bound even time spent waiting for the browser permission prompt.
+    const timer = setTimeout(() => reject(new Error('location unavailable')), 12_000);
+    if (!navigator.geolocation) { clearTimeout(timer); reject(new Error('location unavailable')); return; }
+    navigator.geolocation.getCurrentPosition(position => { clearTimeout(timer); resolve(position); }, () => { clearTimeout(timer); reject(new Error('location unavailable')); }, { enableHighAccuracy: false, maximumAge: 0, timeout: 10_000 });
+  });
+}
+el<HTMLButtonElement>('arrive').onclick = async () => {
+  if (busy || !session || !invitation || !currentGrid) return;
+  const owner = session.token; begin();
+  try {
+    if (!pendingNonce || pendingNonce.expires <= Date.now()) pendingNonce = { token: sessions.randomToken(), expires: Date.now() + nonceSeconds * 1000, issued: false };
+    const nonce = pendingNonce;
+    const headers = { 'X-Gati-Arrival-Nonce': nonce.token };
+    if (!nonce.issued) {
+      const issued = await request('POST', '/api/arrival-nonce', undefined, headers);
+      if (!issued.ok) throw new Error('unavailable');
+      const challenge = await issued.json();
+      if (!Number.isFinite(challenge.expires_at) || challenge.expires_at <= Date.now()) throw new Error('expired challenge');
+      nonce.expires = Math.min(nonce.expires, challenge.expires_at); nonce.issued = true;
+    }
+    if (session?.token !== owner) return;
+    const position = await locateOnce();
+    if (session?.token !== owner) return;
+    const cell = cellAt(currentGrid, position.coords.longitude, position.coords.latitude);
+    if (!cell) { message('Aktualisht GATI mbulon vetëm Tiranën.'); return; }
+    const response = await request('POST', '/api/arrival', { cell }, headers);
+    if (!response.ok) throw new Error('unavailable');
+    if (session?.token !== owner) return;
+    applySignal(await response.json()); pendingNonce = null;
+    message('Mbërritja u konfirmua përkohësisht.');
+  } catch { if (session?.token === owner) message('Mbërritja nuk u konfirmua. Kontrollo vendndodhjen dhe provo përsëri pranë pikës së takimit.'); }
+  finally { finish(); }
+};
+el<HTMLButtonElement>('retract').onclick = async () => {
+  if (busy || !session) return; begin();
+  try {
+    const response = await request('DELETE', '/api/arrival'); if (!response.ok) throw new Error('unavailable');
+    applySignal(await response.json()); pendingNonce = null; if (session) message('Konfirmimi i mbërritjes u hoq.');
+  } catch { if (session) message('Heqja nuk u konfirmua. Provo përsëri.'); }
+  finally { finish(); }
+};
 
 async function start() {
   const [configResponse, gridResponse] = await Promise.all(['/api/config', '/api/geography'].map(url => fetch(url, { credentials: 'omit', cache: 'no-store' })));
   if (!configResponse.ok || !gridResponse.ok) throw new Error('unavailable');
   const configuration = await configResponse.json();
-  if (configuration.schema_version !== 3) throw new Error('unsupported schema');
+  if (configuration.schema_version !== 4) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   pollSeconds = config.notifications.foreground_poll_seconds;
+  nonceSeconds = config.arrivals.nonce_seconds; currentGrid = grid;
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));
   for (const km of config.geography.travel_radius_choices_km) radius.add(new Option(`${km} km`, String(km)));
   radius.value = String(config.geography.travel_radius_choices_km.includes(3) ? 3 : config.geography.travel_radius_choices_km[0]);
@@ -171,6 +233,8 @@ async function start() {
   message('');
   if (session) await sync();
   setInterval(() => {
+    if (pendingNonce && pendingNonce.expires <= Date.now()) pendingNonce = null;
+    if (here && arrivalUntil <= Date.now()) { here = false; arrivalUntil = 0; }
     if (invitation && invitation.ends_at <= Date.now()) { invitation = null; going = false; }
     if (session && session.expires <= Date.now()) end('Gatishmëria përfundoi.');
     if (session && session.confirmed && !document.hidden && Date.now() >= nextPoll) void sync();

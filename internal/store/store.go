@@ -26,6 +26,8 @@ var ErrConflict = errors.New("capability already used")
 var ErrCapacity = errors.New("admission capacity reached")
 
 type Signal struct {
+	ArrivalUntil        int64           `json:"arrival_until,omitempty"`
+	ArrivalMember       string          `json:"_arrival_member,omitempty"`
 	InviteAfter         int64           `json:"_invite_after,omitempty"`
 	Pending             string          `json:"_pending,omitempty"`
 	PendingUntil        int64           `json:"_pending_until,omitempty"`
@@ -110,7 +112,9 @@ func (s *Store) Create(ctx context.Context, hash, cell string, radius, minutes i
 var status = newScript(`
 local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
 __CLOCK__
-if cjson.decode(raw).expires_at<=now then return 'GONE' end
+local s=cjson.decode(raw)
+if s.expires_at<=now then return 'GONE' end
+if s.arrival_until and s.arrival_until<=now then removeArrival(s);s.arrival_until=nil;s._arrival_member=nil;if s.state=='here' then s.state='going' end;raw=cjson.encode(s);redis.call('SET',KEYS[1],raw,'KEEPTTL') end
 return raw
 `)
 
@@ -128,6 +132,8 @@ func (s *Store) Status(ctx context.Context, hash string) (Signal, error) {
 var cancel = newScript(`
 local raw=redis.call('GET',KEYS[1]);if not raw then return 0 end
 local s=cjson.decode(raw)
+removeArrival(s)
+redis.call('DEL','gati:arrival-nonce:'..ARGV[1])
 redis.call('DEL',KEYS[1])
 redis.call('ZREM',KEYS[2],ARGV[1]..'|'..s.cell)
 redis.call('ZREM','gati:cell:'..s.cell,ARGV[1])
@@ -197,12 +203,14 @@ func (s *Store) Allow(ctx context.Context, key string, count int, ttl time.Durat
 }
 
 func newScript(source string) *redis.Script {
+	source = removeArrivalLua + source
 	source = strings.ReplaceAll(source, "__CLOCK__", clockLua)
 	return redis.NewScript(strings.ReplaceAll(source, "gati:", keyPrefix))
 }
 
 // Public removes private matching bookkeeping from the own-session API contract.
 func (s Signal) Public() Signal {
+	s.ArrivalMember = ""
 	s.InviteAfter = 0
 	s.Pending = ""
 	s.PendingUntil = 0
@@ -211,3 +219,21 @@ func (s Signal) Public() Signal {
 	s.Declined = nil
 	return s
 }
+
+// Removal updates the threshold immediately; a replacement claim cannot hide a
+// below-threshold interval between worker ticks. No public counts are returned.
+const removeArrivalLua = `
+local function removeArrival(s)
+ if not s._arrival_member or not s._gathering then return end
+ __CLOCK__
+ local index='gati:arrivals:'..s._gathering
+ redis.call('ZREM',index,s._arrival_member)
+ local key='gati:gathering:'..s._gathering;local raw=redis.call('GET',key)
+ if raw then
+  local g=cjson.decode(raw)
+  if g._presence_threshold and redis.call('ZCOUNT',index,'('..now,'+inf')<g._presence_threshold then
+   g.state='jemi_gati';redis.call('SET',key,cjson.encode(g),'KEEPTTL');redis.call('DEL','gati:presence:'..g.id)
+  end
+ end
+end
+`

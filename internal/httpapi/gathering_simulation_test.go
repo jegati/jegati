@@ -52,11 +52,15 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 	}
 	engine := worker.New(backend, index, c)
 	handler := Handler(c, backend, nil, engine)
+	nonceHeader := ""
 	call := func(method, path, token, body string) *httptest.ResponseRecorder {
 		r := httptest.NewRequest(method, path, strings.NewReader(body))
 		r.RemoteAddr = "127.0.0.2:12345"
 		r.Header.Set("Authorization", "Bearer "+token)
 		r.Header.Set("Content-Type", "application/json")
+		if nonceHeader != "" {
+			r.Header.Set("X-Gati-Arrival-Nonce", nonceHeader)
+		}
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, r)
 		return w
@@ -125,6 +129,107 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 		if newcomer.State != "going" || newcomer.Invitation.EndsAt != original.EndsAt || newcomer.Invitation.Crossing.ID != original.Crossing.ID {
 			t.Fatal("late admission moved destination/deadline or failed intent")
 		}
+	}
+
+	// Founders and late joiners use exactly the same challenge and fresh claim.
+	w = call("POST", "/api/going", tokens[1], body)
+	if w.Code != 200 {
+		t.Fatal("founder going failed")
+	}
+	arrivalCell, _ := grid.CellAt(original.Crossing.Point)
+	arrivalBody := `{"cell":"` + grid.ID(arrivalCell) + `"}`
+	lastNonce := map[string]string{}
+	arrive := func(token string) {
+		nonceHeader = newToken()
+		lastNonce[token] = nonceHeader
+		w := call("POST", "/api/arrival-nonce", token, "")
+		if w.Code != 200 {
+			t.Fatalf("arrival nonce: %d %s", w.Code, w.Body.String())
+		}
+		w = call("POST", "/api/arrival", token, `{"cell":"tirana-v1:1000:0:0"}`)
+		if w.Code != 409 {
+			t.Fatal("remote cell accepted as arrival")
+		}
+		w = call("POST", "/api/arrival", token, arrivalBody)
+		if w.Code != 200 {
+			t.Fatalf("arrival: %d %s", w.Code, w.Body.String())
+		}
+		var first sessionView
+		json.Unmarshal(w.Body.Bytes(), &first)
+		if first.State != "here" || first.ArrivalUntil == 0 {
+			t.Fatal("arrival not recorded")
+		}
+		w = call("POST", "/api/arrival", token, arrivalBody)
+		var again sessionView
+		json.Unmarshal(w.Body.Bytes(), &again)
+		if w.Code != 200 || again.ArrivalUntil != first.ArrivalUntil {
+			t.Fatal("arrival replay renewed freshness")
+		}
+		nonceHeader = ""
+	}
+	arrive(tokens[1])
+	g, _ := backend.GatheringByID(ctx, original.ID)
+	if g.State != "jemi_gati" {
+		t.Fatal("one credential or its replay established collective presence")
+	}
+	arrive(late)
+	backend.AdvanceClock(ctx, 9999)
+	if e = engine.Step(ctx); e != nil {
+		t.Fatal(e)
+	}
+	g, _ = backend.GatheringByID(ctx, original.ID)
+	if g.State != "jemi_gati" {
+		t.Fatal("presence stability ignored")
+	}
+	backend.AdvanceClock(ctx, 1)
+	if e = engine.Step(ctx); e != nil {
+		t.Fatal(e)
+	}
+	g, _ = backend.GatheringByID(ctx, original.ID)
+	if g.State != "jemi_ketu" {
+		t.Fatal("stable arrivals did not establish JEMI KETU")
+	}
+	afterPresence := create()
+	w = call("POST", "/api/going", afterPresence, body)
+	var afterView sessionView
+	json.Unmarshal(w.Body.Bytes(), &afterView)
+	if w.Code != 200 || afterView.State != "going" || afterView.ArrivalUntil != 0 || afterView.Invitation.State != "jemi_ketu" {
+		t.Fatal("joining JEMI KETU failed or automatically counted arrival")
+	}
+	tokens = append(tokens, afterPresence)
+	w = call("DELETE", "/api/arrival", tokens[1], "")
+	if w.Code != 200 {
+		t.Fatal("retraction failed")
+	}
+	g, _ = backend.GatheringByID(ctx, original.ID)
+	if g.State != "jemi_gati" {
+		t.Fatal("retraction did not immediately remove collective presence")
+	}
+	nonceHeader = lastNonce[tokens[1]]
+	w = call("POST", "/api/arrival", tokens[1], arrivalBody)
+	if w.Code != 410 {
+		t.Fatal("used nonce restored a retracted arrival")
+	}
+	nonceHeader = ""
+	arrive(tokens[1])
+	backend.AdvanceClock(ctx, 10000)
+	if e = engine.Step(ctx); e != nil {
+		t.Fatal(e)
+	}
+	g, _ = backend.GatheringByID(ctx, original.ID)
+	if g.State != "jemi_ketu" {
+		t.Fatal("fresh replacement claims failed new stability")
+	}
+	backend.AdvanceClock(ctx, 15*60000+1)
+	// Reads enforce deadlines even before a scheduled cleanup pass.
+	w = call("GET", "/api/signal", tokens[1], "")
+	var expired sessionView
+	json.Unmarshal(w.Body.Bytes(), &expired)
+	if expired.State != "going" || expired.ArrivalUntil != 0 || expired.Invitation.State != "jemi_gati" {
+		t.Fatal("stale arrival remained visible before cleanup")
+	}
+	if e = engine.Step(ctx); e != nil {
+		t.Fatal(e)
 	}
 	w = call("POST", "/api/decline", tokens[0], body)
 	if w.Code != 200 {

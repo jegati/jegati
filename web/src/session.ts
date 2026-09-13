@@ -14,7 +14,11 @@ export function restore(): Session | null {
 export function save(s: Session) { try { sessionStorage.setItem(key, JSON.stringify(s)); } catch { /* Memory-only fallback. */ } }
 export function clear() { try { sessionStorage.removeItem(key); } catch { /* No accessible storage. */ } }
 export function create(request: Willingness): Session {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  const token = btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+  const token = randomToken();
   return { token, request, expires: Date.now() + request.availability_minutes * 60_000, confirmed: false };
+}
+
+export function randomToken(): string {
+ const bytes = crypto.getRandomValues(new Uint8Array(32));
+ return btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
 }

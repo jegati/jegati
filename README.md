@@ -8,12 +8,12 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-Milestones 02–07 are complete: configuration, coarse Tirana geography, expiring
+Milestones 02–08 are complete: configuration, coarse Tirana geography, expiring
 willingness APIs and the Albanian browser participation flow. The UI supports
 manual coarse areas, optional one-shot location, availability/radius choices,
 reload recovery and cancellation. Continuous matching, automatic crosswalk
-invitations, going/decline and late admission are implemented. Arrivals, collective
-maps and notification subscriptions are not implemented yet. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
+invitations, going/decline, late admission and temporary arrival confirmation are
+implemented. Collective maps and notification subscriptions are not implemented yet. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
 exercise willingness, retries, cancellation, expiry and Sybil bursts with a local
 synthetic map report.
 

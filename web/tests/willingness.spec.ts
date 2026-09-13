@@ -93,7 +93,7 @@ test('small screen and keyboard map selection', async ({ page }) => {
   await page.screenshot({ path: '../reports/local/willingness-mobile.png', fullPage: true });
 });
 
-test('real collective invitation, going and JO TANI preserve willingness', async ({ page, request }) => {
+test('real collective invitation, arrival retry, retraction and decline', async ({ page, request, context }) => {
   test.setTimeout(65_000);
   const config = (await (await request.get('/api/config')).json()).config;
   const tokens: string[] = [];
@@ -113,6 +113,28 @@ test('real collective invitation, going and JO TANI preserve willingness', async
     const destination = await page.locator('#destination').textContent();
     await page.getByRole('button', { name: 'PO, PO SHKOJ', exact: true }).click();
     await expect(page.locator('#going-status')).toHaveText('Ke zgjedhur të shkosh.');
+    const own = await page.evaluate(async () => {
+      const session = JSON.parse(sessionStorage.getItem('gati-session-v1')!);
+      return (await fetch('/api/signal', { headers: { Authorization: `Bearer ${session.token}` } })).json();
+    });
+    await context.grantPermissions(['geolocation']);
+    await context.setGeolocation({ longitude: own.invitation.crossing.point[0], latitude: own.invitation.crossing.point[1] });
+    let firstArrivalDeadline: number | undefined;
+    await page.route('**/api/arrival', async route => {
+      expect(Object.keys(route.request().postDataJSON())).toEqual(['cell']);
+      expect(route.request().headers()['x-gati-arrival-nonce']).toMatch(/^[A-Za-z0-9_-]{43}$/);
+      const response = await route.fetch(); firstArrivalDeadline = (await response.json()).arrival_until;
+      await route.abort('failed');
+    }, { times: 1 });
+    await page.getByRole('button', { name: 'JAM KËTU', exact: true }).click();
+    await expect(page.locator('#status')).toContainText('Mbërritja nuk u konfirmua');
+    const retried = page.waitForResponse(r => r.url().endsWith('/api/arrival') && r.request().method() === 'POST');
+    await page.getByRole('button', { name: 'JAM KËTU', exact: true }).click();
+    expect((await (await retried).json()).arrival_until).toBe(firstArrivalDeadline);
+    await expect(page.getByRole('heading', { name: 'JAM KËTU.', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Hiq konfirmimin e mbërritjes' }).click();
+    await expect(page.locator('#status')).toHaveText('Konfirmimi i mbërritjes u hoq.');
+
     await page.getByRole('button', { name: 'Nuk po shkoj më' }).click();
     await expect(page.locator('#status')).toHaveText('Në rregull. Gatishmëria jote vazhdon.');
     await expect(page.locator('#invitation')).toBeHidden();
@@ -125,4 +147,25 @@ test('real collective invitation, going and JO TANI preserve willingness', async
     const activeToken = await page.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('gati-session-v1') ?? 'null')?.token; } catch { return null; } }).catch(() => null);
     if (activeToken) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${activeToken}` } });
   }
+});
+
+test('cancellation stays available during an in-flight creation and late response cannot restore it', async ({ page }) => {
+  let release!: () => void, accepted!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  const created = new Promise<void>(resolve => { accepted = resolve; });
+  await page.route('**/api/signals', async route => {
+    const response = await route.fetch(); accepted(); await held; await route.fulfill({ response });
+  });
+  try {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Zgjidh zonën në qendër të hartës' }).click();
+    await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
+    await created;
+    await expect(page.getByRole('button', { name: 'Mbyll gatishmërinë' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
+    await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
+    release();
+    await expect(page.locator('#active')).toBeHidden();
+    expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
+  } finally { release(); }
 });

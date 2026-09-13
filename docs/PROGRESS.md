@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–07 implemented; next is arrival claims and confirmation.
+Updated: 2026-09-13. Status: milestones 02–08 implemented; next is privacy-preserving aggregate releases.
 
 ## Current task and authorization
 
@@ -35,7 +35,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
 | 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
-| 08 — Arrival claims | Not started | Founding/late participants, nonces/freshness/retraction |
+| 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
 | 09 — Aggregate map/statistics | Not started | Canonical releases and inference review |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
@@ -71,10 +71,10 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 08: shared founding/late arrival nonce, fresh coarse location
-claims, retraction/expiry, stable JEMI KËTU and arrival UI. Keep reviewing cross-surface
-privacy and scaling; neither is certified. The public-card client connection to
-atomic direct join belongs with maps/notifications (09–10).
+Implement milestone 09: canonical delayed/suppressed aggregate releases, collective
+map and statistics, with explicit differencing/inference tests. Keep participant
+and public interfaces separate; thresholds are not a formal anonymity proof.
+The public-card join client will consume the already implemented atomic join API.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -164,3 +164,25 @@ Outstanding release work includes map-update closure, worker failure observabili
 load/fairness/missed-match measurement, comprehensive lifecycle/privacy review and
 the later arrival/aggregate/notification/deployment features. These are tracked
 gates, not completed protections.
+
+## Milestone 08 evidence
+
+Arrival nonce, claim and retraction APIs are implemented for both founding and late
+participants. Nonces are random client-generated authorization header credentials;
+only hashes are stored, with at most 120-second lifetime. Claims transmit only a
+fresh coarse cell and retain no arrival coordinate/cell history. Replays return
+the same confirmation without extending freshness or increasing credential count.
+JEMI KËTU requires a stable cohort; expiry/retraction/cancel/switch remove current
+contributions, and a drop below threshold resets confirmation immediately.
+
+Real Valkey race/replay tests, fixed-clock API tests, native/config/build checks and
+Compose runtime checks passed. Seven Chromium checks passed, including wrong/lost
+response recovery for arrival and cancellation during an in-flight creation.
+Simulation tests cover founding plus late arrival, wrong-area rejection, 9,999ms/
+10,000ms presence boundaries, retraction/replay, joining after JEMI KËTU and stale
+confirmation removal on read before the scheduled cleanup.
+
+Schema 4 adds the per-signal arrival request budget. Development Valkey was recreated
+to mount the updated restrictive ACL; this deliberately resets ephemeral local
+sessions. GPS was mocked for all tests. Distinct credentials and claimed coarse
+location do not establish independent humans or proof of physical presence.

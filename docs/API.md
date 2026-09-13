@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 3, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 4, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |
@@ -15,6 +15,9 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | `POST /api/going` | Admit existing willingness to a reachable live gathering |
 | `POST /api/decline` | Decline the current gathering while retaining willingness |
 | `POST /api/join` | Atomically create/reuse willingness and admit a recipient |
+| `POST /api/arrival-nonce` | Issue an expiring arrival challenge for a going session |
+| `POST /api/arrival` | Confirm a fresh coarse arrival; idempotent nonce replay |
+| `DELETE /api/arrival` | Retract arrival, retaining going intent and willingness |
 
 Participant routes require `Authorization: Bearer <base64url-encoded 32 random bytes>`.
 The client generates the capability; only its SHA-256 hash is stored. Create accepts
@@ -43,7 +46,16 @@ fields plus `gathering_id`. Reachability, cutoffs and state are revalidated. A s
 join returns 410 without creating unintended willingness; successful retries never
 renew the gathering/session. Going to another valid gathering switches intent.
 Declines suppress that gathering for this session, with configurable cooldown and
-bounded temporary decline links. They do not cancel willingness. Arrival and
-notification/follow endpoints are not implemented yet; invitation delivery currently
+bounded temporary decline links. They do not cancel willingness. Notification/follow endpoints are not implemented yet; invitation delivery currently
 uses the foreground own-session poll. Direct recipient join is implemented at the
 API; public map/notification cards will connect the client to it in their milestones.
+
+Arrival issuance and confirmation also require `X-Gati-Arrival-Nonce`, an
+authorization header containing a client-generated random 32-byte base64url nonce.
+Issuance has an empty body and returns only `expires_at`; repeated unused issuance
+preserves the first deadline. Confirmation accepts exactly `cell`, checked against
+the current crossing's allowed coarse cell/rings. One credential contributes once.
+The own-session view includes `state: here` and `arrival_until` while fresh. A
+gathering becomes `jemi_ketu` after configured stable presence; it resets if current
+accepted arrivals fall below threshold. Internal nonce/member/cohort data is never
+returned. Wrong-area claims are 409; unavailable/expired/used-retracted claims 410.

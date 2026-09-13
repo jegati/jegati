@@ -48,3 +48,8 @@ Schema 3 adds `matching.invitation_cooldown_seconds` (default 60; production flo
 30; maximum 300) and `limits.max_declines_per_signal` (default 32, maximum 128).
 These bound repeat invitations and temporary declined-gathering links. Once the
 link budget is reached, automatic invitations stop for that willingness session.
+
+Schema 4 adds `limits.arrival_requests_per_signal_window` (default 20, maximum 60),
+using the configured network-window duration, in addition to network/global limits.
+Arrival confirmation cohorts support thresholds up to 500. Nonce/freshness, coarse
+neighbor rings and stability now actively control the arrival flow.

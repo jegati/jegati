@@ -43,7 +43,7 @@ func TestInvalidConfigurations(t *testing.T) {
 		{"missing section", "availability:", "missing_availability:"},
 		{"null", "activation_count: 20", "activation_count: null"},
 		{"quoted number", "activation_count: 20", "activation_count: \"20\""},
-		{"unsupported schema", "schema_version: 3", "schema_version: 99"},
+		{"unsupported schema", "schema_version: 4", "schema_version: 99"},
 		{"simulation build guard", "profile: production", "profile: simulation"},
 		{"unknown profile", "profile: production", "profile: public"},
 		{"minimum under 30", "minimum_minutes: 30", "minimum_minutes: 15"},

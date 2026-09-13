@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 3
+const SchemaVersion = 4
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -71,12 +71,13 @@ type Notifications struct {
 }
 
 type Limits struct {
-	MaxDeclinesPerSignal       int `yaml:"max_declines_per_signal" json:"max_declines_per_signal"`
-	MaxBodyBytes               int `yaml:"max_body_bytes" json:"max_body_bytes"`
-	NetworkWindowSeconds       int `yaml:"network_window_seconds" json:"network_window_seconds"`
-	RequestsPerNetworkWindow   int `yaml:"requests_per_network_window" json:"requests_per_network_window"`
-	NewSignalsPerNetworkWindow int `yaml:"new_signals_per_network_window" json:"new_signals_per_network_window"`
-	GlobalWritesPerSecond      int `yaml:"global_writes_per_second" json:"global_writes_per_second"`
-	MaxActiveSignals           int `yaml:"max_active_signals" json:"max_active_signals"`
-	CleanupBatchSize           int `yaml:"cleanup_batch_size" json:"cleanup_batch_size"`
+	ArrivalRequestsPerSignalWindow int `yaml:"arrival_requests_per_signal_window" json:"arrival_requests_per_signal_window"`
+	MaxDeclinesPerSignal           int `yaml:"max_declines_per_signal" json:"max_declines_per_signal"`
+	MaxBodyBytes                   int `yaml:"max_body_bytes" json:"max_body_bytes"`
+	NetworkWindowSeconds           int `yaml:"network_window_seconds" json:"network_window_seconds"`
+	RequestsPerNetworkWindow       int `yaml:"requests_per_network_window" json:"requests_per_network_window"`
+	NewSignalsPerNetworkWindow     int `yaml:"new_signals_per_network_window" json:"new_signals_per_network_window"`
+	GlobalWritesPerSecond          int `yaml:"global_writes_per_second" json:"global_writes_per_second"`
+	MaxActiveSignals               int `yaml:"max_active_signals" json:"max_active_signals"`
+	CleanupBatchSize               int `yaml:"cleanup_batch_size" json:"cleanup_batch_size"`
 }

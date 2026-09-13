@@ -13,6 +13,7 @@ import (
 	"net/netip"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -95,7 +96,7 @@ func (s signalAPI) authorized(w http.ResponseWriter, r *http.Request) (string, b
 		return "", false
 	}
 	if !ok {
-		w.Header().Set("Retry-After", "60")
+		w.Header().Set("Retry-After", strconv.Itoa(s.config.Limits.NetworkWindowSeconds))
 		writeError(w, 429)
 		return "", false
 	}
@@ -118,7 +119,7 @@ func (s signalAPI) authorized(w http.ResponseWriter, r *http.Request) (string, b
 			return "", false
 		}
 		if !ok {
-			w.Header().Set("Retry-After", "60")
+			w.Header().Set("Retry-After", strconv.Itoa(s.config.Limits.NetworkWindowSeconds))
 			writeError(w, 429)
 			return "", false
 		}

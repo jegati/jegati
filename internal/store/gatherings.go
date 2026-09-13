@@ -258,7 +258,8 @@ func (s *Store) PendingReservations(ctx context.Context, maximum int) ([]Reserva
 var readGathering = newScript(`
 __CLOCK__
 local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
-if cjson.decode(raw).ends_at<=now then return 'GONE' end
+local g=cjson.decode(raw);if g.ends_at<=now then return 'GONE' end
+if g.state=='jemi_ketu' and g._presence_threshold and redis.call('ZCOUNT','gati:arrivals:'..g.id,'('..now,'+inf')<g._presence_threshold then g.state='jemi_gati';raw=cjson.encode(g);redis.call('SET',KEYS[1],raw,'KEEPTTL');redis.call('DEL','gati:presence:'..g.id) end
 return raw
 `)
 

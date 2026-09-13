@@ -1,5 +1,5 @@
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 3
+schema_version: 4
 profile: production
 availability:
   minimum_minutes: 30
@@ -45,6 +45,7 @@ notifications:
   queue_ttl_seconds: 300
   area_follow_max_hours: 24
 limits:
+  arrival_requests_per_signal_window: 20
   max_declines_per_signal: 32
   max_body_bytes: 1024
   network_window_seconds: 60

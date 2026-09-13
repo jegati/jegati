@@ -19,17 +19,22 @@ if ARGV[1]=='decline' then
  if s._gathering~=g.id then return 'CONFLICT' end
  local count=0;for _,v in pairs(s._declined) do count=count+1 end
  if count>=tonumber(ARGV[5]) then return 'CONFLICT' end
+ removeArrival(s)
+ s._arrival_member=nil;s.arrival_until=nil
  s._declined[g.id]=true;s._gathering=nil;s._gathering_until=nil;s.state='gati';s._invite_after=now+tonumber(ARGV[6])
 else
- if ARGV[1]=='going' and s.state=='going' and s._gathering==g.id then return cjson.encode(s) end
+ if ARGV[1]=='going' and (s.state=='going' or s.state=='here') and s._gathering==g.id then return cjson.encode(s) end
  if s.expires_at<minimum or g.ends_at<minimum or s._declined[g.id] then return 'GONE' end
  if ARGV[1]=='offer' and s._gathering and s._gathering~=g.id and (s._gathering_until or 0)>now then return 'CONFLICT' end
  if ARGV[1]=='offer' then
   if (s._invite_after or 0)>now then return 'GONE' end
   local count=0;for _,v in pairs(s._declined) do count=count+1 end
   if count>=tonumber(ARGV[5]) then return 'GONE' end
-  if s.state~='going' then s.state='invited' end
- else s.state='going' end
+  if s._gathering~=g.id or (s._gathering_until or 0)<=now or (s.state~='going' and s.state~='here') then s.state='invited' end
+ else
+  if s._gathering~=g.id and s._arrival_member then removeArrival(s);s._arrival_member=nil;s.arrival_until=nil end
+  s.state='going'
+ end
  s._gathering=g.id;s._gathering_until=g.ends_at;s._pending=nil;s._pending_until=nil
 end
 redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL')
@@ -67,7 +72,7 @@ local previous=redis.call('GET',KEYS[1])
 if previous then
  local v=cjson.decode(previous)
  if v._declined and v._declined[g.id] then return 'GONE' end
- if v.state=='going' and v._gathering==g.id and v.expires_at>now and v.cell==ARGV[1] and v.radius_km==tonumber(ARGV[2]) and v.availability_minutes==tonumber(ARGV[3]) then return previous end
+ if (v.state=='going' or v.state=='here') and v._gathering==g.id and v.expires_at>now and v.cell==ARGV[1] and v.radius_km==tonumber(ARGV[2]) and v.availability_minutes==tonumber(ARGV[3]) then return previous end
 end
 if g.ends_at<now+tonumber(ARGV[8]) then return 'GONE' end
 local function createSignal()
@@ -77,6 +82,7 @@ local raw=createSignal()
 if raw=='GONE' or raw=='CONFLICT' or raw=='CAPACITY' then return raw end
 local s=cjson.decode(raw)
 if s.expires_at<now+tonumber(ARGV[8]) then return 'GONE' end
+if s._gathering~=g.id and s._arrival_member then removeArrival(s);s._arrival_member=nil;s.arrival_until=nil end
 s._gathering=g.id;s._gathering_until=g.ends_at;s._pending=nil;s._pending_until=nil;s.state='going'
 redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL')
 return cjson.encode(s)

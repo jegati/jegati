@@ -188,6 +188,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	if m.DestinationRule != "nearest_eligible_crosswalk_to_coarse_group_center" || !m.PreferOpenGatherings {
 		return errors.New("unsupported destination or admission policy")
 	}
+	if c.Limits.ArrivalRequestsPerSignalWindow > 60 {
+		return errors.New("arrival request bound exceeded")
+	}
 	if c.Limits.MaxDeclinesPerSignal > 128 || m.InvitationCooldownSeconds > 300 || (c.Profile == "production" && m.InvitationCooldownSeconds < 30) {
 		return errors.New("invitation lifecycle bounds violated")
 	}
@@ -202,6 +205,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	}
 	if m.MinimumRemainingMinutes*60+m.ActivationStabilitySeconds+m.ReconciliationSeconds >= a.MinimumMinutes*60 {
 		return errors.New("minimum availability cannot accommodate matching stability")
+	}
+	if r.ConfirmationCount > 500 {
+		return errors.New("arrival threshold exceeds bounded confirmation cohort")
 	}
 	if r.FreshnessMinutes > 15 || r.NonceSeconds > 120 || r.NonceSeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= m.LateJoinMinRemainingMinutes*60 || r.AllowedCellNeighborRings > 1 {
 		return errors.New("arrival lifetime or geography outside bounds")

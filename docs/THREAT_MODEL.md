@@ -90,3 +90,19 @@ cross-surface review is still a release gate. The worker's snapshot/selection co
 lease recovery, fairness, same-crossing conflicts and temporary-index cleanup need
 stress/failure testing. Config changes invalidate pending reservations; handling a
 removed crossing in an already-open gathering remains hardening work.
+
+### Implemented arrival boundary (milestone 08)
+
+A fresh one-shot browser position is coarsened locally; the request sends only the
+coarse cell and authorization headers. The server validates the allowed crossing
+cell/rings, current going state, gathering/session deadlines and a one-use nonce.
+Raw nonces remain in browser memory only; the store keeps hashes with bounded TTL.
+Replays cannot duplicate/refresh confirmation or restore a retracted claim. Stable
+cohorts use nonce-specific member references so replacing a retracted arrival does
+not conceal a broken stability interval. All loss paths and reads enforce deadlines.
+Tests include founding/late equality, wrong cells, replay/races, retraction and
+expiry, including joining an already confirmed gathering without automatic arrival.
+
+Browser location can be spoofed and many credentials can represent one adversary.
+These controls limit replay and resource consumption, not physical-presence proof
+or human independence. No public individual arrival or count endpoint exists.

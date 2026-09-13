@@ -88,3 +88,23 @@ pages are transient input; the between-run cache contains only gathering
 bounds. Going/decline/switch never extend that TTL. Atomic direct join validates a
 live reachable destination before creating willingness, with no orphan signal on
 rejection. No arrival/member counts exist yet.
+
+## Temporary arrival lifecycle
+
+`arrival-nonce:<capability-hash>` contains nonce hash, gathering ID, expiry and used
+flag, at most 120 seconds and never beyond session/gathering expiry. A used nonce
+is a short-lived replay tombstone; cancellation removes it. It cannot restore a
+retracted arrival. Arrival confirmation stores only an expiry and private member
+reference in the session, with no arrival coordinates or coarse-cell history.
+`arrivals:<gathering-id>` is an internal sorted set of capability-hash/nonce-hash
+members scored by freshness deadline (maximum 15 minutes, bounded by session and
+gathering). One credential has at most one live member. Removal on cancel, decline,
+switch and retraction is atomic; deadline-aware reads ignore expired scores.
+
+`presence:<gathering-id>` holds only the temporary stable confirmation cohort,
+with TTL bounded by stability plus twice the reconciliation interval and by the
+gathering end. The successful cohort is deleted once JEMI KËTU forms. A drop below
+the configured current-arrival threshold resets the state; subsequent recovery
+requires another stability interval. Sorted-set cleanup runs in bounded batches;
+its key cannot outlive the gathering. Own-session reads also clear expired arrival
+metadata. Physical cleanup delays under overload require the hardening/load tests.
