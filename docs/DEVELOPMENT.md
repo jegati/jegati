@@ -96,7 +96,7 @@ The development frontend allows Vite's local asset cache; it is not the producti
 static frontend server. Caddy/production deployment belongs to milestone 13.
 
 CI is configured to build/start the containers and check API/client/proxy/Valkey.
-It has not run remotely because no push is authorized. Image references are pinned
+It has not run remotely because no remote Git push is authorized. Image references are pinned
 to publisher index digests; schema parsing alone does not verify those image builds.
 
 After starting the stack, `make check-containers` checks actual service health,
@@ -116,9 +116,10 @@ store address/password-file is supplied. Use Compose for the actual willingness 
 ## Willingness browser checks
 
 `make dev` now serves the participation screen and real ephemeral API at
-http://127.0.0.1:5173. Choose an approximate area on the map or use optional one-shot
-location, duration and radius. The local map needs no external tile/font service.
-Matching and arrival are not available yet.
+http://127.0.0.1:5173. Choose duration and radius, then press JAM GATI to acquire required one-shot
+device location and submit its coarse cell. No manual location is accepted. The
+local map needs no external tile/font service. Continuous matching, private
+crossroad preview, going/decline, arrival and public aggregate views are implemented.
 
 Install the pinned test browser with `make browser-install` (user cache), then run
 `make test-browser` while the Compose API runs. Playwright builds the client and starts its own Vite preview at
@@ -128,3 +129,10 @@ reports/local. `make dev-native` previews the UI but needs an explicit store
 connection to accept willingness; prefer Compose for the full implemented flow.
 
 MapLibre worker integration follows its [official Vite instructions](https://maplibre.org/maplibre-gl-js/docs/). Browser checks use built assets so missing worker dependencies cannot hide behind development serving.
+
+
+Optional background push has a separate explicit user opt-in and temporary browser
+resume. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for `make dev-push`, the required
+public operator contact and device/provider checks. Default development works with
+push disabled. Browser fixtures replace external push registration/delivery; the
+full Chromium worker test executes native notification display with the app closed.

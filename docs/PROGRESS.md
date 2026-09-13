@@ -649,3 +649,32 @@ API/web images were rebuilt; push remains off. Effective schema-8 config SHA-256
 The latest small browser cleanup timeout correction is tested by the final browser
 build; a final development web-image refresh and schema-8 3,000-person regression
 will follow. Setup, lifecycle and manual provider checks are in NOTIFICATIONS.md.
+
+
+## Selected usability slice: final evidence and next action — 2026-09-13
+
+All selected code (1/2/3/5) is locally implemented and incrementally committed.
+Suggestions 4/6 remain excluded. The final web image and running stack passed
+`make check-containers`; `/api/push-config` confirms default push is off. Base and
+optional Compose configuration parsing passed. The repeated pinned
+`make security-check` again reported zero reachable/imported-package vulnerabilities;
+the one unused-module OpenPGP advisory remains documented, not silently omitted.
+Local documentation links and `git diff --check` passed.
+
+The final schema-8 3,000-person Tirana seed-42 run and `make check-population` passed:
+3,000 accepted, 1,920 uniquely invited, 1,715 going, 1,107 unique arrivals / 1,554
+accepted confirmations, 46 gatherings (30 ever confirmed), 24 joins after JEMI KËTU,
+456 cancellations and all other 2,544 session expiries checked. Wall time 239.73 s;
+262,740 HTTP requests. This is accelerated functional simulation, with push disabled
+and synthetic discovery; it is not external push verification or a capacity test.
+Compiled source ead158a, source-dirty flag and artifact/config/map hashes are retained
+in reports/usability-final-summary.json. Only documentation changed afterwards.
+See reports/usability-final.md and the ignored local replay for exact scope.
+
+Next input needed for live push setup: a real public operator project/security-contact
+URL to replace the localhost placeholder, followed by supported browser/device
+interoperability testing. Keys already exist locally; do not request passwords or
+personal participant information. Default functionality works without push. No remote
+Git push or public deployment occurred. Broader follows/daily summaries, hardening,
+100k benchmark, production deployment and independently verified release/audit remain
+incomplete. Preserve unrelated untracked commands.txt.

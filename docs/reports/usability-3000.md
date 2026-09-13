@@ -1,5 +1,8 @@
 # Selected usability work: implementation and evidence
 
+Historical A–D evidence; see [the completed selected slice](usability-final.md)
+for later push work and the final schema-8 regression.
+
 Date: 2026-09-13. Plan: ../USABILITY_IMPLEMENTATION_PLAN.md. Selected suggestions
 2/3/5 are implemented. Suggestion 1 has server-side offer discovery; subscriptions,
 Web Push transport and browser opt-in/resume remain pending. Sharing links/QR (4)

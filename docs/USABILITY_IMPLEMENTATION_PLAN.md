@@ -70,7 +70,8 @@ encrypted provider transport and explicit browser opt-in/resume. Step H local
 checks passed (28 browser tests, real-store/race, native checks and fixed-clock
 integration; see PROGRESS); actual provider/device delivery remains
 unverified. Push is off by default while the public operator contact is unset.
-Service keys are already generated locally and ignored by Git. The earlier
-3,000-person run and exact source/config provenance are in reports/usability-3000.md.
+Service keys are already generated locally and ignored by Git. The final
+3,000-person regression and exact source/config provenance are in
+[reports/usability-final.md](reports/usability-final.md).
 Sharing links/QR and new purpose copy remain excluded. No stronger location proof
 or public deployment readiness is claimed.

@@ -1,10 +1,11 @@
 # Functional configuration
 
 `config/gati.yaml` is the complete production-default document. `internal/config`
-is its authoritative typed schema and validation policy (schema version 6).
+is its authoritative typed schema and validation policy (schema version 8).
 Every field is required, including explicit zero/false values. Unknown or duplicate
 keys, aliases, nulls, coercion from strings to numbers, extra documents and files
-above 64 KiB are rejected. No field accepts credentials or external URLs.
+above 64 KiB are rejected. No field accepts credentials. The optional push contact is an explicit public
+operator URL/mailbox; provider hosts form a separate exact DNS allowlist.
 
 `config/simulation.yaml` contains low-count local test defaults. Normal builds
 reject it. Only explicitly compiled `-tags simulation` binaries can load it;
@@ -12,8 +13,8 @@ HTTP serving with a simulation build is restricted to literal loopback addresses
 Only the isolated simulation build includes authenticated clock controls.
 
 Willingness, matching, admission, arrival and device-fix quality settings are active.
-Aggregate and notification-subscription settings await those milestones; fields do
-not establish that a feature or protection exists.
+Public activity and optional session push settings are active. Daily summaries and
+area follows/alerts remain unfinished; fields alone do not establish a feature.
 
 The public representation uses deterministic JSON field order and a SHA-256 hash
 of those bytes. YAML comments/formatting do not change the hash. All consumers can
@@ -89,3 +90,13 @@ release interval). `max_snapshot_bytes` caps a complete uncompressed snapshot
 (default 1,000,000; at least 1024, at most 1,000,000). Invalid or oversized captures
 are discarded, never partially published. Existing minimum/buckets/delay/retention
 remain. The policy, publisher, API and browser views are implemented; remaining work is tracked in PROGRESS.
+
+
+## Schema 8 optional push parameters
+
+Push is disabled by default. The required `notifications` fields expose its public
+operator contact, exact provider hostnames, reconciliation batch/interval,
+concurrency, transport timeout and retry bounds. Enabled production configuration
+rejects the localhost contact placeholder. VAPID service keys stay outside YAML in
+an ignored mounted file. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for local setup,
+provider privacy limits and the distinction between fixture and device verification.
