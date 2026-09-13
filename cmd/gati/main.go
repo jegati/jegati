@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jegati/jegati/internal/geography"
+	"github.com/jegati/jegati/internal/notification"
 	"github.com/jegati/jegati/internal/store"
 	"github.com/jegati/jegati/internal/worker"
 	"io"
@@ -37,6 +38,7 @@ func run() error {
 	passwordFile := flag.String("store-password-file", "", "mounted service password file")
 	intersectionFile := flag.String("intersections", "data/tirana/intersections.json", "versioned public intersection dataset")
 	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
+	pushKeyFile := flag.String("push-key-file", ".runtime/vapid.json", "mounted VAPID service key file (only read when optional push is enabled)")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
@@ -81,6 +83,9 @@ func run() error {
 	if e != nil {
 		return errors.New("cannot read public map asset")
 	}
+	if c.Notifications.PushEnabled && backend == nil {
+		return errors.New("optional push requires the temporary store")
+	}
 	var engine *worker.Engine
 	if backend != nil {
 		raw, e := os.ReadFile(*intersectionFile)
@@ -97,6 +102,10 @@ func run() error {
 			return e
 		}
 		engine = worker.New(backend, index, c)
+		engine.Push, e = notification.New(c, backend, *pushKeyFile)
+		if e != nil {
+			return e
+		}
 	}
 	handler, e := configureHandler(c, backend, roads, engine)
 	if e != nil {
@@ -107,6 +116,9 @@ func run() error {
 	defer stop()
 	if engine != nil && backgroundWorkers {
 		go engine.Run(ctx)
+		if engine.Push != nil {
+			go engine.Push.Run(ctx)
+		}
 		go worker.NewActivityPublisher(backend, c).Run(ctx)
 	}
 	if backend != nil && backgroundWorkers {

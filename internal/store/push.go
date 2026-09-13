@@ -35,8 +35,10 @@ local s=cjson.decode(raw);if s.expires_at<=now then return 'GONE' end
 local old=redis.call('GET',KEYS[2]);local b=cjson.decode(ARGV[1])
 if old then
  local previous=cjson.decode(old)
- if previous.digest~=b.digest or previous.binding~=b.binding then return 'CONFLICT' end
- return tostring(previous.expires_at)
+ if previous.expires_at>now then
+  if previous.digest~=b.digest or previous.binding~=b.binding then return 'CONFLICT' end
+  return tostring(previous.expires_at)
+ end
 end
 b.expires_at=math.min(s.expires_at,b.expires_at)
 if b.expires_at<=now then return 'GONE' end

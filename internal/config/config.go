@@ -250,6 +250,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	if err != nil || len(n.PushContact) > 256 || contact.User != nil || contact.Fragment != "" || !((contact.Scheme == "https" && contact.Hostname() != "") || (contact.Scheme == "mailto" && strings.Contains(contact.Opaque, "@"))) {
 		return errors.New("push contact must be an operator HTTPS or mailto URI")
 	}
+	if n.PushEnabled && c.Profile == "production" && contact.Hostname() == "localhost" {
+		return errors.New("replace the development push contact before enabling delivery")
+	}
 	seenHosts := map[string]bool{}
 	for _, host := range n.PushEndpointHosts {
 		if len(host) > 253 || !regexp.MustCompile(`^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$`).MatchString(host) || seenHosts[host] {

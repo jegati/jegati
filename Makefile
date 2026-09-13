@@ -80,3 +80,11 @@ check-population:
 	node scripts/check-population.mjs "$(REPORT)"
 simulate-suite:
 	python3 scripts/run-simulation-suite.py --config "$(CONFIG)" --output "$(or $(OUTPUT),reports/local/tirana-suite-$(shell date -u +%Y%m%dT%H%M%S))"
+
+.PHONY: push-keys dev-push security-check
+push-keys: secrets
+	go run ./cmd/gati-push-keys
+dev-push: push-keys
+	$(COMPOSE) -f compose.yaml -f compose.push.yaml up --build
+security-check:
+	go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...

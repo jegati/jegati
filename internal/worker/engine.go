@@ -11,12 +11,14 @@ import (
 	"github.com/jegati/jegati/internal/config"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/matching"
+	"github.com/jegati/jegati/internal/notification"
 	"github.com/jegati/jegati/internal/store"
 	"sync"
 	"time"
 )
 
 type Engine struct {
+	Push             *notification.Service
 	Store            *store.Store
 	Planner          matching.Planner
 	Config           config.Config

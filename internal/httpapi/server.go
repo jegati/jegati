@@ -29,6 +29,10 @@ func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*wo
 	if len(engines) > 0 {
 		signal.engine = engines[0]
 	}
+	mux.HandleFunc("GET /api/push-config", signal.pushConfiguration)
+	mux.HandleFunc("GET /api/push", signal.push)
+	mux.HandleFunc("POST /api/push", signal.push)
+	mux.HandleFunc("DELETE /api/push", signal.push)
 	mux.HandleFunc("POST /api/signals", signal.create)
 	mux.HandleFunc("GET /api/signal", signal.status)
 	mux.HandleFunc("DELETE /api/signal", signal.cancel)
@@ -71,7 +75,7 @@ func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*wo
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
-		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(r.Method == "POST" && (r.URL.Path == "/api/signals" || r.URL.Path == "/api/going" || r.URL.Path == "/api/decline" || r.URL.Path == "/api/join" || r.URL.Path == "/api/gathering-preview" || r.URL.Path == "/api/arrival-nonce" || r.URL.Path == "/api/arrival")) && !(r.Method == "DELETE" && (r.URL.Path == "/api/signal" || r.URL.Path == "/api/arrival")) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(r.Method == "POST" && (r.URL.Path == "/api/push" || r.URL.Path == "/api/signals" || r.URL.Path == "/api/going" || r.URL.Path == "/api/decline" || r.URL.Path == "/api/join" || r.URL.Path == "/api/gathering-preview" || r.URL.Path == "/api/arrival-nonce" || r.URL.Path == "/api/arrival")) && !(r.Method == "DELETE" && (r.URL.Path == "/api/push" || r.URL.Path == "/api/signal" || r.URL.Path == "/api/arrival")) {
 			w.Header().Set("Allow", "GET, HEAD")
 			writeError(w, http.StatusMethodNotAllowed)
 			return

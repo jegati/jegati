@@ -18,4 +18,4 @@ GATI_TEST_ADDR=$(docker port "$container" 6379/tcp)
 export GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/app-password"
 export GATI_INTEGRATION=1
 # Go integration tests retry the initial connection with a short bounded deadline.
-go test -race -p 1 -count=1 ./internal/store ./internal/httpapi
+go test -race -p 1 -count=1 ./internal/store ./internal/httpapi ./internal/notification

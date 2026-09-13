@@ -573,3 +573,27 @@ Configuration rejection tests passed for concurrency/retries/timeouts/hostnames 
 contact schemes. Existing Web Push interval/TTL settings are now used by the store
 policy integration; no provider was contacted. Earlier schema-7 hashes/reports are
 historical. Source and local API/client now use schema 8.
+
+## Optional push step F — 2026-09-13
+
+Provider transport and private subscription API are connected. Endpoints/keys are
+AEAD-encrypted in Valkey, bound to capability hash + random delivery binding. Exact
+HTTPS host allowlists, public-address DNS validation/direct IP dialing, verified TLS,
+no proxy/redirect forwarding, bounded body/time/concurrency and queue/attempt fences
+protect delivery. Public VAPID key/config is separate; registration/status/opt-out
+are authenticated and no-store. `make push-keys` generated project-local service keys
+without printing them; they are ignored by Git. The optional Compose overlay mounts
+only that read-only file. Default push remains disabled; the localhost contact
+placeholder cannot enable production-profile delivery. The user was asked for a
+public project/security-contact URL while independent code/test work continues.
+
+`make test-store` passed restricted-Valkey + race tests, including new encrypted
+transport/fake-provider and API auth/query/origin/strict-input/opt-out checks.
+Transport tests cover public/private/mixed DNS, direct checked-IP dialing and redirects.
+The first fake-delivery fixture had a gathering shorter than the configured admission
+minimum; it was corrected before the passing run. `go mod verify` passed. Pinned
+`make security-check` reported no reachable/imported vulnerabilities, plus the unused
+OpenPGP module advisory documented in THIRD_PARTY. Compose base/optional parsing
+passed. No real endpoint/provider was contacted. Browser opt-in/resume/worker source
+is being integrated and has not yet completed its dedicated tests; the existing
+19 browser tests still pass with push off. Next: step G/H browser lifecycle checks.

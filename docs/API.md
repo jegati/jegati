@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 7, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 8, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |
@@ -14,6 +14,10 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | `DELETE /api/signal` | Cancel caller's signal; idempotent |
 | `POST /api/going` | Admit existing willingness to a reachable live gathering |
 | `POST /api/decline` | Decline the current gathering while retaining willingness |
+| `GET /api/push-config` | Whether transport is configured, and its public VAPID key; no capability required |
+| `GET /api/push` | Authenticated subscription enabled/binding/expiry only |
+| `POST /api/push` | Explicit expiring subscription registration; no participation transition |
+| `DELETE /api/push` | Idempotent subscription removal even if transport is disabled |
 | `POST /api/gathering-preview` | Check a currently published gathering and disclose its private destination without enrollment |
 | `POST /api/join` | Atomically create/reuse willingness and admit a recipient |
 | `POST /api/arrival-nonce` | Issue an expiring arrival challenge for a going session |
@@ -48,7 +52,7 @@ join returns 410 without creating unintended willingness; successful retries nev
 renew the gathering/session. Going to another valid gathering switches intent.
 Declines suppress that gathering for this session, with configurable cooldown and
 bounded temporary decline links. They do not cancel willingness. The worker now discovers offers for background willingness; the foreground own-session
-poll displays them. Background notification/follow delivery endpoints remain unimplemented.
+poll displays them. Optional push endpoints are implemented; geographic follows remain future work.
 Public map cards connect the client to private preview and explicit atomic join.
 
 Arrival issuance and confirmation also require `X-Gati-Arrival-Nonce`, an
@@ -94,3 +98,20 @@ body violations and always uses no-store. A browser newcomer holds the capabilit
 only in memory until explicit PO, PO SHKOJ; confirmation calls atomic `/api/join`
 which rechecks live eligibility. Existing participants confirm through `/api/going`.
 This endpoint expands accepted destination inference as documented in decision 0008.
+
+## Optional push registration (schema 8)
+
+`POST /api/push` requires a live willingness capability and exactly `binding`,
+`endpoint`, `p256dh`, `auth`, `expires_at`. Binding is a random 32-byte hex delivery
+label, not an authorization credential. Keys must represent a valid P-256 point
+and 16-byte Web Push auth secret. The endpoint must use an exact configured HTTPS
+provider host with no userinfo/fragment/custom port. Strict fields/query/origin,
+body size, network creation and global write limits apply. Expiry cannot exceed
+willingness or an earlier browser deadline. Only expiry is returned; no subscription
+or key material is echoed. Identical retry preserves binding/deadline. A different
+binding requires opt-out first. Registration/cancellation do not alter willingness,
+going or arrival. `GET /api/push` exposes only the authenticated binding/deadline;
+`DELETE` remains available when the operator disables transport. Generic error
+responses never include provider URLs/keys. `/api/push-config` exposes the public
+service key only. Push is off by default and needs local mounted service keys plus
+an operator contact configuration. Real provider/device testing is still separate.

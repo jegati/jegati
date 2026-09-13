@@ -23,3 +23,17 @@ and transitive checksums in go.mod/go.sum. No client-side state caching is enabl
 The map renderer MapLibre GL JS (6.9.0, BSD-3-Clause) and browser testing framework
 Playwright (1.63.0, Apache-2.0) are pinned in web/package-lock.json. Chromium and
 FFmpeg test artifacts remain in the user's Playwright cache with upstream terms.
+
+Optional Web Push uses github.com/SherClockHolmes/webpush-go v1.4.0 (MIT), pinned
+with its module checksum; upstream tag commit f5c3e9f7b642a8dd66cb844050520526f721971d.
+It supplies RFC 8291 encryption and VAPID; GATI validates keys/endpoints before use
+and supplies a bounded protected HTTP client. Transitives are explicitly pinned:
+golang-jwt/jwt/v5 v5.3.1 (MIT), golang.org/x/crypto v0.57.0 and x/sys v0.48.0 (BSD-3-Clause).
+The scratch image includes the pinned builder's CA certificate bundle for verified
+provider TLS. These services are contacted only by optional, configured delivery.
+
+`make security-check` uses pinned Go govulncheck v1.8.0. Its 2026-09-13 scan reported
+no reachable or imported-package vulnerabilities. The module scan flagged
+GO-2026-5932 for x/crypto/openpgp, which GATI does not import or link; the notification
+library uses x/crypto/hkdf. This is not an independent security audit. Tool modules
+are developer tooling, separate from the deployed application dependency graph.

@@ -1,0 +1,12 @@
+# Optional local Web Push wiring. First set push_enabled/contact in config/gati.yaml.
+# Functional behavior remains in the published YAML, never hidden in this overlay.
+services:
+  api:
+    command: ["-listen", "0.0.0.0:8080", "-config", "/config/gati.yaml", "-store-address", "valkey:6379", "-store-password-file", "/run/secrets/app-password", "-push-key-file", "/run/secrets/vapid.json"]
+    volumes:
+      - type: bind
+        source: ./.runtime/vapid.json
+        target: /run/secrets/vapid.json
+        read_only: true
+        bind:
+          create_host_path: false

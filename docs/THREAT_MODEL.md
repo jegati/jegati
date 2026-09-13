@@ -202,3 +202,30 @@ reachability/cutoff checks and no-store bound the endpoint. Response lifetime us
 admission revalidates eligibility; a preview neither reserves a place nor guarantees
 later admission. Public maps/snapshots remain cell-only. Fixed-clock store/API and
 browser tests cover no enrollment, unchanged public release and preview expiry.
+
+### Optional push transport (decision 0009, schema 8)
+
+Opt-in Web Push requires a provider endpoint and encryption keys. Transport material
+is AES-GCM encrypted under a domain-separated key derived from the mounted VAPID
+service key, with signal hash + random binding as associated data. Store compromise
+alone cannot decrypt or transplant endpoint material; compromise of the API host/key
+still can. The store retains only one current-state/outbox record per live signal
+and a minimal rate-gap deadline. It adds no personal history. Sender claims and
+acknowledgements are fenced; retries/queues/index work are bounded. Cancellation and
+read-time deadlines prevent later claims, but cannot recall a request already in flight.
+
+Provider URLs require exact configured HTTPS hosts. DNS is checked at connection
+time; all answers must be public addresses and the checked IP is dialed directly.
+TLS verifies the original hostname; proxies and redirects are disabled. Tests cover
+private/metadata/transition addresses, mixed DNS answers and non-forwarded redirect
+authorization. Work/concurrency/time/response sizes are bounded. Payloads are padded,
+encrypted metadata (binding/deadline), without location, participant/gathering ID or
+message text. Browser display fetches current authorized state and uses generic
+Albanian text. Providers can still associate endpoints, sender, recipient and timing;
+application TTL is not provider deletion. Bad/stale provider responses stop or bound
+retries. Delivery is best-effort, can coalesce states, and is not exactly-once.
+
+The reviewed pinned transport and actual restricted-store fake-provider tests check
+endpoint encryption, immutable registration, cancellation before send, padded/encrypted
+requests, expiry and claim races. They do not establish Chrome/Firefox/Safari provider
+interoperability or OS notification behavior; that needs real-device evidence.

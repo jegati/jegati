@@ -83,6 +83,7 @@ func TestInvalidConfigurations(t *testing.T) {
 		{"public retention", "snapshot_retention_minutes: 15", "snapshot_retention_minutes: 16"},
 		{"summary retention", "daily_summary_retention_days: 30", "daily_summary_retention_days: 31"},
 		{"follow retention", "area_follow_max_hours: 24", "area_follow_max_hours: 25"},
+		{"push contact placeholder", "push_enabled: false", "push_enabled: true"},
 		{"push concurrency", "push_concurrency: 8", "push_concurrency: 17"},
 		{"push retry bound", "push_max_attempts: 3", "push_max_attempts: 6"},
 		{"push timeout", "push_timeout_seconds: 5", "push_timeout_seconds: 11"},

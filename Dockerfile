@@ -9,6 +9,7 @@ RUN CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags="-s -w" -o /gati .
 
 FROM scratch
 COPY --from=build /gati /gati
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY config/gati.yaml /config/gati.yaml
 COPY data/tirana/roads.geojson /data/tirana/roads.geojson
 COPY data/tirana/intersections.json /data/tirana/intersections.json
