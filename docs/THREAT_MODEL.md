@@ -1,8 +1,9 @@
 # Initial threat model and evidence index
 
-Status: design only. No application, infrastructure control or security test has
-been implemented. Keep this document updated with actual test paths and reports
-as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
+Status: initial threat design plus milestone 02 scaffold evidence. Participant
+features and their protections are not implemented. See the
+[scaffold report](reports/02-scaffold.md) for config validation, API headers and
+simulation-profile rejection tests. Keep this document updated as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
 defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.
 
 ## Assets and trust boundaries
@@ -32,7 +33,7 @@ anonymous to network providers or its operator.
 | Provider correlates requests | First-party assets, no app access logs, optional generic push | Browser network capture and provider inventory; network/provider visibility remains |
 | Browser compromise steals capabilities | No third-party scripts, CSP, bounded client storage, header-only secrets | Browser security/network/storage tests; compromised device outside guarantee |
 | Build/deployment differs from source | Pinned build inputs, signatures/hashes, independent rebuild and host inspection | Artifact comparison and scoped audit; remote version claim is not proof |
-| Simulation reaches production | Separate origin/target allowlist, production excludes control routes | Production artifact/route inspection and rejected non-test destinations |
+| Simulation reaches production | Separate origin/target allowlist, production excludes control routes | Config build guard and scaffold route tests passed (internal/config, internal/httpapi, scripts/smoke.sh); population-tool destination checks remain future work |
 
 ## Evidence rules
 

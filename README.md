@@ -8,7 +8,11 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-Preparation stage. No application has been implemented yet.
+Milestone 02 is in progress: a typed configuration loader, minimal Go API and
+Albanian client scaffold are implemented. Participation, matching, arrivals and
+maps are not implemented yet. Docker runtime validation is pending.
+
+Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 
 Read the [development and verification plan](docs/DEVELOPMENT_PLAN.md) for the proposed architecture, 15 implementation commits, local Tirana simulation, privacy/security boundaries, and deployment verification process.
 
@@ -29,5 +33,19 @@ bash scripts/doctor.sh
 ```
 
 Missing required tools produce exit status 1. The checker does not install tools or
-verify Docker daemon access. Application startup and test commands will be added
-when implemented; commands in the plan are currently future targets.
+verify Docker daemon access. To run the current scaffold without Docker:
+
+```sh
+bash scripts/bootstrap.sh
+make deps
+make verify-local
+make dev-native
+```
+
+Open http://127.0.0.1:5173. This is a preparation screen, not the full participation
+flow. Use `make dev` once Docker is available to validate the Compose stack.
+
+## License
+
+Original source and documentation are licensed under [AGPL-3.0-or-later](LICENSE).
+See [third-party notices](THIRD_PARTY.md) for dependency and future map-data terms.

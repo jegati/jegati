@@ -1,0 +1,45 @@
+# Public functional settings. No secrets. See docs/CONFIGURATION.md.
+schema_version: 1
+profile: production
+availability:
+  minimum_minutes: 30
+  choices_minutes: [30, 60, 90, 120]
+  maximum_minutes: 120
+geography:
+  cell_size_meters: 1000
+  travel_radius_choices_km: [1, 3, 5]
+  crossing_dataset: tirana-crossings-v1
+matching:
+  activation_count: 20
+  activation_stability_seconds: 10
+  maximum_debounce_seconds: 2
+  reconciliation_seconds: 10
+  minimum_remaining_minutes: 15
+  crossing_index_batch_size: 500
+  candidate_batch_size: 100
+  destination_rule: nearest_eligible_crosswalk_to_coarse_group_center
+  prefer_open_gatherings: true
+  maximum_gathering_minutes: 60
+  late_join_min_remaining_minutes: 5
+arrivals:
+  confirmation_count: 10
+  confirmation_stability_seconds: 10
+  freshness_minutes: 15
+  nonce_seconds: 120
+  allowed_cell_neighbor_rings: 0
+public_activity:
+  minimum_count: 20
+  count_buckets: [20, 50, 100, 250, 500, 1000]
+  release_seconds: 300
+  delay_epochs: 1
+  snapshot_retention_minutes: 15
+  daily_summary_retention_days: 30
+notifications:
+  nearby_gati_count: 50
+  nearby_arrival_count: 50
+  nearby_radius_km: 5
+  foreground_poll_seconds: 30
+  push_min_interval_seconds: 300
+  push_max_per_hour: 6
+  queue_ttl_seconds: 300
+  area_follow_max_hours: 24

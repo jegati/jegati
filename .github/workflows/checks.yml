@@ -1,0 +1,28 @@
+name: scaffold checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
+        with:
+          go-version: '1.27.1'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: make deps
+      - run: make verify-local COMPOSE='docker compose'
+      - run: docker compose build
+      - run: docker compose up -d --wait --wait-timeout 90
+      - run: |
+          curl --fail http://127.0.0.1:8080/healthz
+          curl --fail http://127.0.0.1:5173/
+          curl --fail http://127.0.0.1:5173/api/config
+          docker compose exec -T valkey valkey-cli ping
+      - if: always()
+        run: docker compose down

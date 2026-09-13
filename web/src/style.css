@@ -1,0 +1,9 @@
+:root { font-family: system-ui, sans-serif; color: #352c31; background: #fff8f3; color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 1.5rem; }
+main { width: min(100%, 35rem); padding-block: 3rem; }
+.brand { letter-spacing: .12em; font-weight: 700; }
+h1 { font-size: clamp(2.5rem, 10vw, 5rem); line-height: 1; letter-spacing: -.04em; margin-block: 2.5rem 1rem; }
+p { line-height: 1.7; }
+.tagline { font-size: 1.35rem; }
+#status { border-top: 1px solid #dac9c8; margin-top: 2.5rem; padding-top: 1.5rem; }

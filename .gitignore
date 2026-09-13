@@ -1,0 +1,15 @@
+# Local secrets and runtime artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Dependencies and build output
+node_modules/
+web/dist/
+bin/
+coverage/
+.tmp/
+reports/local/
+*.test
+*.out

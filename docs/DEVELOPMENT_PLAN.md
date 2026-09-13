@@ -1,6 +1,6 @@
 # GATI 🦩 — development and verification plan
 
-Status: proposed architecture, before implementation. This document defines the intended commits and release gates; it does not claim that the application or protections already exist.
+Status: architecture and milestone plan. Implementation has started; consult PROGRESS.md for completed functionality and validation. This document describes intended behavior, not evidence that every protection already exists.
 
 Read [AGENTS.md](../AGENTS.md) for development instructions and
 [PROGRESS.md](PROGRESS.md) for actual implementation and validation status. The
@@ -105,7 +105,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 ### Central functional configuration
 
-Implement one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and commands below are planned deliverables of commit 02, not executable assets yet.
+Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching and notification behavior consuming these settings remains future work.
 
 ```yaml
 profile: production

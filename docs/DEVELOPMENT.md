@@ -41,7 +41,17 @@ Never paste your sudo password into chat. The system Compose plugin and the pinn
 standalone client may have different versions; GATI will use the pinned client
 when `scripts/env.sh` is sourced. Installing Docker can change host networking;
 these instructions deliberately do not add your user to the privileged docker group.
-A later runtime check determines whether commands require `sudo` for this host.
+For autonomous runtime testing, the agent's user also needs Docker socket access.
+If you choose the standard Docker-group setup, run:
+
+```sh
+sudo usermod -aG docker "$USER"
+```
+
+Then log out/in and restart the Codex terminal so its process inherits the group;
+`docker info` must succeed without sudo. Docker-group membership grants root-level
+host access. Keep the socket restricted to that group; never make it world-writable.
+If you prefer rootless Docker, use that setup instead of the group step.
 
 Rootless Docker is another supported Engine option, but it requires `newuidmap`,
 `newgidmap` and subordinate UID/GID ranges. Those helpers were absent during setup;
@@ -54,3 +64,37 @@ Read [PROGRESS.md](PROGRESS.md) for implemented commands and checks. A successfu
 Compose configuration parse does not demonstrate a running stack, image build,
 Valkey behavior or production readiness. Keep container startup validation pending
 until a usable Docker Engine is available.
+
+## Available scaffold commands
+
+```sh
+make deps                      # Download locked Go/npm dependencies
+make config-check              # Validate production defaults
+make config-show               # Print canonical public JSON
+make config-check-simulation    # Check isolated simulation defaults
+make verify-local              # Tests, builds, config/Compose parse and HTTP smoke
+make dev-native                # API + Vite scaffold on loopback; Ctrl-C stops both
+```
+
+`make dev-native` opens the scaffold at http://127.0.0.1:5173, with an API on
+127.0.0.1:8080. It has no participant data, willingness action or map yet and needs
+no Valkey. This temporary scaffold command does not replace the planned Compose
+workflow once participant storage is added. Node dependencies must first be installed
+with `make deps`. The native smoke test uses temporary OS-selected loopback ports.
+
+After Docker is usable:
+
+```sh
+make dev             # Build/start the development API, Vite and isolated Valkey
+make down            # Stop the Compose stack
+```
+
+The Compose stack is only a development definition. The Valkey service has no
+published port or persistent volume, and the API does not yet connect to it.
+Restricted service ACLs/credentials must be added before participant writes.
+The development frontend allows Vite's local asset cache; it is not the production
+static frontend server. Caddy/production deployment belongs to milestone 13.
+
+CI is configured to build/start the containers and check API/client/proxy/Valkey.
+It has not run remotely because no push is authorized. Image references are pinned
+to publisher index digests; schema parsing alone does not verify those image builds.

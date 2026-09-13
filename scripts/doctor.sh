@@ -29,10 +29,11 @@ check_tool go required version
 check_tool node required --version
 check_tool npm required --version
 check_tool docker required --version
+check_tool docker-compose optional version
 check_tool gh optional --version
 
 if command -v docker >/dev/null 2>&1; then
-  if docker compose version >/dev/null 2>&1; then
+  if docker compose version >/dev/null 2>&1 || docker-compose version >/dev/null 2>&1; then
     printf '%-12s available\n' compose
   else
     printf '%-12s missing or unusable (required)\n' compose

@@ -1,0 +1,45 @@
+# Development scaffold. Not yet a production deployment.
+name: gati
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: ["127.0.0.1:8080:8080"]
+    volumes: ["./config/gati.yaml:/config/gati.yaml:ro"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging: {driver: "none"}
+    networks: [frontend, backend]
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile.dev
+    environment:
+      GATI_API_PROXY: http://api:8080
+    ports: ["127.0.0.1:5173:5173"]
+    depends_on: [api]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [frontend]
+  valkey:
+    image: valkey/valkey:9.1.2-alpine@sha256:a0dbf4c1d5708782907c10e2c72deff317518518b5288a58416981d9db95d30b
+    command: ["valkey-server", "/etc/valkey/valkey.conf"]
+    volumes: ["./deploy/valkey.dev.conf:/etc/valkey/valkey.conf:ro"]
+    tmpfs: ["/data:size=128m"]
+    read_only: true
+    user: "999:999"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging: {driver: "none"}
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+    networks: [backend]
+networks:
+  frontend: {}
+  backend:
+    internal: true

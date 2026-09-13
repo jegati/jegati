@@ -1,7 +1,7 @@
 # 0001 — Local-first anonymous MVP boundaries
 
 Date: 2026-09-13. Status: working implementation direction from the agreed plan;
-not evidence that any privacy control or feature is implemented.
+not completion evidence; see PROGRESS.md for implemented controls and checks.
 
 ## Context
 
