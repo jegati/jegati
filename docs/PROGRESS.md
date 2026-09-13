@@ -278,3 +278,20 @@ Unit/race tests, a bounded exhaustive planner oracle, real-store tests, legacy
 simulation integration, and all 13 current-config browser checks passed. The
 standalone replay browser test passed on the exploratory 3,000-person artifact.
 The final 18-run suite and 100 m comparison are next. No real GPS or deployment.
+
+## Population suite findings and limiter correction
+
+The first 18-run batch completed. Four checks initially failed: three sparse runs
+correctly had no gathering but exposed a null-slice report-checker bug; one dense
+run stopped on HTTP 503 exactly at the 16:20:00 UTC network-secret rollover.
+The limiter previously used separate SET NX and GET calls, allowing expiration
+between them. Secret selection/read now occurs atomically using Valkey's real
+clock, retaining the existing ten-minute bounded lifecycle. Real-store race tests
+passed, including a one-millisecond-before-rollover fixture, old-secret expiration
+and concurrent replicas sharing the next epoch's secret. No raw address logging.
+The failed run remains preserved; rerun and final suite evidence are pending.
+
+The baseline seed-42 repeat has identical complete functional JSON/timelines after
+excluding only wall runtime, sampled driver heap and source build metadata.
+Canonical functional SHA-256:
+`f9141abd66bc40039ba48131ddab20ac98404b28da460182312a69295c69c13a`.

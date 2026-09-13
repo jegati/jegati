@@ -9,7 +9,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"strconv"
 	"strings"
 	"time"
 
@@ -172,30 +171,39 @@ if n>tonumber(ARGV[1]) then return 0 end
 return 1
 `)
 
+// Creation and reading share one atomic operation. A separate SET NX then GET
+// races expiration at an epoch boundary and can reject a valid request with 503.
+// Use the store's real clock, independently of the functional simulation clock.
+const networkSecretLua = `
+local clock=redis.call('TIME')
+local now=tonumber(clock[1])*1000+math.floor(tonumber(clock[2])/1000)
+local epoch=math.floor(now/600000)
+local key=KEYS[1]..tostring(epoch)
+local secret=redis.call('GET',key)
+if not secret then
+ secret=ARGV[1]
+ redis.call('SET',key,secret,'PX',(epoch+1)*600000-now)
+end
+return {tostring(epoch),secret}
+`
+
+var networkSecret = redis.NewScript(networkSecretLua)
+
 // NetworkKey uses a shared, expiring rotation secret. No address is stored and the
 // resulting key is never linked to an individual session record. It remains a
 // sensitive short-lived pseudonym, not anonymized data.
 func (s *Store) NetworkKey(ctx context.Context, address string) (string, error) {
-	epoch := time.Now().Unix() / 600
-	key := keyPrefix + "rate:secret:" + strconv.FormatInt(epoch, 10)
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	ttl := time.Until(time.Unix((epoch+1)*600, 0))
-	if ttl <= 0 {
-		ttl = time.Millisecond
-	}
-	if err := s.Client.SetNX(ctx, key, b, ttl).Err(); err != nil {
+	result, err := networkSecret.Run(ctx, s.Client, []string{keyPrefix + "rate:secret:"}, b).StringSlice()
+	if err != nil || len(result) != 2 || len(result[1]) != 32 {
 		return "", errors.New("limiter unavailable")
 	}
-	secret, err := s.Client.Get(ctx, key).Bytes()
-	if err != nil {
-		return "", errors.New("limiter unavailable")
-	}
-	mac := hmac.New(sha256.New, secret)
+	mac := hmac.New(sha256.New, []byte(result[1]))
 	mac.Write([]byte(address))
-	return strconv.FormatInt(epoch, 10) + ":" + hex.EncodeToString(mac.Sum(nil)), nil
+	return result[0] + ":" + hex.EncodeToString(mac.Sum(nil)), nil
 }
 func (s *Store) Allow(ctx context.Context, key string, count int, ttl time.Duration) (bool, error) {
 	v, err := limit.Run(ctx, s.Client, []string{keyPrefix + "rate:" + key}, count, ttl.Milliseconds()).Int()
