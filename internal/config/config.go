@@ -188,6 +188,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	if m.DestinationRule != "nearest_eligible_crosswalk_to_coarse_group_center" || !m.PreferOpenGatherings {
 		return errors.New("unsupported destination or admission policy")
 	}
+	if m.ActivationCount > 500 || m.ActivationCount > c.Limits.MaxActiveSignals {
+		return errors.New("activation threshold exceeds bounded founding transaction or capacity")
+	}
 	if m.MaximumGatheringMinutes > 60 || m.MinimumRemainingMinutes > m.MaximumGatheringMinutes || m.LateJoinMinRemainingMinutes > m.MinimumRemainingMinutes {
 		return errors.New("inconsistent gathering deadlines")
 	}

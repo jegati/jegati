@@ -26,12 +26,17 @@ var ErrConflict = errors.New("capability already used")
 var ErrCapacity = errors.New("admission capacity reached")
 
 type Signal struct {
-	Cell                string `json:"cell"`
-	RadiusKM            int    `json:"radius_km"`
-	AvailabilityMinutes int    `json:"availability_minutes"`
-	CreatedAt           int64  `json:"created_at"`
-	ExpiresAt           int64  `json:"expires_at"`
-	State               string `json:"state"`
+	Pending             string          `json:"_pending,omitempty"`
+	PendingUntil        int64           `json:"_pending_until,omitempty"`
+	Gathering           string          `json:"_gathering,omitempty"`
+	GatheringUntil      int64           `json:"_gathering_until,omitempty"`
+	Declined            map[string]bool `json:"_declined,omitempty"`
+	Cell                string          `json:"cell"`
+	RadiusKM            int             `json:"radius_km"`
+	AvailabilityMinutes int             `json:"availability_minutes"`
+	CreatedAt           int64           `json:"created_at"`
+	ExpiresAt           int64           `json:"expires_at"`
+	State               string          `json:"state"`
 }
 type Store struct{ Client *redis.Client }
 
@@ -189,4 +194,14 @@ func (s *Store) Allow(ctx context.Context, key string, count int, ttl time.Durat
 func newScript(source string) *redis.Script {
 	source = strings.ReplaceAll(source, "__CLOCK__", clockLua)
 	return redis.NewScript(strings.ReplaceAll(source, "gati:", keyPrefix))
+}
+
+// Public removes private matching bookkeeping from the own-session API contract.
+func (s Signal) Public() Signal {
+	s.Pending = ""
+	s.PendingUntil = 0
+	s.Gathering = ""
+	s.GatheringUntil = 0
+	s.Declined = nil
+	return s
 }

@@ -131,3 +131,13 @@ proposed deadline. Focused race tests passed. Decision 0003 explains the bounded
 cohort and conservative reservation stability. This planner is not wired into the
 API yet and does not establish end-to-end activation. Next: atomic Valkey
 reservation/activation/admission and worker recovery/timer integration.
+
+## Milestone 07, transaction slice
+
+Atomic temporary reservation and activation now exist in the store (not yet wired
+to the running API worker). Real-store race tests cover overlapping reservations,
+stale coarse-area/radius/deadline validation, early activation refusal, cancelled
+founder replacement refusal, replay-stable destination/deadline and removal of
+private bookkeeping from own-session JSON. `make test-store` passed.
+Founding transactions currently support activation thresholds up to 500; validation
+rejects larger thresholds and thresholds exceeding configured signal capacity.

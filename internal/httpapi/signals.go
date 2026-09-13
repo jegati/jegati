@@ -149,7 +149,7 @@ func (s signalAPI) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(signal)
+	json.NewEncoder(w).Encode(signal.Public())
 }
 func readCreate(body io.Reader) (createRequest, error) {
 	var request createRequest
@@ -209,7 +209,7 @@ func (s signalAPI) status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(value)
+	json.NewEncoder(w).Encode(value.Public())
 }
 func (s signalAPI) cancel(w http.ResponseWriter, r *http.Request) {
 	hash, ok := s.authorized(w, r)

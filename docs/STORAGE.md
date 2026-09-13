@@ -63,3 +63,19 @@ Simulation builds compile a separate `gati-sim:*` namespace and require separate
 generated ACL credentials. Their frozen clock affects functional deadlines only;
 real native TTLs still bound the disposable store. See SIMULATION.md. Production
 creation retries now explicitly check stored deadlines as well as native TTL.
+
+## Matching transaction groundwork (milestone 07, not yet scheduled)
+
+Signals can contain private `_pending`, `_pending_until`, `_gathering`,
+`_gathering_until` and `_declined` bookkeeping. The own-session API removes these
+fields; the upcoming invitation view will expose only the selected gathering.
+`pending:<id>` holds a bounded founding hash list and public crossing while the
+stability timer runs; its TTL covers stability plus bounded recovery. The `pending`
+sorted index uses ready-at scores and a TTL no longer than its latest reservation.
+`destination:<crossing-id>` prevents duplicate use of that exact crossing while
+reserved/open, with the corresponding reservation/gathering lifetime.
+Activation deletes the pending record/index member and sets `gathering:<id>` plus
+a deadline-scored `gatherings` index, with TTL at the fixed end (maximum 60 minutes).
+No permanent founder/member history is retained in the gathering record.
+Every activation rechecks all surviving founders and the configuration version.
+These records are not public APIs. Worker sweeps/recovery/admission still need wiring.

@@ -39,3 +39,7 @@ Schema 2 adds a required `limits` section: body size, network window/request/cre
 counts, global writes/second, active-signal capacity and cleanup batch size. Bounds
 are enforced before serving; every limit remains public and auditable. The defaults
 are starting controls, not evidence of effective Sybil resistance at production load.
+
+The current bounded activation transaction accepts `matching.activation_count` up
+to 500 and no greater than `limits.max_active_signals`. This is an implementation
+work bound; larger crowds can use late admission without a larger founding write.
