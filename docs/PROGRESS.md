@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–05 complete; next is isolated Tirana simulation.
+Updated: 2026-09-13. Status: milestones 02–06 complete; next is continuous activation and late admission.
 
 ## Current task and authorization
 
@@ -33,7 +33,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 03 — Coarse geography and crossing fixtures | Complete | 2,571 imported crossings, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
 | 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
-| 06 — Seeded Tirana simulation | Not started | Isolated real-API driver and deterministic scenarios |
+| 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
 | 07 — Continuous activation and late admission | Not started | Matching/timers/crosswalk selection, races and joining |
 | 08 — Arrival claims | Not started | Founding/late participants, nonces/freshness/retraction |
 | 09 — Aggregate map/statistics | Not started | Canonical releases and inference review |
@@ -59,8 +59,8 @@ make dev-native
 an HTTP smoke. It does not start containers. `make dev-native` serves a read-only UI/API preview at http://127.0.0.1:5173; Ctrl-C stops its API/client processes. It has no Valkey connection; use Compose for willingness. Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup.
 
 `make dev` / `make down` are implemented for Compose but require Docker Engine.
-The planned `make simulate` and `make load` do not exist yet. A simulation-capable
-config build is not the population simulator or fake-clock implementation.
+`make simulate` runs the isolated willingness population simulator and controllable
+clock. `make load` does not exist yet. Matching/arrival scenarios follow those features.
 
 ## Validation and commits
 
@@ -71,9 +71,10 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 06: isolated seeded Tirana API simulation and controlled
-functional time, with production-route exclusion tests. Docker Engine 29.1.3 and
-Compose 5.5.1 are usable. Local containers run on loopback.
+Implement milestone 07: continuous threshold stability, crossing allocation,
+fixed destinations/deadlines, invitation state and late admission. Extend the
+simulator with deterministic activation/decline/late-join scenarios as these land.
+Docker and the local Compose willingness app remain available on loopback.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -110,3 +111,13 @@ The map is currently a first-party road backdrop and the user's own selected coa
 area, not a public activity map. PWA installation/offline shell, notifications and
 activation are still pending. Browser session restoration/backups are outside
 forensic erasure guarantees. Server deadlines remain authoritative.
+
+## Milestone 06 evidence
+
+See reports/06-simulation.md and SIMULATION.md for exact results and limitations.
+Two evening runs produced byte-identical JSON; a single-network Sybil burst accepted
+59/238 credentials for 40 synthetic people, rejecting 179. Logical expiry and
+restricted simulation namespace were checked against real disposable Valkey.
+Production store integration and native checks passed after fixing cross-package
+test interference. No simulation-control credential or synthetic participant token
+is written to a report or committed. Normal Compose remains separate.

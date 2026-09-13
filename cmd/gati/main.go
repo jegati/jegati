@@ -18,7 +18,6 @@ import (
 
 	"github.com/jegati/jegati/internal/buildmode"
 	"github.com/jegati/jegati/internal/config"
-	"github.com/jegati/jegati/internal/httpapi"
 )
 
 func main() {
@@ -78,7 +77,11 @@ func run() error {
 	if e != nil {
 		return errors.New("cannot read public map asset")
 	}
-	server := &http.Server{Handler: httpapi.Handler(c, backend, roads), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
+	handler, e := configureHandler(c, backend, roads)
+	if e != nil {
+		return e
+	}
+	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if backend != nil {

@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -41,7 +42,12 @@ func Connect(ctx context.Context, address, username, password string) (*Store, e
 		c.Close()
 		return nil, errors.New("temporary store unavailable")
 	}
-	return &Store{c}, nil
+	backend := &Store{c}
+	if err := backend.initializeClock(ctx); err != nil {
+		c.Close()
+		return nil, err
+	}
+	return backend, nil
 }
 func Hash(capability []byte) string {
 	sum := sha256.Sum256(capability)
@@ -55,11 +61,12 @@ func decode(raw string) (Signal, error) {
 	return s, nil
 }
 
-var create = redis.NewScript(`
-local clock=redis.call('TIME'); local now=tonumber(clock[1])*1000+math.floor(tonumber(clock[2])/1000)
+var create = newScript(`
+__CLOCK__
 local old=redis.call('GET',KEYS[1])
 if old then
  local s=cjson.decode(old)
+ if s.expires_at<=now then return 'GONE' end
  if s.cell==ARGV[1] and s.radius_km==tonumber(ARGV[2]) and s.availability_minutes==tonumber(ARGV[3]) then return old end
  return 'CONFLICT'
 end
@@ -76,7 +83,7 @@ return s
 `)
 
 func (s *Store) Create(ctx context.Context, hash, cell string, radius, minutes int, ttl time.Duration, capacity int) (Signal, error) {
-	raw, err := create.Run(ctx, s.Client, []string{"gati:s:" + hash, "gati:cap:" + hash, "gati:expiry", "gati:cell:" + cell}, cell, radius, minutes, ttl.Milliseconds(), capacity, hash+"|"+cell, hash).Text()
+	raw, err := create.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell}, cell, radius, minutes, ttl.Milliseconds(), capacity, hash+"|"+cell, hash).Text()
 	if err != nil {
 		return Signal{}, errors.New("temporary store write failed")
 	}
@@ -91,15 +98,15 @@ func (s *Store) Create(ctx context.Context, hash, cell string, radius, minutes i
 	return decode(raw)
 }
 
-var status = redis.NewScript(`
+var status = newScript(`
 local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
-local clock=redis.call('TIME');local now=tonumber(clock[1])*1000+math.floor(tonumber(clock[2])/1000)
+__CLOCK__
 if cjson.decode(raw).expires_at<=now then return 'GONE' end
 return raw
 `)
 
 func (s *Store) Status(ctx context.Context, hash string) (Signal, error) {
-	raw, err := status.Run(ctx, s.Client, []string{"gati:s:" + hash}).Text()
+	raw, err := status.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash}).Text()
 	if err != nil {
 		return Signal{}, errors.New("temporary store read failed")
 	}
@@ -109,7 +116,7 @@ func (s *Store) Status(ctx context.Context, hash string) (Signal, error) {
 	return decode(raw)
 }
 
-var cancel = redis.NewScript(`
+var cancel = newScript(`
 local raw=redis.call('GET',KEYS[1]);if not raw then return 0 end
 local s=cjson.decode(raw)
 redis.call('DEL',KEYS[1])
@@ -119,14 +126,14 @@ return 1
 `)
 
 func (s *Store) Cancel(ctx context.Context, hash string) error {
-	if err := cancel.Run(ctx, s.Client, []string{"gati:s:" + hash, "gati:expiry"}, hash).Err(); err != nil {
+	if err := cancel.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "expiry"}, hash).Err(); err != nil {
 		return errors.New("temporary store cancel failed")
 	}
 	return nil
 }
 
-var cleanup = redis.NewScript(`
-local clock=redis.call('TIME');local now=tonumber(clock[1])*1000+math.floor(tonumber(clock[2])/1000)
+var cleanup = newScript(`
+__CLOCK__
 local expired=redis.call('ZRANGEBYSCORE',KEYS[1],'-inf',now,'LIMIT',0,ARGV[1])
 for _,member in ipairs(expired) do
  local split=string.find(member,'|',1,true)
@@ -140,10 +147,10 @@ return #expired
 `)
 
 func (s *Store) Cleanup(ctx context.Context, batch int) (int, error) {
-	return cleanup.Run(ctx, s.Client, []string{"gati:expiry"}, batch).Int()
+	return cleanup.Run(ctx, s.Client, []string{keyPrefix + "expiry"}, batch).Int()
 }
 
-var limit = redis.NewScript(`
+var limit = newScript(`
 local n=redis.call('INCR',KEYS[1]);if n==1 then redis.call('PEXPIRE',KEYS[1],ARGV[2]) end
 if n>tonumber(ARGV[1]) then return 0 end
 return 1
@@ -154,7 +161,7 @@ return 1
 // sensitive short-lived pseudonym, not anonymized data.
 func (s *Store) NetworkKey(ctx context.Context, address string) (string, error) {
 	epoch := time.Now().Unix() / 600
-	key := "gati:rate:secret:" + strconv.FormatInt(epoch, 10)
+	key := keyPrefix + "rate:secret:" + strconv.FormatInt(epoch, 10)
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
@@ -175,6 +182,11 @@ func (s *Store) NetworkKey(ctx context.Context, address string) (string, error) 
 	return strconv.FormatInt(epoch, 10) + ":" + hex.EncodeToString(mac.Sum(nil)), nil
 }
 func (s *Store) Allow(ctx context.Context, key string, count int, ttl time.Duration) (bool, error) {
-	v, err := limit.Run(ctx, s.Client, []string{"gati:rate:" + key}, count, ttl.Milliseconds()).Int()
+	v, err := limit.Run(ctx, s.Client, []string{keyPrefix + "rate:" + key}, count, ttl.Milliseconds()).Int()
 	return v == 1, err
+}
+
+func newScript(source string) *redis.Script {
+	source = strings.ReplaceAll(source, "__CLOCK__", clockLua)
+	return redis.NewScript(strings.ReplaceAll(source, "gati:", keyPrefix))
 }

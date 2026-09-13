@@ -61,3 +61,7 @@ browser-install:
 	cd web && npx playwright install chromium
 test-browser:
 	cd web && npx playwright test
+
+.PHONY: simulate
+simulate:
+	SCENARIO="$(or $(SCENARIO),tirana-evening)" SEED="$(or $(SEED),42)" bash scripts/simulate.sh

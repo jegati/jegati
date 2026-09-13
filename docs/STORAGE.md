@@ -58,3 +58,8 @@ It checks native TTL expiry, index cleanup, cancellation/replay, concurrent idem
 rate counters, denied privileged commands and the real HTTP willingness contract.
 Default unit tests explicitly skip these integrations; they do not fake a passing
 store test. The readiness/build/native checks are separate from this target.
+
+Simulation builds compile a separate `gati-sim:*` namespace and require separately
+generated ACL credentials. Their frozen clock affects functional deadlines only;
+real native TTLs still bound the disposable store. See SIMULATION.md. Production
+creation retries now explicitly check stored deadlines as well as native TTL.

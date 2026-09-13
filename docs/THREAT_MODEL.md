@@ -64,3 +64,13 @@ compromised browser code and local clock tampering remain outside deletion claim
 The API independently enforces its own time. Browser tests check exact-coordinate
 absence in request URLs/bodies and storage plus failure/reload behavior; this is
 not a complete malicious-browser or administrator audit.
+
+### Implemented simulation boundary (milestone 06)
+
+Simulation controls/flags are selected at compile time, require loopback and a
+separate run credential, reject browser Origins, and use a disjoint ACL namespace.
+The driver refuses production profiles/nonloopback/redirects before writes. Test
+clock/source records are never served by the product routes. Synthetic reports
+contain no capabilities and live outside production build inputs. Scenarios expose
+that one-network limits still admitted more credentials than synthetic humans.
+They establish neither independent arrivals nor resistance to distributed Sybils.

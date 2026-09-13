@@ -1,0 +1,9 @@
+seed: 42
+population: 40
+distribution: clustered
+availability_minutes: [30, 60, 90, 120]
+radius_km: [1, 3, 5]
+cancellation_probability: 0.15
+duplicate_request_fraction: 0.10
+sybil_fraction: 0.0
+sybil_credentials: 1

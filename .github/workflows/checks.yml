@@ -17,6 +17,8 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: make deps
       - run: make test-store
+      - run: make simulate
+      - run: make simulate SCENARIO=tirana-sybil
       - run: make verify-local COMPOSE='docker compose'
       - run: docker compose build
       - run: make secrets

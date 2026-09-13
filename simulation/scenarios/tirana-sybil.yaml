@@ -1,0 +1,9 @@
+seed: 42
+population: 40
+distribution: single_hotspot
+availability_minutes: [30]
+radius_km: [3]
+cancellation_probability: 0.0
+duplicate_request_fraction: 0.02
+sybil_fraction: 0.5
+sybil_credentials: 10
