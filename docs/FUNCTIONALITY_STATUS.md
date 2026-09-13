@@ -5,6 +5,10 @@ test sources and locally executed evidence. Optional future availability is excl
 “Tested” means the checks below cover the stated behavior; it does not certify all
 security properties or a public deployment. A configured field alone is not a feature.
 
+The proposed next steps and acceptance gates are in
+[ACTIVITY_IMPLEMENTATION_PLAN.md](ACTIVITY_IMPLEMENTATION_PLAN.md). The missing
+features below remain unimplemented.
+
 ## The four user-requested journeys
 
 | Journey | Verdict | Present and tested | Missing / qualification |

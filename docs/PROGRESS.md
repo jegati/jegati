@@ -71,13 +71,14 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-The simulation task is complete; see reports/population-3000.md for results and
-reproduction commands. Resume milestone 09 aggregate-publication design and tests
-under the disclosed nearest-intersection inference limitation (decision 0004), then
-notifications/hardening/load/deployment verification. The user has now selected
-100 m cells / 50 m reported device error as the operating default (decision 0006). Before a real pilot, review the
-short-radius exclusions and journey/deadline outcomes; do not silently change the
-privacy resolution or claim human usability from synthetic actors.
+Begin commit 1 of ACTIVITY_IMPLEMENTATION_PLAN.md: finalize count semantics,
+public-grid/epoch contracts and cross-surface privacy fixtures before building the
+aggregate publisher. Then implement the statistics cards, city map/public joining,
+server-discovered notification events and optional delivery lifecycle in its stated
+order. Current code status remains in FUNCTIONALITY_STATUS.md; this plan does not
+complete milestone 09/10. Keep the selected 100 m private grid / 50 m device-error
+limit and 30/20 thresholds. Historical population evidence is in
+reports/population-3000.md. Known nearest-intersection inference remains disclosed.
 No credential or toolchain blocker remains for local work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
@@ -366,3 +367,28 @@ and maps the broader MVP to present/tested, partial and missing evidence. Core p
 aggregates/notification subscriptions, 100k validation, independent audit and
 production/deployment verification remain incomplete. Next: milestone 09 under the
 disclosed inference limitation. No privacy or deployment certification is claimed.
+
+
+## Plan for the four missing activity journeys
+
+Prepared ACTIVITY_IMPLEMENTATION_PLAN.md with ten commit targets and acceptance
+checks. It defines shared willingness/going/fresh-arrival semantics, a proposed
+separate 1 km public grid, existing 5-minute/one-epoch delayed releases, joint
+suppression, bounded snapshot capture, cached APIs and Albanian cards/map/join flows.
+It also covers server-side invitation discovery (some current offers depend on
+polling), an atomic bounded outbox, optional push with an expiring opt-in resume
+record, area follows, and a 3,000-person simulation extension using real released
+activity instead of injected public discovery.
+
+The plan preserves continuous private matching and the current operating config.
+It does not equate thresholding with anonymity or treat the accepted private
+counterexample as approval of additional public leaks. The precise publication policy,
+new adversarial fixtures, capture consistency and real push interoperability remain
+implementation gates. Estimated effort: 75–125 focused hours, with privacy redesign
+and provider/device troubleshooting outside a guaranteed schedule.
+
+Validation for this planning-only change: inspected current code/API/config/tests,
+reviewed W3C/Apple push lifecycle and platform guidance, checked Markdown links and
+git diff formatting. No application tests were rerun and no missing feature was
+implemented. Local implementation needs no new credentials through fake delivery;
+real device/secure-origin interoperability is a separately recorded final check.

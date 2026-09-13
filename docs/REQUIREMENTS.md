@@ -54,6 +54,11 @@ They must reveal only necessary information and offer an actionable join flow.
 Show significant GATI areas, bucketed activity such as **50+ GATI**, activated
 gatherings, sufficiently confirmed gathering areas and simple aggregate statistics
 over time. A map represents collective areas/destinations, never individuals.
+After JAM GATI, show published approximate nearby willingness. Gathering cards must
+show approximate going and fresh-arrival statistics before and after JAM KËTU.
+Keep the Tirana collective activity map available throughout these states. These
+statistics use the same privacy-preserving release rules across cards and maps.
+
 Suppress or coarsen small groups. Mark deliberately delayed data with its time;
 do not describe historical releases as exact current occupancy.
 

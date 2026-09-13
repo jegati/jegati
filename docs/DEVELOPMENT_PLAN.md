@@ -1,5 +1,12 @@
 # GATI 🦩 — development and verification plan
 
+The next implementation slice is detailed in
+[ACTIVITY_IMPLEMENTATION_PLAN.md](ACTIVITY_IMPLEMENTATION_PLAN.md): the four requested
+nearby-statistics, invitation, arrival-statistics and citywide-map journeys. It
+specifies the public release contract, notification lifecycle, commit sequence and
+acceptance gates. It is proposed work, not completion evidence.
+
+
 Status: architecture and milestone plan. Implementation has started; consult PROGRESS.md for completed functionality and validation. This document describes intended behavior, not evidence that every protection already exists.
 
 Read [AGENTS.md](../AGENTS.md) for development instructions and
