@@ -38,7 +38,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
 | 09 — Aggregate map/statistics | Current activity implemented; daily history remains | Cell-only delayed releases/API/cards/map, real-store and browser evidence below; inference accepted in decision 0007 |
-| 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
+| 10 — Notifications and follows | In progress | Worker-side offers and foreground display implemented; optional push/subscriptions/fake sink/follows remain |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
 | 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
 | 13 — Deployment | Not started | Production stack, backup/restore/rollback and clean VM validation |
@@ -520,3 +520,36 @@ so older population totals are historical until rerun. `make simulate` passed it
 40-person run and race-enabled fixed-clock real-store test, including direct store
 creation followed by worker-only invitation (no HTTP status poll). Delivery is not
 implemented yet. Next: bounded optional subscription/outbox and transport.
+
+## Usability validation and handoff — 2026-09-13
+
+Plan: `docs/USABILITY_IMPLEMENTATION_PLAN.md`. Commits 55ac165 (scope), 84c984d
+(one-action willingness/recovery/private preview), d564fce (background offers).
+Selected suggestions 2/3/5 are implemented; suggestion 1 has background discovery,
+with optional Web Push registration, transport and browser delivery still pending
+(steps E–H). Suggestions 4/6 remain excluded. No new credentials were needed for
+these local milestones; no external publication/provider delivery took place.
+
+Nineteen Chromium tests passed, including arrival-confirmation expiry returning the
+JAM KËTU action without automatic renewal. `make verify-local`, `make test-store`,
+`make simulate`, focused Go race tests and `make check-containers` passed. A final
+cursor-lifetime review added an absolute participant-expiry bound checked even on
+follower replicas; Go race tests and the fixed-clock real-store simulation passed
+again after that small correction. The 3,000-person run was compiled at d564fce,
+before that cursor-expiry correction; its exact source/dirty status and artifacts
+are recorded, so it is not presented as a final release build.
+
+`make simulate-population SCENARIO=tirana-population SEED=42 OUTPUT=reports/local/tirana-usability-3000-42`
+and `make check-population REPORT=reports/local/tirana-usability-3000-42/report.json`
+passed: 3,000 accepted, 1,921 uniquely invited, 1,112 unique arrivals / 1,589 arrival
+confirmations, 46 gatherings (30 ever confirmed), 22 joins after JEMI KËTU, 456
+cancellations and all remaining 2,544 expiries verified. Wall time 222.49 seconds;
+functional time is accelerated, not a capacity benchmark or human usability study.
+See `docs/reports/usability-3000.md` and its synthetic summary for scope/provenance.
+The matching configuration remains schema 7 / 100 m default; no behavior thresholds
+were changed. Current development UI/API have been rebuilt locally.
+
+Next concrete work: step E of the usability plan—temporary opt-in subscription and
+bounded/deduplicated outbox with cancellation/expiry tests, followed by Web Push
+transport and explicit browser opt-in/resume. No working-push button is exposed
+before delivery is connected. Preserve the unrelated untracked `commands.txt`.

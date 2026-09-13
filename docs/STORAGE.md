@@ -123,3 +123,15 @@ checks enforce <=15 minutes from observation start, including publication delay.
 Simulation uses the disjoint gati-sim prefix. No new participant backup or durable
 outbox is implemented in this slice. Public reads require only clock and aggregate
 keys. ZSCAN is added to the restricted application's command allowlist.
+
+## Selected usability changes
+
+Private preview adds no stored participant/preview record or durable credential.
+New preview capabilities exist only in page memory until explicit joining. Private
+destination geometry is discarded on close; it never enters public release data.
+Existing preview uses the current immutable claim. Background offer discovery uses
+the existing atomic intent record and a rotating in-memory worker cursor; it adds
+no participant history, subscription or outbox. The cursor is reset when its snapshot
+or live gathering list is empty and advances during bounded reconciliation work.
+Its absolute deadline is the cursor signal’s expiry, checked on every worker tick
+even after loss of the writer lease. It is never logged or persisted.

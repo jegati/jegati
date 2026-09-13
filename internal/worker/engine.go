@@ -17,15 +17,16 @@ import (
 )
 
 type Engine struct {
-	Store       *store.Store
-	Planner     matching.Planner
-	Config      config.Config
-	Hash, owner string
-	step        sync.Mutex
-	mu          sync.RWMutex
-	open        []store.Gathering
-	lastSweep   int64
-	offerCursor string
+	Store            *store.Store
+	Planner          matching.Planner
+	Config           config.Config
+	Hash, owner      string
+	step             sync.Mutex
+	mu               sync.RWMutex
+	open             []store.Gathering
+	lastSweep        int64
+	offerCursor      string
+	offerCursorUntil int64
 }
 
 func randomID() string {
@@ -71,7 +72,13 @@ func (e *Engine) Step(ctx context.Context) error {
 	defer e.step.Unlock()
 	now, err := e.Store.Now(ctx)
 	if err != nil {
+		e.offerCursor = ""
+		e.offerCursorUntil = 0
 		return err
+	}
+	if now >= e.offerCursorUntil {
+		e.offerCursor = ""
+		e.offerCursorUntil = 0
 	}
 	if err = e.Refresh(ctx, now); err != nil {
 		return err

@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 6, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 7, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |
@@ -14,6 +14,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | `DELETE /api/signal` | Cancel caller's signal; idempotent |
 | `POST /api/going` | Admit existing willingness to a reachable live gathering |
 | `POST /api/decline` | Decline the current gathering while retaining willingness |
+| `POST /api/gathering-preview` | Check a currently published gathering and disclose its private destination without enrollment |
 | `POST /api/join` | Atomically create/reuse willingness and admit a recipient |
 | `POST /api/arrival-nonce` | Issue an expiring arrival challenge for a going session |
 | `POST /api/arrival` | Confirm a fresh coarse arrival; idempotent nonce replay |
@@ -46,9 +47,9 @@ fields plus `gathering_id`. Reachability, cutoffs and state are revalidated. A s
 join returns 410 without creating unintended willingness; successful retries never
 renew the gathering/session. Going to another valid gathering switches intent.
 Declines suppress that gathering for this session, with configurable cooldown and
-bounded temporary decline links. They do not cancel willingness. Notification/follow endpoints are not implemented yet; invitation delivery currently
-uses the foreground own-session poll. Direct recipient join is implemented at the
-API; public map/notification cards will connect the client to it in their milestones.
+bounded temporary decline links. They do not cancel willingness. The worker now discovers offers for background willingness; the foreground own-session
+poll displays them. Background notification/follow delivery endpoints remain unimplemented.
+Public map cards connect the client to private preview and explicit atomic join.
 
 Arrival issuance and confirmation also require `X-Gati-Arrival-Nonce`, an
 authorization header containing a client-generated random 32-byte base64url nonce.
@@ -76,3 +77,20 @@ ETag supports 304. Shared max-age is at most 30 seconds and never beyond expiry;
 authenticated requests are always no-store. Public reads inspect only aggregate
 keys. Origin retention includes pending release and cannot revoke external copies.
 Known inference limitations are accepted in decision 0007.
+
+## Private destination preview
+
+`POST /api/gathering-preview` accepts the same strict body as `/api/join` and a
+random authorization-header capability. The requested ID must occur in the latest
+currently released snapshot. Reachability and live admission deadlines are checked;
+existing signals must supply their unchanged cell/radius/duration and not have
+declined that gathering. Success returns only `invitation` and
+`preview_expires_at`, never counts or participants. The preview expires within
+`geography.location_fix_max_age_seconds` and earlier release/gathering/session
+bounds. Missing/unpublished/unreachable/closed targets return generic 409. A new
+preview creates no signal or reservation and returns no reusable preview token.
+It shares new-signal network and global-write rate budgets, rejects query/origin/
+body violations and always uses no-store. A browser newcomer holds the capability
+only in memory until explicit PO, PO SHKOJ; confirmation calls atomic `/api/join`
+which rechecks live eligibility. Existing participants confirm through `/api/going`.
+This endpoint expands accepted destination inference as documented in decision 0008.

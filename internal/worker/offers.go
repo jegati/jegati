@@ -31,6 +31,7 @@ func (e *Engine) offerWaiting(ctx context.Context, now int64, signals []matching
 		i := (start + n) % len(signals)
 		candidate := signals[i]
 		e.offerCursor = candidate.Hash
+		e.offerCursorUntil = candidate.ExpiresAt
 		if candidate.Assigned || candidate.ReservedUntil > now {
 			continue
 		}

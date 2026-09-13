@@ -15,7 +15,7 @@ Implementation order and remaining work are in
 | 1. First visit → JAM GATI → nearby willingness count | Implemented locally | Device-only willingness, cancellation/expiry and a nearby published-area bucket. Real-store capture/API tests plus browser presentation with fixed public fixtures. | Public figures describe a delayed observation, not immediate occupancy. Below-minimum values remain unavailable, never zero. |
 | 2. Nearby threshold → invitation → accept/decline | Partial | Continuous private activation, foreground JEMI GATI, PO, PO SHKOJ / JO TANI; browser and fixed-clock API tests. | No background push, follows or server-side notification outbox yet. Push stays optional/off by default; JO TANI preserves willingness. |
 | 3. Going → location-checked JAM KËTU → approximate going/arrival statistics | Implemented locally | Real API/browser arrival, nonce retry/retraction and expiry; same published going/here cards before/after arrival. Real fixed-clock publisher tests verify public suppression independently of private JEMI KËTU. | Presentation tests use fixed public fixtures alongside real arrival tests. No live-device presence proof; fresh claims last at most 15 minutes. Full browser-to-real-publisher test under the normal 5–10 minute delay remains a later integration extension. |
-| 4. Tirana activity map | Implemented locally | Always-visible first-party city map; willingness polygons and gathering entries in the same public cells; statistics/list, explicit public-map join and capability-preserving retry. | Exact crossroads appear only in private invitations/admission. No daily-history summaries yet. Population discovery still uses its existing synthetic scheduling; it does not yet consume the new map API. |
+| 4. Tirana activity map | Implemented locally | Always-visible first-party city map; willingness polygons and gathering entries in the same public cells; statistics/list, explicit public-map join and capability-preserving retry. | Exact crossroads appear only in private invitations/admission and explicit eligible private previews (decision 0008). No daily-history summaries yet. Population discovery still uses its existing synthetic scheduling; it does not yet consume the new map API. |
 
 Evidence: [publication policy](../internal/activity/release_test.go),
 [real-store publication](../internal/store/activity_test.go),
@@ -89,3 +89,15 @@ Fixtures are deliberately distinguished from real publisher evidence above. A
 focused activity recheck verifies the final Albanian time formatting and map-ready
 screenshot. The 3,000-person publisher-enabled seed-42 run and report checks passed (see
 reports/activity-3000.md); no full 18-case rerun or 100k result is claimed.
+
+## Selected usability refinements — 2026-09-13
+
+Implemented: one-action JAM GATI with cancellable fresh device acquisition; explicit
+private destination preview before a public-map join (new and existing sessions);
+waiting/offline/retry/server-expiry guidance; arrival freshness and explicit renewal;
+worker-side invitation discovery without polling. Preview neither enrolls nor
+changes intent. Nineteen Chromium tests passed, including preview cancellation,
+offline recovery, expiry, and return from expired arrival to the JAM KËTU action.
+Real-store fixed-clock checks verify preview gating/no enrollment and background
+offers. Optional Web Push transport, subscriptions and browser resume remain pending
+in USABILITY_IMPLEMENTATION_PLAN.md. Sharing links/QR and new purpose copy are excluded.
