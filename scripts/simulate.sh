@@ -45,4 +45,9 @@ done
 bin/gati-simulate -target "http://127.0.0.1:$api_port" -scenario "simulation/scenarios/${SCENARIO:-tirana-evening}.yaml" -seed "${SEED:-42}"
 
 kill "$api_pid";wait "$api_pid";api_pid=""
-GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -p 1 -tags simulation -count=1 ./internal/store ./internal/httpapi -run "TestSimulationClockAndNamespace|TestSimulatedContinuousActivationAndLateAdmission"
+GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -p 1 -tags simulation -count=1 ./internal/store ./internal/httpapi -run "TestSimulationClockAndNamespace|TestSimulatedContinuousActivationAndLateAdmission|TestKnownColludingInvitationInference"
+
+if [[ "${GATI_PRIVACY_PROBE:-0}" == 1 ]];then
+  printf 'Known inference counterexample recorded in reports/local/privacy-probe.json. Privacy gate FAILED (expected exit 2).\n'
+  exit 2
+fi

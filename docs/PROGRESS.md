@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–08 implemented; next is privacy-preserving aggregate releases.
+Updated: 2026-09-13. Status: milestones 02–08 implemented; paused at milestone 09 for a privacy/product decision.
 
 ## Current task and authorization
 
@@ -36,7 +36,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
-| 09 — Aggregate map/statistics | Not started | Canonical releases and inference review |
+| 09 — Aggregate map/statistics | Privacy gate failed; decision needed | Production-threshold collusion probe reconstructs one synthetic target cell; see reports/09-inference-gate.md |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
 | 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
@@ -71,10 +71,13 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 09: canonical delayed/suppressed aggregate releases, collective
-map and statistics, with explicit differencing/inference tests. Keep participant
-and public interfaces separate; thresholds are not a formal anonymity proof.
-The public-card join client will consume the already implemented atomic join API.
+Resolve the product decision in reports/09-inference-gate.md before adding public
+activity surfaces: retain deterministic closest-crossing behavior with explicitly
+bounded anonymity, or revise the behavior/privacy model. The user authorized
+continuing until credentials or a material product decision were needed; this is
+that boundary. Do not silently accept the residual risk or change the requested
+closest-crossing rule. Resume milestone 09 after the decision, preserving the
+implemented anonymous local core flow and remaining release gates.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -186,3 +189,19 @@ Schema 4 adds the per-signal arrival request budget. Development Valkey was recr
 to mount the updated restrictive ACL; this deliberately resets ephemeral local
 sessions. GPS was mocked for all tests. Distinct credentials and claimed coarse
 location do not establish independent humans or proof of physical presence.
+
+## Milestone 09 privacy gate — needs user input
+
+`make privacy-probe` reproduced a counterexample against the actual API with the
+production activation threshold of 20 and normal rate limits. Nineteen controlled
+credentials from one network plus one unknown synthetic signal produced a crossing
+that narrowed 127 compatible coarse cells to one. No database or public aggregate
+endpoint was needed. The command deliberately exited 2: this is a FAILED privacy
+gate, not a passing assurance test. Synthetic evidence and assumptions are committed
+in reports/09-inference-gate.md and 09-inference-counterexample.json.
+
+No public map/statistics/follow surfaces were shipped after finding the issue.
+Changing the deterministic closest-crossing rule or accepting weaker protection
+against colluding inputs is a material product decision. The default unit/race/
+store/browser checks remain separate from this deliberately failing counterexample.
+No credentials, remote push, public deployment or real location were used.

@@ -106,3 +106,14 @@ expiry, including joining an already confirmed gathering without automatic arriv
 Browser location can be spoofed and many credentials can represent one adversary.
 These controls limit replay and resource consumption, not physical-presence proof
 or human independence. No public individual arrival or count endpoint exists.
+
+### Demonstrated inference failure — release gate, milestone 09
+
+The production-threshold probe in reports/09-inference-gate.md reconstructs a
+synthetic participant's coarse cell from the ordinary invitation when the observer
+controls the other 19 founding signals. It reduces 127 compatible cells to one
+while allowing every configured target radius. This is a concrete unmet privacy
+requirement, not merely a hypothetical residual risk or an anonymity-proof caveat.
+No public aggregate endpoint is involved. Rate limits/TTL/delayed public releases
+do not eliminate this counterexample. Public activity work is paused for the
+product/privacy decision; no stronger claim is authorized by the current tests.

@@ -65,3 +65,8 @@ test-browser:
 .PHONY: simulate
 simulate:
 	SCENARIO="$(or $(SCENARIO),tirana-evening)" SEED="$(or $(SEED),42)" bash scripts/simulate.sh
+
+.PHONY: privacy-probe
+# Reproducing the counterexample is deliberately a failing privacy gate.
+privacy-probe:
+	GATI_PRIVACY_PROBE=1 SCENARIO=tirana-evening SEED=42 bash scripts/simulate.sh

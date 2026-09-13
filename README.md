@@ -17,6 +17,12 @@ implemented. Collective maps and notification subscriptions are not implemented 
 exercise willingness, retries, cancellation, expiry and Sybil bursts with a local
 synthetic map report.
 
+**Privacy gate unresolved:** a reproducible synthetic collusion test reconstructs
+one participant's coarse cell from the ordinary nearest-crossing invitation.
+See the [evidence and product decision](docs/reports/09-inference-gate.md).
+The prototype does not yet meet the full inference-protection requirement and is
+not ready for public deployment. Public activity features are paused at this gate.
+
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 
 Read the [development and verification plan](docs/DEVELOPMENT_PLAN.md) for the proposed architecture, 15 implementation commits, local Tirana simulation, privacy/security boundaries, and deployment verification process.
