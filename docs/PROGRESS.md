@@ -1,14 +1,13 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: preparation; application development has not started.
+Updated: 2026-09-13. Status: milestone 02 in progress; user-local toolchain installed.
 
 ## Current task and authorization
 
-The user authorized installing development/testing tools, implementing the plan,
-testing milestones and making incremental local commits. They then paused that
-work to request AGENTS.md and supporting documentation/tools **before development**.
-This preparation fulfills that intervening request. Resume implementation on the
-user's next instruction; do not start it as part of the documentation-only task.
+The user resumed implementation after the documentation preparation. Installation
+of development/testing tools, milestone implementation/testing and incremental
+local commits are authorized. Continue independent work until a credential or
+material product decision is needed.
 
 No remote push or deployment is currently authorized. No credentials have been
 requested or stored. Do not infer GitHub write access from the configured remote.
@@ -29,7 +28,7 @@ requested or stored. Do not infer GitHub write access from the configured remote
 | Plan milestone | State | Evidence / next work |
 | --- | --- | --- |
 | 01 — Product/threat boundaries | Documented | REQUIREMENTS, plan, decision 0001, THREAT_MODEL; planned claims distinguished from evidence |
-| 02 — Toolchain, scaffold, license, typed config | Not started | Run doctor, install pinned tools, scaffold, validate production/simulation settings |
+| 02 — Toolchain, scaffold, license, typed config | In progress | Pinned user-local tools installed; scaffold/config work next; Docker Engine blocked on host administrator authentication |
 | 03 — Coarse geography and crossing fixtures | Not started | Reproducible map import, attribution and boundary/selection checks |
 | 04 — Expiring willingness | Not started | Capability API, retention/index and replay tests |
 | 05 — Albanian willingness UI | Not started | Accessible duration/radius/coarse area flow and network inspection |
@@ -47,8 +46,11 @@ requested or stored. Do not infer GitHub write access from the configured remote
 ## Environment observations — recheck before relying on them
 
 On 2026-09-13 the shell reported Ubuntu 24.04.3 LTS, Git, curl and make available.
-Go, Node/npm, Docker and GitHub CLI were not on PATH. `sudo -n true` reported that a
-password is required. No tool installation was attempted. These are observations
+Initially Go, Node/npm, Docker and GitHub CLI were not on PATH. Go 1.27.1,
+Node 24.21.0/npm 11.19.0 and standalone Compose 5.5.1 are now installed under
+`~/.local/share/gati/tools`; source `scripts/env.sh` to select them. `sudo -n true`
+reports that a password is required; Docker Engine and rootless UID-map helpers
+remain absent. These are observations
 of the agent's execution environment, not proof of everything installed on the PC.
 
 The repository remote is `https://github.com/jegati/jegati.git`, branch `main` at
@@ -77,10 +79,16 @@ to the README only when they work, or label them explicitly as future targets.
 
 ## Next implementation action
 
-When implementation resumes: inspect this tracker and git state, run doctor,
-install verified pinned user-local Go/Node toolchains as needed, resolve the local
-container runtime prerequisite, then implement milestone 02 with meaningful config
-validation tests. Preserve the revised matching and late-admission behavior.
+Finish the milestone 02 scaffold/config tests independently of Docker, then record
+container checks as pending. The user must authenticate an administrator setup
+step before full Compose runtime testing; see DEVELOPMENT.md for exact commands.
+
+## Toolchain validation — 2026-09-13
+
+- `bash scripts/bootstrap.sh`: installed pinned artifacts after SHA-256 verification.
+- With `source scripts/env.sh`: `go version`, `node --version`, `npm --version`
+  and `docker-compose version` passed with the pinned versions above.
+- Docker Engine is absent; no daemon or container startup claim is made.
 
 ## Preparation validation — 2026-09-13
 
