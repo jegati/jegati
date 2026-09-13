@@ -218,6 +218,8 @@ is honest. Preserve deployable releases and encrypted operational secrets for
 recovery, but never back up participant state. Rollbacks must handle config/schema
 compatibility and stale browser caches; a deliberate store reset loses live sessions.
 
-Next: finish release-artifact/rollback verification, then provision an authorized
-staging host and real edge rules. Provider credentials, domain choice and the
-acceptable provider-visibility boundary are required for that external stage.
+Local release-artifact, production executable/browser reproduction and compatible
+rollback checks are complete; see PROGRESS.md and the retained report. Next:
+provision an authorized staging host and verify real edge rules. Provider access,
+domain choice, the accepted provider-visibility boundary and explicit public
+authorization are required for that external stage.

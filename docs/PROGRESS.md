@@ -1024,3 +1024,39 @@ its production image and reproduce the Dockerfile's stripped binary alongside th
 native development binary. This avoids treating differing OCI metadata/image IDs
 as proof of differing executable code. The earlier clean-build check remains valid;
 a final comparison will explicitly connect the clean stripped artifact to the image.
+
+## Local deployment preparation complete — 2026-09-14
+
+Final guarded release-directory rehearsal b189e86 passed in 123.74s, including
+stable live Valkey and capability expiry across both switches. No owned rehearsal
+containers or networks remain. Release guards pass all four Python tests.
+
+The reviewable final artifact bundle is reports/local/release-auditable, exported
+from 52caa181f2f73a815af2c7b0ddd8d8d2e8b01b4f. Its release manifest SHA256 is
+433e129fdef9e983b21fdf7588e6190fd9569082b3d4bfea6602deaff13d42dc. Both independent
+clean builds in reports/local/reproduction-container-final matched each other,
+and their stripped API executable and all browser files matched the actual
+production images. Production /gati SHA256:
+90b0c30dd83100208b271c9b81686c9620204e1accafa1e9460a1f2ea546e03d.
+The latest evidence-only documentation commit is intentionally outside that source
+artifact; executable/config behavior is unchanged. OCI image IDs differ between
+builds, so reproducibility claims concern verified executable/browser bytes, not
+OCI metadata or remote honesty.
+
+Completed local checks: Go race/simulation/vet/TypeScript, live Valkey integrations,
+monitoring/release guards, 3,000-person simulation, repeated 10k/100k/1M component
+benchmarks, before/after real-time 100k mixed load, production Caddy/two-API/worker
+security and browser rehearsal, compatible release rollback, served assets/config
+and two-clean-build-to-image comparison. Exact scopes and exclusions are retained
+in the two reports linked above. 1M live-user capacity, real VPS performance and
+Cloudflare/TLS/device/push validation remain unproven. No source was pushed and no
+service was publicly deployed.
+
+Next action requires user input for the external staging step: chosen domain/VPS,
+SSH access arranged privately, Cloudflare login/tunnel credentials provisioned on
+that host, and explicit remote/public authorization. Never request tokens/passwords
+in chat. Review host swap/hibernation/snapshots, provider plaintext visibility,
+real edge cache/spoof limits and operator alert routing before the small pilot.
+Keep advanced geographic parallelism and remaining linear planner/publication work
+as measured follow-up optimization; current 100k local mixed traffic met its gates.
+Preserve unrelated untracked commands.txt.
