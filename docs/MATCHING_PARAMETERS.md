@@ -137,3 +137,19 @@ zero-neighbor exception above apply. Simulation lowers some publication/activati
 floors; isolated clock steps also drive public snapshots. It does not enable unfinished notifications. Avoid interpreting the nearby
 50 threshold as today's activation threshold: the implemented JEMI GATI threshold
 is `matching.activation_count` (30 normal/population, 3 small regression profile).
+
+## Optional Web Push configuration (schema 8)
+
+Delivery integration is in progress; the following typed settings are not yet a
+claim of working provider delivery. `push_enabled` defaults to false. `push_contact`
+is the operator's public HTTPS/mailto contact, never a participant email; replace
+the localhost development placeholder before external use. `push_endpoint_hosts`
+is an exact DNS allowlist (no wildcards, URLs or IP literals). Default providers are
+Chrome/Firefox/Safari; network address validation is an additional transport gate.
+`push_worker_batch_size` (1000, max 1000) bounds due records per pass;
+`push_worker_seconds` (2, max 30) schedules passes; `push_concurrency` (8, max 16)
+bounds simultaneous workers; `push_timeout_seconds` (5, max 10) bounds delivery;
+`push_max_attempts` (3, max 5) and `push_retry_seconds` (10, max 60) bound exponential
+retry attempts within `queue_ttl_seconds` (300 maximum). Existing
+`push_min_interval_seconds` and `push_max_per_hour` jointly set the minimum gap
+between newly queued notifications; opting out and back in cannot reset it.

@@ -1,5 +1,5 @@
 # Isolated population run: requested current settings; only profile differs from gati.yaml.
-schema_version: 7
+schema_version: 8
 profile: simulation
 availability:
   minimum_minutes: 30
@@ -41,6 +41,15 @@ public_activity:
   snapshot_retention_minutes: 15
   daily_summary_retention_days: 30
 notifications:
+  push_enabled: false
+  push_contact: "https://localhost"
+  push_endpoint_hosts: ["fcm.googleapis.com", "updates.push.services.mozilla.com", "web.push.apple.com"]
+  push_worker_batch_size: 1000
+  push_worker_seconds: 2
+  push_concurrency: 8
+  push_timeout_seconds: 5
+  push_max_attempts: 3
+  push_retry_seconds: 10
   nearby_gati_count: 50
   nearby_arrival_count: 50
   nearby_radius_km: 5

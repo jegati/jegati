@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 7
+const SchemaVersion = 8
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -65,6 +65,16 @@ type PublicActivity struct {
 }
 
 type Notifications struct {
+	PushEnabled         bool     `yaml:"push_enabled" json:"push_enabled"`
+	PushContact         string   `yaml:"push_contact" json:"push_contact"`
+	PushEndpointHosts   []string `yaml:"push_endpoint_hosts" json:"push_endpoint_hosts"`
+	PushWorkerBatchSize int      `yaml:"push_worker_batch_size" json:"push_worker_batch_size"`
+	PushWorkerSeconds   int      `yaml:"push_worker_seconds" json:"push_worker_seconds"`
+	PushConcurrency     int      `yaml:"push_concurrency" json:"push_concurrency"`
+	PushTimeoutSeconds  int      `yaml:"push_timeout_seconds" json:"push_timeout_seconds"`
+	PushMaxAttempts     int      `yaml:"push_max_attempts" json:"push_max_attempts"`
+	PushRetrySeconds    int      `yaml:"push_retry_seconds" json:"push_retry_seconds"`
+
 	NearbyGatiCount        int `yaml:"nearby_gati_count" json:"nearby_gati_count"`
 	NearbyArrivalCount     int `yaml:"nearby_arrival_count" json:"nearby_arrival_count"`
 	NearbyRadiusKm         int `yaml:"nearby_radius_km" json:"nearby_radius_km"`

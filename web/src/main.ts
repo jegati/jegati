@@ -255,7 +255,7 @@ async function start() {
   const [configResponse, gridResponse] = await Promise.all(['/api/config', '/api/geography'].map(url => fetch(url, { credentials: 'omit', cache: 'no-store' })));
   if (!configResponse.ok || !gridResponse.ok) throw new Error('unavailable');
   const configuration = await configResponse.json();
-  if (configuration.schema_version !== 7) throw new Error('unsupported schema');
+  if (configuration.schema_version !== 8) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   pollSeconds = config.notifications.foreground_poll_seconds;
   nonceSeconds = config.arrivals.nonce_seconds; currentGrid = grid;

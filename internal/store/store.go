@@ -129,6 +129,8 @@ func (s *Store) Status(ctx context.Context, hash string) (Signal, error) {
 }
 
 var cancel = newScript(`
+redis.call('DEL','gati:push:'..ARGV[1],'gati:push-gap:'..ARGV[1])
+redis.call('ZREM','gati:push-due',ARGV[1])
 local raw=redis.call('GET',KEYS[1]);if not raw then return 0 end
 local s=cjson.decode(raw)
 removeArrival(s)

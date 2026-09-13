@@ -553,3 +553,23 @@ Next concrete work: step E of the usability plan—temporary opt-in subscription
 bounded/deduplicated outbox with cancellation/expiry tests, followed by Web Push
 transport and explicit browser opt-in/resume. No working-push button is exposed
 before delivery is connected. Preserve the unrelated untracked `commands.txt`.
+
+## Optional push step E — 2026-09-13
+
+Schema 8 adds explicit disabled-by-default push policy, operator contact/provider
+allowlist and worker/transport/retry bounds. The store layer now holds one encrypted
+transport slot/coalescing outbox per opted-in live signal, with atomic claim fences,
+bounded retries, unchanged willingness, quota-preserving opt-out, cancellation and
+TTL/index cleanup. Decision 0009 refines transition-written queues to a bounded
+latest-state reconciler; short-lived intermediate transitions may coalesce. API,
+encryption, provider transport and browser opt-in are the next integration work.
+
+`make test-store` passed with actual restricted Valkey and the race detector:
+idempotent registration/lifetime bounds, no enrollment/intent change, 20 concurrent
+claims producing one winner, stale acknowledgements, retry ceiling, notification
+gap across opt-out/re-opt-in, cancellation and native expiry. A Lua reserved-field
+syntax error was found on the first run and fixed before the passing run.
+Configuration rejection tests passed for concurrency/retries/timeouts/hostnames and
+contact schemes. Existing Web Push interval/TTL settings are now used by the store
+policy integration; no provider was contacted. Earlier schema-7 hashes/reports are
+historical. Source and local API/client now use schema 8.

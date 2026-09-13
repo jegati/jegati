@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/jegati/jegati/internal/geography"
 	"io"
+	"net/url"
 	"os"
 	"reflect"
 	"regexp"
@@ -241,6 +242,20 @@ func (c Config) Validate(allowSimulation bool) error {
 	}
 	if n.AreaFollowMaxHours > 24 || n.QueueTtlSeconds > 300 || n.NearbyRadiusKm > 20 || n.ForegroundPollSeconds > 60 || n.PushMinIntervalSeconds < n.QueueTtlSeconds || n.PushMaxPerHour > 60 {
 		return errors.New("notification configuration outside bounds")
+	}
+	if n.PushWorkerBatchSize > 1000 || n.PushWorkerSeconds > 30 || n.PushConcurrency > 16 || n.PushConcurrency > n.PushWorkerBatchSize || n.PushTimeoutSeconds > 10 || n.PushMaxAttempts > 5 || n.PushRetrySeconds > 60 || n.PushTimeoutSeconds >= n.QueueTtlSeconds {
+		return errors.New("push work or delivery bounds violated")
+	}
+	contact, err := url.Parse(n.PushContact)
+	if err != nil || len(n.PushContact) > 256 || contact.User != nil || contact.Fragment != "" || !((contact.Scheme == "https" && contact.Hostname() != "") || (contact.Scheme == "mailto" && strings.Contains(contact.Opaque, "@"))) {
+		return errors.New("push contact must be an operator HTTPS or mailto URI")
+	}
+	seenHosts := map[string]bool{}
+	for _, host := range n.PushEndpointHosts {
+		if len(host) > 253 || !regexp.MustCompile(`^[a-z0-9]+([.-][a-z0-9]+)*\.[a-z]{2,}$`).MatchString(host) || seenHosts[host] {
+			return errors.New("push endpoints require unique exact DNS hostnames")
+		}
+		seenHosts[host] = true
 	}
 	if c.Profile == "production" && (m.ActivationCount < 10 || r.ConfirmationCount < 10 || p.MinimumCount < 20 || p.ReleaseSeconds < 300) {
 		return errors.New("production privacy floors violated")
