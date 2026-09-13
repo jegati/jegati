@@ -98,3 +98,7 @@ static frontend server. Caddy/production deployment belongs to milestone 13.
 CI is configured to build/start the containers and check API/client/proxy/Valkey.
 It has not run remotely because no push is authorized. Image references are pinned
 to publisher index digests; schema parsing alone does not verify those image builds.
+
+After starting the stack, `make check-containers` checks actual service health,
+configuration proxying and Valkey persistence/network/mount settings. These checks
+passed locally on 2026-09-13; remote CI and clean-host deployment remain separate.

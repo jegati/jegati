@@ -39,3 +39,7 @@ compose-check:
 	$(COMPOSE) -f compose.yaml config --quiet
 verify-local: test build config-check config-check-simulation compose-check
 	bash scripts/smoke.sh
+
+.PHONY: check-containers
+check-containers:
+	COMPOSE="$(COMPOSE)" node scripts/check-containers.mjs

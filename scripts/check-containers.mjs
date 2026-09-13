@@ -1,0 +1,20 @@
+// Inspect the already running local stack; does not restart or mutate services.
+import { execFileSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+const compose = (process.env.COMPOSE ?? 'docker-compose').split(/\s+/);
+const run = (...args) => execFileSync(compose[0], [...compose.slice(1), ...args], { encoding: 'utf8' }).trim();
+assert.equal((await fetch('http://127.0.0.1:8080/healthz')).status, 200);
+assert.ok((await (await fetch('http://127.0.0.1:5173/')).text()).includes('lang="sq"'));
+const config = await (await fetch('http://127.0.0.1:5173/api/config')).json();
+assert.equal(config.config.availability.minimum_minutes, 30);
+assert.equal(run('exec', '-T', 'valkey', 'valkey-cli', 'ping'), 'PONG');
+const settings = JSON.parse(run('exec', '-T', 'valkey', 'valkey-cli', '--json', 'CONFIG', 'GET', 'save', 'appendonly', 'maxmemory-policy'));
+assert.equal(settings.save, '');
+assert.equal(settings.appendonly, 'no');
+assert.equal(settings['maxmemory-policy'], 'noeviction');
+const id = run('ps', '-q', 'valkey');
+const ports = JSON.parse(execFileSync('docker', ['inspect', '--format', '{{json .HostConfig.PortBindings}}', id], { encoding: 'utf8' }));
+assert.ok(!ports || Object.keys(ports).length === 0, 'Valkey port exposed to host');
+const mounts = JSON.parse(execFileSync('docker', ['inspect', '--format', '{{json .Mounts}}', id], { encoding: 'utf8' }));
+assert.ok(!mounts.some((mount) => mount.Type === 'volume' || (mount.Type === 'bind' && mount.RW)), 'persistent writable store mount');
+console.log('Container checks passed: API, Albanian client, config proxy, Valkey health/persistence/private networking.');

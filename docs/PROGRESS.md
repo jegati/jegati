@@ -1,13 +1,12 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestone 02 native scaffold tested; container runtime
-validation blocked on host administrator authentication.
+Updated: 2026-09-13. Status: milestone 02 complete; milestone 03 geography/map import in progress.
 
 ## Current task and authorization
 
 The user resumed implementation after documentation preparation. Installing needed
 tools, implementing/testing milestones and making incremental local commits are
-authorized. Continue once the Docker prerequisite is resolved. No push or deployment
+authorized. Docker access is now available; continue through the plan. No push or deployment
 is authorized, and GitHub authentication/write access remains unverified.
 
 ## Actual repository state
@@ -18,8 +17,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 - Typed YAML configuration, production/simulation validation, canonical JSON/hash,
   Go config/health API, Albanian client preparation screen and native HTTP smoke.
 - AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
-- Pinned Dockerfiles/development Compose and CI definition; container runtime checks
-  and remote CI have not run. The API does not yet connect to Valkey.
+- Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API does not yet connect to Valkey.
 - No willingness, matching, arrival, map, notification or participant-storage code.
   The configuration fields for those features describe future functional inputs.
 
@@ -28,8 +26,8 @@ is authorized, and GitHub authentication/write access remains unverified.
 | Plan milestone | State | Evidence / next work |
 | --- | --- | --- |
 | 01 — Product/threat boundaries | Documented | Requirements, plan, decision 0001, THREAT_MODEL |
-| 02 — Toolchain, scaffold, license, typed config | Partial; runtime blocked | Native checks passed; see reports/02-scaffold.md; need usable Docker Engine |
-| 03 — Coarse geography and crossing fixtures | Not started | Reproducible map import, attribution and boundary/selection checks |
+| 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
+| 03 — Coarse geography and crossing fixtures | In progress | Reproducible map import, attribution and boundary/selection checks |
 | 04 — Expiring willingness | Not started | Capability API, restricted store credentials/ACLs, retention/index and replay tests |
 | 05 — Albanian willingness UI | Not started | Duration/radius/coarse area participation flow and browser network inspection |
 | 06 — Seeded Tirana simulation | Not started | Isolated real-API driver and deterministic scenarios |
@@ -70,22 +68,13 @@ Use `git log` for authoritative commit IDs. The preparation commit is `a082b7a`;
 toolchain installation was committed as `b9b362e`. Subsequent scaffold work is a
 separate coherent local commit. Do not embed a commit's own hash in its files.
 
-## Blocker and next action
+## Next action
 
-On this Ubuntu 24.04.3 PC, there is no Docker daemon/CLI and no rootless UID-map
-helpers. `sudo -n true` requires a password. User-local tools were installed, and
-independent native scaffold work is complete. The next milestone acceptance step
-requires administrator-authenticated Docker installation/access. Never request
-passwords in chat; the user can follow the exact commands in DEVELOPMENT.md.
+Implement milestone 03: versioned Tirana map import/attribution, fixed coarse grid,
+crossing index and selection/boundary tests. Docker Engine 29.1.3 and Compose 5.5.1
+are usable. Scaffold containers run on loopback (web 5173, API 8080); Valkey is private.
+The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
-Once `docker info` works in the agent's shell:
-
-1. Recheck git state and tool versions.
-2. Run `make dev` / container build and startup checks; check API, Vite config proxy
-   and Valkey health/persistence settings. Fix failures before marking 02 complete.
-3. Start milestone 03: map import/attribution, coarse grid and crossing index/tests.
-4. Update this tracker/report and make incremental commits; do not push without
-   explicit authorization.
-
-Keep secrets and real participant data out of this file. Record failures, skipped
-checks and remaining work, rather than treating an intended control as implemented.
+The map download may depend on public Overpass availability; preserve actual source
+checksums and timestamps, never substitute invented map features as real data.
+Keep updating this tracker with tests, failures and the next concrete action.

@@ -8,9 +8,9 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-Milestone 02 is in progress: a typed configuration loader, minimal Go API and
+Milestone 02 is complete: a typed configuration loader, minimal Go API and
 Albanian client scaffold are implemented. Participation, matching, arrivals and
-maps are not implemented yet. Docker runtime validation is pending.
+maps are not implemented yet. The local Compose stack has passed runtime validation.
 
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 

@@ -1,7 +1,7 @@
 # Milestone 02 scaffold verification — 2026-09-13
 
-Result: native scaffold checks passed. Milestone 02 remains incomplete until the
-Compose images and running stack are verified on a usable Docker Engine.
+Result: milestone 02 complete. Native checks, pinned image builds and running
+Compose services were verified on 2026-09-13 after Docker installation.
 
 ## Implemented behavior
 
@@ -42,11 +42,12 @@ prove matching/notification behavior, since those features are not implemented.
 
 ## Pending and limitations
 
-Docker Engine is not installed. `sudo -n true` requests authentication, and rootless
-UID/GID helpers are absent. Container image builds, startup, Valkey settings at
-runtime and clean-machine Compose parity have **not** been tested. Follow
-[DEVELOPMENT.md](../DEVELOPMENT.md#container-runtime-prerequisite) to provide the
-runtime. Do not mark this milestone complete based only on configuration parsing.
+Docker Engine 29.1.3 is now available to the agent without sudo. Both pinned API
+and frontend images built successfully; Compose 5.5.1 started all three services.
+`make check-containers` verifies the API, Albanian client, config proxy, Valkey PONG,
+`save=""`, `appendonly=no`, `maxmemory-policy=noeviction`, no host store port and no
+persistent writable store mount. This verifies the scaffold on this PC, not a clean
+VM production deployment or participant storage (not implemented at this milestone).
 
 No browser automation/visual review, arrival/matching tests, privacy-inference audit,
 100k load test, independently reproducible build or production deployment has run.
