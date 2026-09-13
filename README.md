@@ -8,6 +8,9 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
+See the [functionality and test-coverage audit](docs/FUNCTIONALITY_STATUS.md).
+The operating default is 100 m cells with a 50 m maximum reported device error.
+
 Milestones 02–08 are complete: configuration, coarse Tirana geography, expiring
 willingness APIs and the Albanian browser participation flow. The UI supports
 required one-shot device location, availability/radius choices,

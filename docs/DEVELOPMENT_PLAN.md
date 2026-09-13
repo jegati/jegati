@@ -68,7 +68,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 ### Willingness
 
-- Defaults to evaluate in simulation: duration choices 30/60/90/120 minutes, with a minimum of 30 minutes, travel radius 0.1/0.5/1/3 km, approximately 1 km cells; schema 6 also supports explicit 100 m-cell comparisons. These are tunable hypotheses, not privacy-certified numbers.
+- Defaults to evaluate in simulation: duration choices 30/60/90/120 minutes, with a minimum of 30 minutes, travel radius 0.1/0.5/1/3 km, 100 m cells with a 50 m maximum reported device error (decision 0006). These are tunable hypotheses, not privacy-certified numbers.
 - The client generates a cryptographically random capability of at least 256 bits. Only its hash is stored; send the capability in an authorization header, never a URL. Client credentials must be cleared on cancellation/expiry while the client runs and rechecked immediately on reopening; a closed browser cannot execute a cleanup timer. No automatic session renewal or permanent browser ID. Explain that browser backups and a compromised device are outside server deletion guarantees.
 - Store coarse cell, radius bucket, server timestamps, deadline, temporary state and optional current gathering reference. Derive everything else where possible. One active signal per capability; renewing creates a fresh session after the old session ends. Multiple devices or browser resets can still create multiple credentials.
 - Validate supported geography, enum choices, schema sizes, expiry and replay atomically. A server-generated deadline is authoritative.
@@ -99,7 +99,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 ### JAM KËTU / JEMI KËTU
 
 - A going user can request a one-use, short-lived arrival nonce for their currently admitted gathering, whether admission occurred before or after activation. Require a fresh one-shot location fix, convert it locally to the allowed coarse arrival cell, and send the cell and nonce. Never use background tracking.
-- Check gathering deadline, prior going state, nonce lifetime/replay, admitted membership and allowed arrival cells. Reject insufficient location accuracy locally; do not upload accuracy or exact coordinates. Manual area selection works for willingness but cannot substitute for the arrival location check.
+- Check gathering deadline, prior going state, nonce lifetime/replay, admitted membership and allowed arrival cells. Reject insufficient location accuracy locally; do not upload accuracy or exact coordinates. Both willingness and arrival require a device-service fix; no manual area input is offered.
 - Atomically accept at most one arrival per admitted capability. Issue **JEMI KËTU** after the currently configured 20 fresh accepted arrival claims stable for a configurable 10 seconds, evaluated continuously with deadline timers. Public map publication still needs the stricter public threshold. Repeat arrivals, duplicate requests and worker retries must not inflate counts.
 - A location-spoofing client or Sybil attacker can pass these checks. Nonces prevent replay, not spoofing. Name this limitation in the acceptance report.
 - An arrival claim is fresh for 15 minutes or until the gathering ends, whichever comes first. Do not silently refresh it. Public labels describe a recent confirmation window, not continuous occupancy. Allow retraction; it affects future releases only.
@@ -109,19 +109,22 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching/arrival behavior is implemented; public notification subscriptions remain future work. See MATCHING_PARAMETERS.md for active versus reserved settings.
 
 ```yaml
+# Public functional settings. No secrets. See docs/CONFIGURATION.md.
+schema_version: 6
 profile: production
 availability:
   minimum_minutes: 30
   choices_minutes: [30, 60, 90, 120]
   maximum_minutes: 120
 geography:
-  location_max_accuracy_meters: 100
+  location_max_accuracy_meters: 50
   location_fix_max_age_seconds: 60
-  cell_size_meters: 1000
-  travel_radius_choices_km: [1, 3, 5]
+  cell_size_meters: 100
+  travel_radius_choices_km: [0.1, 0.5, 1, 3]
   intersection_dataset: tirana-intersections-v1
 matching:
-  activation_count: 20
+  invitation_cooldown_seconds: 60
+  activation_count: 30
   activation_stability_seconds: 10
   maximum_debounce_seconds: 2
   reconciliation_seconds: 10
@@ -133,7 +136,7 @@ matching:
   maximum_gathering_minutes: 60
   late_join_min_remaining_minutes: 5
 arrivals:
-  confirmation_count: 10
+  confirmation_count: 20
   confirmation_stability_seconds: 10
   freshness_minutes: 15
   nonce_seconds: 120
@@ -154,6 +157,16 @@ notifications:
   push_max_per_hour: 6
   queue_ttl_seconds: 300
   area_follow_max_hours: 24
+limits:
+  arrival_requests_per_signal_window: 20
+  max_declines_per_signal: 32
+  max_body_bytes: 1024
+  network_window_seconds: 60
+  requests_per_network_window: 3000
+  new_signals_per_network_window: 60
+  global_writes_per_second: 500
+  max_active_signals: 150000
+  cleanup_batch_size: 1000
 ```
 
 - `activation_count` controls **JEMI GATI**; `confirmation_count` controls **JEMI KËTU**. Counts refer to accepted temporary signals/arrival claims, not verified unique humans. The two `nearby_*_count` values separately control broad “enough activity near you” alerts for followers/nonparticipants. Public alert counts must be bucket boundaries at or above `public_activity.minimum_count`; never consult suppressed raw counts for those alerts. A private invitation uses the user's chosen travel radius; a broad nearby alert uses the configured notification radius around the followed/coarse area, then checks actual join eligibility when opened.
@@ -248,73 +261,13 @@ make down
 
 Use one deterministic Go simulation CLI that drives the real API and matching code. A controllable clock supports fast functional scenarios; performance tests use real wall-clock time. Explicitly separate simulation ground truth from production API responses. The simulator dashboard may show synthetic individuals only on a separate development origin with an unmistakable Albanian simulation banner. Compile simulation routes/clock overrides out of production, bind them to loopback, and test their absence in production artifacts. Never allow a deployment environment flag alone to turn them on in a public binary.
 
-The next requested simulation work is detailed in [SIMULATION_PLAN.md](SIMULATION_PLAN.md),
-including effort, scenarios and report gates. See [MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md)
-for actual configurable behavior and inactive fields. The YAML below remains a
-proposed sketch, not a currently accepted scenario file.
-
-Version-controlled scenario parameters (proposed):
-
-```yaml
-# Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 6
-profile: production
-availability:
-  minimum_minutes: 30
-  choices_minutes: [30, 60, 90, 120]
-  maximum_minutes: 120
-geography:
-  location_max_accuracy_meters: 100
-  location_fix_max_age_seconds: 60
-  cell_size_meters: 1000
-  travel_radius_choices_km: [0.1, 0.5, 1, 3]
-  intersection_dataset: tirana-intersections-v1
-matching:
-  invitation_cooldown_seconds: 60
-  activation_count: 30
-  activation_stability_seconds: 10
-  maximum_debounce_seconds: 2
-  reconciliation_seconds: 10
-  minimum_remaining_minutes: 15
-  intersection_index_batch_size: 500
-  candidate_batch_size: 100
-  destination_rule: nearest_eligible_crossroad_to_coarse_group_center
-  prefer_open_gatherings: true
-  maximum_gathering_minutes: 60
-  late_join_min_remaining_minutes: 5
-arrivals:
-  confirmation_count: 20
-  confirmation_stability_seconds: 10
-  freshness_minutes: 15
-  nonce_seconds: 120
-  allowed_cell_neighbor_rings: 0
-public_activity:
-  minimum_count: 20
-  count_buckets: [20, 50, 100, 250, 500, 1000]
-  release_seconds: 300
-  delay_epochs: 1
-  snapshot_retention_minutes: 15
-  daily_summary_retention_days: 30
-notifications:
-  nearby_gati_count: 50
-  nearby_arrival_count: 50
-  nearby_radius_km: 5
-  foreground_poll_seconds: 30
-  push_min_interval_seconds: 300
-  push_max_per_hour: 6
-  queue_ttl_seconds: 300
-  area_follow_max_hours: 24
-limits:
-  arrival_requests_per_signal_window: 20
-  max_declines_per_signal: 32
-  max_body_bytes: 1024
-  network_window_seconds: 60
-  requests_per_network_window: 3000
-  new_signals_per_network_window: 60
-  global_writes_per_second: 500
-  max_active_signals: 150000
-  cleanup_batch_size: 1000
-```
+The implemented response simulations and original effort estimate are documented
+in [SIMULATION_PLAN.md](SIMULATION_PLAN.md). See [SIMULATION.md](SIMULATION.md)
+for commands and [MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md) for active controls.
+Version-controlled behavior inputs live in
+[simulation/scenarios/tirana-population.yaml](../simulation/scenarios/tirana-population.yaml)
+and related cases. They are separate from application configuration; the default
+population command snapshots current gati.yaml and changes only its profile.
 
 Include city center clusters, Lake Park, sparse outskirts, radius/grid boundaries, incompatible availability, willingness without going, going without arrival, late joins before/after JEMI KËTU, follower-to-participant admission, duplicate and expired join links, decline while remaining GATI, arbitrary-minute 30-minute availability, threshold stability/reset, nearest-intersection ties, unreachable nearest intersection, missing intersections, map updates, destination stability under late joins, expiry before threshold, replayed/spoofed arrivals, NAT-shared users, Sybil bursts, notification failure, worker restart, cache staleness and complete store loss. Synthetic traffic must never contact a production endpoint: enforce a loopback/explicit test-target allowlist and separate development credentials.
 

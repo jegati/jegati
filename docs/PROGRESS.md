@@ -74,8 +74,8 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 The simulation task is complete; see reports/population-3000.md for results and
 reproduction commands. Resume milestone 09 aggregate-publication design and tests
 under the disclosed nearest-intersection inference limitation (decision 0004), then
-notifications/hardening/load/deployment verification. The operating config retains
-1,000 m cells; 100 m was an explicit comparison. Before a real pilot, review the
+notifications/hardening/load/deployment verification. The user has now selected
+100 m cells / 50 m reported device error as the operating default (decision 0006). Before a real pilot, review the
 short-radius exclusions and journey/deadline outcomes; do not silently change the
 privacy resolution or claim human usability from synthetic actors.
 No credential or toolchain blocker remains for local work.
@@ -337,3 +337,32 @@ synthetic decisions/journeys, injected late discovery, no human usability or 100
 capacity claim, finer-cell exposure, known collusion/location-spoofing risks, and
 unfinished public maps/notifications/deployment verification. Work is committed
 locally; unrelated commands.txt remains untouched. Next action is milestone 09.
+
+## Default 100 m grid and functionality audit
+
+The user selected 100 m (0.1 km) cells as the default after the population comparison.
+Updated gati.yaml and the matching population example to 100 m / 50 m maximum
+reported device error (decision 0006); thresholds/radii remain unchanged. Restored
+supported schema 6 after validation found a stale schema-5 declaration. Fixed the
+browser founding fixture to derive its cell from the running grid rather than
+hardcoding a 1 km cell. Historical experiment snapshots and regression grids remain
+explicitly unchanged. The development stack was restarted with a fresh ephemeral
+store to avoid interpreting old grid state.
+
+Runtime production-profile SHA-256:
+`32e4166672c16df72d5a34538396c37937ddc5fd9f95241fafecfb9357f0c43b`.
+Equivalent isolated population profile SHA-256:
+`8ec7ec11fead062be0566d5d3243acfc32977d2c716982f4e15b5f3083b57335`.
+
+Validation passed: config checks, make verify-local, make test-store, legacy
+simulation/fixed-clock integration, and all 13 browser checks on the new grid.
+The existing 100 m population comparison already exercises these functional
+settings; the 18-case suite was not rerun. No missing tool/credential blocks work.
+
+The user clarified four journeys: nearby counts after JAM GATI, threshold
+notifications/decisions, location-checked arrival with going/arrival statistics,
+and a citywide aggregate activity map. FUNCTIONALITY_STATUS.md audits each journey
+and maps the broader MVP to present/tested, partial and missing evidence. Core private flow is present; public
+aggregates/notification subscriptions, 100k validation, independent audit and
+production/deployment verification remain incomplete. Next: milestone 09 under the
+disclosed inference limitation. No privacy or deployment certification is claimed.

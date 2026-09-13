@@ -4,9 +4,12 @@ Executed locally on 2026-09-13. All **18 final scenario checks passed** after th
 fixes described below. This is synthetic functional evidence, not a human usability
 study, anonymity proof or 100k capacity benchmark.
 
+The default has since changed to 100 m cells (decision 0006). These recorded
+experiments retain their original input snapshots.
+
 ## Inputs and reproducibility
 
-The baseline uses the user's current `config/gati.yaml`: **30** willing credentials
+The historical baseline used the user's then-current `config/gati.yaml`: **30** willing credentials
 to activate, **20** fresh arrivals to confirm presence, radius choices
 **0.1/0.5/1/3 km**, **1,000 m cells**, minimum availability **30 minutes**. Only the
 run profile changes to simulation. No application rate budget was raised.

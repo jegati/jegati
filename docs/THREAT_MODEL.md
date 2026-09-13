@@ -146,8 +146,10 @@ cost visible; distributed Sybil resistance remains unresolved.
 
 Fractional radii and optional 100 m cells are supported. Smaller cells reveal more
 precise participant areas, and thresholding still provides no formal anonymity.
-The current 1,000 m baseline cannot match 0.1/0.5 km radii under conservative whole-
-cell reachability. See decision 0005 and the population findings report.
+The former 1,000 m baseline excluded 0.1/0.5 km radii under conservative whole-
+cell reachability. The user selected 100 m cells / 50 m reported device accuracy
+as the default after that comparison (decision 0006). This increases spatial
+exposure and index cost; historical inference evidence retains its original config.
 
 The dense experiment exposed a real ten-minute rate-secret rollover race. Secret
 creation/read is now atomic using Valkey time. Real-store tests cover epoch-boundary

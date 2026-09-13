@@ -6,9 +6,9 @@ availability:
   choices_minutes: [30, 60, 90, 120]
   maximum_minutes: 120
 geography:
-  location_max_accuracy_meters: 100
+  location_max_accuracy_meters: 50
   location_fix_max_age_seconds: 60
-  cell_size_meters: 1000
+  cell_size_meters: 100
   travel_radius_choices_km: [0.1, 0.5, 1, 3]
   intersection_dataset: tirana-intersections-v1
 matching:

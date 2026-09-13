@@ -11,7 +11,7 @@ combinations even when each value is individually within its range.
 - `config/simulation.yaml`: small isolated regression settings (activation 3,
   arrival 2), retained for legacy checks.
 - `config/simulation-population-100m.yaml`: explicit 100 m-cell / 50 m accuracy
-  comparison; the normal app is unchanged.
+  profile, now matching the default and retained for prior experiment commands.
 - `simulation/scenarios/tirana-population.yaml`: 3,000-person behavior inputs;
   see SIMULATION.md for the other scenarios. These are not application policy.
 - `internal/config/types.go` and `config.go`: authoritative field names/validation.
@@ -65,12 +65,13 @@ fairness algorithm. One credential is not one person.
 | `availability.choices_minutes` | `[30,60,90,120]` | Strictly increasing positive integer minute choices, 1–32 entries, within min/max. Actual app permits alternatives such as `[30,45,60]` when min/max agree. Simulation choices must be accepted by the selected application config. |
 | `availability.maximum_minutes` | 120 | Highest user choice/session lifetime, at most 120; must equal last choice. |
 | `geography.travel_radius_choices_km` | `[0.1,0.5,1,3]` | Ascending finite values from 0.1 to 20 km in 0.1 km increments, at most 32 entries. Simulation choices must be present in the application config. Uses conservative distance from the whole coarse cell, not walking distance or time. |
-| `geography.cell_size_meters` | 1000 | Nominal private geographic grid size, integer 100–5000. Larger cells conceal more precision but can exclude more radius matches. This changes IDs and the reachability index. |
+| `geography.cell_size_meters` | 100 | Nominal private geographic grid size, integer 100–5000. Larger cells conceal more precision but can exclude more radius matches. This changes IDs and the reachability index. |
 | `geography.intersection_dataset` | `tirana-intersections-v1` | Installed road-junction dataset version; startup requires matching file version. Other versions require importing/installing reviewed data, not just changing a label. |
-| `geography.location_max_accuracy_meters` | 100 | Client rejects larger reported device errors; positive integer, at most half the configured nominal cell size. Accuracy estimate stays on-device. |
+| `geography.location_max_accuracy_meters` | 50 | Client rejects larger reported device errors; positive integer, at most half the configured nominal cell size. Accuracy estimate stays on-device. |
 | `geography.location_fix_max_age_seconds` | 60 | Client rejects stale fixes and expires an unused willingness fix before submission; allowed 5–120 seconds. No manual fallback. |
 
-With 1,000 m cells the whole-cell reachability rule excludes every 0.1/0.5 km
+The default is now 100 m cells / 50 m reported device error (decision 0006).
+With the previous 1,000 m cells the whole-cell reachability rule excludes every 0.1/0.5 km
 choice: the cell's uncertainty already exceeds that radius. Setting the cell size
 to 100 m also requires `location_max_accuracy_meters` to be at most 50. Finer cells
 reveal a more precise area, increase index cost, and still exclude some short-radius

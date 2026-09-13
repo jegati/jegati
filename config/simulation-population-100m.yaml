@@ -1,4 +1,4 @@
-# Explicit finer-grid comparison: 100m cells and 50m reported device accuracy; other settings unchanged.
+# Explicit 100m profile, now matching the default; retained for experiment reproducibility.
 schema_version: 6
 profile: simulation
 availability:

@@ -1,6 +1,8 @@
 # 0005 — Fractional travel radii and optional 100 m cells
 
-Date: 2026-09-13. The user requested simulations using their current settings:
+Date: 2026-09-13. Grid-default choice superseded by decision 0006; the other bounds remain.
+
+The user requested simulations using their current settings:
 30 willing credentials, 20 arrivals, travel radii 0.1/0.5/1/3 km, and support for
 cells down to 0.1 km if needed. This supersedes whole-kilometre radius and 500 m
 minimum-grid restrictions. Schema 6 permits finite increasing radii in 0.1 km

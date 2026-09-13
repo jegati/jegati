@@ -27,6 +27,9 @@ Declining/cancelling is neutral, easy and never guilt-inducing.
   map pin, address or area input is offered. Require a fresh, sufficiently precise
   reported fix, coarsen locally and discard exact coordinates. Device estimates
   can be inaccurate or spoofed; this is not a guarantee of genuine location.
+- Default geographic cells are **100 m (0.1 km)**, explicitly selected by the user
+  after reviewing the simulation comparison. The default maximum reported device
+  error is 50 m, required by the whole-cell accuracy bound.
 - Minimum offered availability is **30 minutes**.
 - Matching is **continuous**, based on geographic proximity, compatible remaining
   availability, user-selected travel radius and configurable thresholds.

@@ -57,7 +57,7 @@ Schema 5 replaces `crossing_dataset`/`crossing_index_batch_size` with
 `tirana-intersections-v1`. Old crosswalk configuration is rejected, not aliased.
 Private gathering JSON now calls its destination `intersection`.
 
-`geography.location_max_accuracy_meters` defaults to 100 (positive, at most half
+`geography.location_max_accuracy_meters` defaults to 50 (positive, at most half
 nominal cell size). `location_fix_max_age_seconds` defaults to 60 (5..120). Both
 willingness and arrival ask the device for a fresh high-accuracy one-shot fix;
 reported accuracy and age are checked locally. A willingness fix expires before
@@ -74,7 +74,7 @@ Schema 6 accepts travel radii as finite numeric kilometres in 0.1 km increments
 from 0.1 to 20, and cells from 100 to 5,000 m. Existing whole-kilometre configurations
 remain valid after the schema version update. Store, API, matching and client
 restoration preserve fractional values. The current requested gati.yaml settings
-are 30 willing credentials, 20 arrivals and radii [0.1,0.5,1,3], with 1,000 m cells.
+are 30 willing credentials, 20 arrivals and radii [0.1,0.5,1,3], with 100 m cells (decision 0006).
 A short radius does not override the whole-cell conservative distance test.
 Small cells increase location exposure; see decision 0005. Test fixtures no longer
 read the developer-editable gati.yaml as immutable regression defaults.

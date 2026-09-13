@@ -13,7 +13,7 @@ make simulate-population
 make simulate-population SEED=43
 make simulate-population SCENARIO=tirana-success
 make simulate-suite
-# Explicit alternative configuration, not a replacement for the baseline:
+# Explicit 100 m profile, now equivalent to the default:
 make simulate-population SIM_CONFIG=config/simulation-population-100m.yaml
 ```
 
@@ -27,14 +27,15 @@ REPORT=path/to/report.json` checks the funnel, expiry, geometry and config invar
 The script validates the selected application config and converts **only** its
 profile to `simulation` in the run directory. It never edits your input file.
 The API remains a simulation-only build in the `gati-sim:*` namespace. Current
-baseline: activation 30, arrivals 20, radii 0.1/0.5/1/3 km and 1,000 m cells.
+baseline: activation 30, arrivals 20, radii 0.1/0.5/1/3 km and 100 m cells.
 `config/simulation-population.yaml` is an explicit example of these settings;
 the default command reads your current gati.yaml instead of that static example.
 
-`config/simulation-population-100m.yaml` is a labeled comparison using 100 m cells
-and at most 50 m reported device error. The 1,000 m baseline cannot match either
+`config/simulation-population-100m.yaml` retains the previously labeled comparison using 100 m cells
+and at most 50 m reported device error; it now matches the default. The historical
+1,000 m experiment baseline could not match either
 0.1 or 0.5 km radii under the conservative whole-cell rule. Finer cells expose a
-more precise area and still exclude some boundary matches. See decision 0005.
+more precise area and still exclude some boundary matches. See decisions 0005/0006. Historical report snapshots retain their original settings.
 
 ## Scenario inputs
 

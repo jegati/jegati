@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { cellAt } from '../src/area';
 
 test.beforeEach(async ({ context }) => {
   await context.grantPermissions(['geolocation']);
@@ -101,12 +102,15 @@ test('small screen and keyboard device-location action', async ({ page }) => {
 test('real collective invitation, arrival retry, retraction and decline', async ({ page, request, context }) => {
   test.setTimeout(65_000);
   const config = (await (await request.get('/api/config')).json()).config;
+  const grid = await (await request.get('/api/geography')).json();
+  const cell = cellAt(grid, 19.81812345, 41.32754321);
+  expect(cell).not.toBeNull();
   const tokens: string[] = [];
   try {
     // Synthetic founding signals use the same coarse cell as the mocked device fix.
     for (let i = 1; i < config.matching.activation_count; i++) {
       const token = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url'); tokens.push(token);
-      const response = await request.post('/api/signals', { headers: { Authorization: `Bearer ${token}` }, data: { cell: 'tirana-v1:1000:5:5', radius_km: 3, availability_minutes: 30 } });
+      const response = await request.post('/api/signals', { headers: { Authorization: `Bearer ${token}` }, data: { cell, radius_km: 3, availability_minutes: 30 } });
       expect(response.status()).toBe(200);
     }
     await page.goto('/');
