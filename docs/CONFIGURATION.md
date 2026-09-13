@@ -78,3 +78,14 @@ are 30 willing credentials, 20 arrivals and radii [0.1,0.5,1,3], with 100 m cell
 A short radius does not override the whole-cell conservative distance test.
 Small cells increase location exposure; see decision 0005. Test fixtures no longer
 read the developer-editable gati.yaml as immutable regression defaults.
+
+## Schema 7 public activity parameters
+
+`public_activity.area_size_meters` sets the fixed grid shared by public willingness
+and gathering entries (default 1000 m; 1000..5000, an integer multiple of private
+cell size). It does not change private matching. `capture_max_seconds` bounds a
+complete observation (default 30 s; fast isolated simulation 5 s; must be below
+release interval). `max_snapshot_bytes` caps a complete uncompressed snapshot
+(default 1,000,000; at least 1024, at most 1,000,000). Invalid or oversized captures
+are discarded, never partially published. Existing minimum/buckets/delay/retention
+remain. The policy is implemented; publication wiring is tracked in PROGRESS.

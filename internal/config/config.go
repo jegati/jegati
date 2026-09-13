@@ -227,6 +227,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	if r.FreshnessMinutes > 15 || r.NonceSeconds > 120 || r.NonceSeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= m.LateJoinMinRemainingMinutes*60 || r.AllowedCellNeighborRings > 1 {
 		return errors.New("arrival lifetime or geography outside bounds")
 	}
+	if p.AreaSizeMeters < 1000 || p.AreaSizeMeters > 5000 || p.AreaSizeMeters < g.CellSizeMeters || p.AreaSizeMeters%g.CellSizeMeters != 0 || p.CaptureMaxSeconds > 30 || p.CaptureMaxSeconds >= p.ReleaseSeconds || p.MaxSnapshotBytes < 1024 {
+		return errors.New("public grid or capture bounds violated")
+	}
 	if !ascending(p.CountBuckets) || p.CountBuckets[0] != p.MinimumCount {
 		return errors.New("public buckets must be increasing and begin at public minimum")
 	}

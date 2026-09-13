@@ -1,10 +1,10 @@
 # Plan: complete the four activity journeys
 
-Status: proposed implementation sequence, 2026-09-13. This document adds detail to
+Status: implementation authorized, 2026-09-13; updated by decision 0007. This document adds detail to
 milestones 09/10 and their relevant hardening work; it does not mark them implemented.
 The current evidence remains in FUNCTIONALITY_STATUS.md. Existing implementation
-authorization and latest user direction govern subsequent work; this turn adds
-the plan and acceptance criteria only.
+authorization and latest user direction govern work. Inference limitations are
+accepted and documented; they do not block implementation.
 
 ## 1. Intended experience
 
@@ -13,7 +13,7 @@ the plan and acceptance criteria only.
 | First visit → JAM GATI | Keep the willingness confirmation and easy cancellation. Add a nearby published-area card, for example **50+ GATI**, with its map area and observation time. Show a neutral unavailable/suppressed state when no count can be published. |
 | Threshold → decision | Keep continuous matching and **JEMI GATI → PO, PO SHKOJ / JO TANI**. Add reliable server-side event discovery and optional background notification delivery. JO TANI declines this gathering while preserving willingness; cancellation stays separate. |
 | Going → JAM KËTU → ongoing statistics | Keep the fresh device fix, destination-cell/nonce/deadline checks and temporary arrival. Show published approximate going and fresh-arrival counts on the gathering card before and after arrival. Personal state updates immediately; public numbers update on their release schedule. |
-| Tirana activity map | Keep a city map visible across the willingness/going/arrival screens. Add published willingness areas and eligible gathering destinations with shared statistics, timestamps and a late-join action. A shaded-area layer supplies the initial heatmap-style view. |
+| Tirana activity map | Keep a city map visible across the willingness/going/arrival screens. Add published willingness areas and eligible gatherings within the same public cells with shared statistics, timestamps and a late-join action. A shaded-area layer supplies the initial heatmap-style view. |
 
 All product copy remains Albanian. Suggested labels: **GATI afër teje**,
 **Kanë zgjedhur të shkojnë: 50+**, **Kanë konfirmuar mbërritjen: 20+**,
@@ -47,7 +47,7 @@ for a release, not instantaneous raw counters or a lifetime attendance history.
 
 ### Area and time resolution
 
-Keep public geography separate from private matching geography. Propose a fixed,
+Keep public geography separate from private matching geography. Use a fixed,
 nonoverlapping **1,000 m public area grid** anchored to the existing Tirana bounds.
 Map each 100 m input cell into one public area. No dynamic merging, zoom-dependent
 recounting, parent totals, arbitrary circles or participant-radius count endpoints.
@@ -66,34 +66,37 @@ bucket means a recent lower bound, not an exact population or a promise that it 
 still present. Small/unpublishable values use the same neutral placeholder, with
 no raw count, threshold distance or detailed suppression reason in any response.
 
-### Composition and publication gate
+### Publication policy and accepted inference limits
 
-One pure publication-policy module must assess the complete release together:
-willingness areas, destination markers, going/here pairs, private invitations,
-area alerts, repeated epochs, cached releases and membership in multiple views.
-Suppressing each metric independently is insufficient. For example, two large
-nested counts can expose a very small non-arrived remainder. Origin-area willingness
-and destination-area gathering counts also create inference opportunities together.
+Decision 0007 authorizes implementation despite inferred information. Keep fixed
+cells, buckets, delays and small-count suppression; do not block these features on
+eliminating collusion, differencing, nested-count or origin/destination inference.
+Record reproducible counterexamples as limitations, never as an anonymity pass.
 
-The first commit defines and tests a deterministic joint-release policy, including
-small remainders, linked views and temporal/bucket transitions. Suppress associated
-fields/markers when a combination cannot pass that policy. Do not expose an exact
-remainder, publish a special reason, vary the answer by caller, or silently replace
-requested gathering statistics with another feature and call the work complete.
+For each release, count each live credential once in its origin area and at most
+one gathering. Publish a gathering only when at least `minimum_count` live linked
+credentials (invited, going or here) remain. Bucket going and here separately;
+values below the minimum are omitted. Publish JEMI KËTU only when the sampled private
+state is confirmed and the here count also reaches the public minimum. No raw
+counts, exact remainders, parent totals or suppression reasons are released.
+These rules deliberately retain inferential leakage from combined views and epochs.
 
-Thresholds, buckets and delay are **not formal anonymity**. Decision 0004 retains
-a known private nearest-crossroad inference limitation; it does not automatically
-approve additional public inference. Re-run the known probe under the 100 m config
-and add public differencing/collusion probes. Preserve failures as failures. If a new
-counterexample requires changing agreed behavior, finish independent work and present
-the concrete decision; keep the unsafe public output disabled. This gate is the main
-schedule risk, not a claim that a hand-written suppression rule solves anonymity.
+**The public statistics API and map identify gatherings only by their containing
+public cell, using the same 1,000 m grid as willingness.** Include an opaque gathering
+ID, cell ID, deadline and permitted buckets/state, but no intersection ID, label,
+coordinates, computed group center or displaced marker encoding the destination.
+Multiple gatherings in one cell share its polygon and appear as entries in that
+cell's list; do not jitter markers to suggest distinct locations. Exact crossroad
+information remains in the existing private invitation/admission flow, so people
+can actually attend. Map browsing alone does not fetch that private information.
+An eligible participant may therefore still learn a destination through joining;
+cell-only publication is not a claim of resistance to enrolled observers.
 
-A public gathering marker must independently qualify for release through a stable
-eligible cohort and the joint policy. A private invitation is not permission to
-publish it. The immutable sampled gathering state supplies its label, not a live
-per-request lookup. Known frozen end times allow the client to stop offering stale
-markers; admission is always revalidated against current private state.
+The first implementation commit supplies deterministic publication and inference
+fixtures. Later capture tests cover deadlines and duplicate contributions. Public
+entries use sampled state, not live per-request counts; joining always revalidates
+current private state and cutoffs. Push remains **off by default, chosen explicitly
+by the user**, and declining it never changes matching or access to in-app features.
 
 ## 3. Architecture and data flow
 
@@ -107,7 +110,7 @@ flowchart LR
     S --> M[Continuous matching and arrival checks]
     M --> V[Own-state API and private event outbox]
     S --> A[Bounded activity capture]
-    A --> P[Joint suppression and delayed publication]
+    A --> P[Suppression, bucketing and delayed publication]
     P --> R[Immutable public release]
     R --> U[Nearby card, gathering statistics, Tirana map]
     R --> F[Area-follow alert decisions]
@@ -163,7 +166,7 @@ polygons using released bucket categories; avoid smooth interpolation that inven
 activity inside suppressed areas. Zoom changes rendering only. Provide accessible
 text/cards and a layer toggle for willingness versus gatherings.
 
-A released gathering popup shows its destination, deadline, last-published state
+A released gathering popup shows only its public cell, deadline, last-published state
 and permitted going/arrival buckets. New recipients use a deliberate join screen:
 fresh device fix, availability/radius, **PO, PO SHKOJ**, then existing `/api/join`.
 Existing participants reuse their session and the intent path. Opening a link, map
@@ -196,7 +199,7 @@ in an in-app alert only after passing the same publication rules.
 A closed tab loses today's sessionStorage capability. To make an opted-in private
 notification actionable after reopening, explicitly add **one expiring resume record
 in IndexedDB** containing the current capability, deadline and notification handle;
-no exact/coarse location history. Only enable this bounded persistence with background
+no exact/coarse location history. Only enable this bounded persistence with explicit background
 notification opt-in; retain the tab-only path otherwise. Store only capability hashes
 server-side. Every restored record is deadline-checked and revalidated by the API;
 server expiry is authoritative. Cancellation/opt-out clears the associated records
@@ -235,10 +238,10 @@ one schema revision, update canonical config/hash/client compatibility and docs.
 | Setting | Proposed value / constraint |
 | --- | --- |
 | `public_activity.area_size_meters` | 1000; fixed reviewed public grid, at least 1000 and aligned with the configured private grid |
-| Existing public minimum / buckets | 20 / [20,50,100,250,500,1000]; common across cards/map/alerts, subject to joint suppression |
+| Existing public minimum / buckets | 20 / [20,50,100,250,500,1000]; common across cards/map/alerts, subject to the documented publication policy |
 | Existing release / delay / retention | 300 s / 1 epoch / 15 min; retention includes staging and cache lifetime |
 | `public_activity.capture_max_seconds` | 30; measured deadline, below release interval; discard incomplete captures |
-| `public_activity.max_snapshot_bytes` | Initial 2 MiB uncompressed cap; reject incomplete output, measure actual Tirana payload |
+| `public_activity.max_snapshot_bytes` | Initial 1,000,000 byte uncompressed cap; reject incomplete output, measure actual Tirana payload |
 | Existing foreground poll | 30 s with existing jitter/backoff; live state distinct from public release timing |
 | Existing push interval / hourly cap | 300 s / 6; coalesced events, no exactly-once external-delivery promise |
 | Existing notification queue TTL | 300 s, also capped by recipient/session/gathering relevance deadline |
@@ -266,15 +269,15 @@ STORAGE, threat model and tests with implementation, not speculative pass claims
 | # | Commit target | Required evidence before calling it complete |
 | --- | --- | --- |
 | 1 | `design: define public activity and notification contracts` | Exact W/going/here semantics, fixed public grid, observation/release clocks, retention, proposed schema and API fixtures. Adversarial examples for nested counts, 19/20, 49/50, temporal transitions, colluding inputs and origin/destination correlation. Record bounded claims and unsafe cases. |
-| 2 | `feat: publish bounded delayed activity snapshots` | Dedicated all-state capture, deadline/dedup handling, joint policy, fenced immutable publication, cached API, TTL and invalid/absent-data behavior. Real-store race/restart tests; no individual fields or per-request participant scan. |
+| 2 | `feat: publish bounded delayed activity snapshots` | Dedicated all-state capture, deadline/dedup handling, publication policy, fenced immutable publication, cached API, TTL and invalid/absent-data behavior. Real-store race/restart tests; no individual fields or per-request participant scan. |
 | 3 | `feat: show nearby and gathering activity statistics` | Nearby card after JAM GATI; common going/here bucket cards in invited/going/here states; suppressed/loading/offline/error behavior, timestamp and overlapping-count explanation. Browser/network assertions; same release gives identical values across views. |
-| 4 | `feat: map public activity and join released gatherings` | Always-visible Tirana map, shaded willingness areas, eligible gathering markers, accessible cards and public-link join flow. First-party requests only, no markers for hidden groups, no counts altered by zoom, fresh location and cutoff/replay/late-arrival checks. |
+| 4 | `feat: map public activity and join released gatherings` | Always-visible Tirana map, shaded willingness areas, cell-only gathering entries, accessible cards and public-link join flow. First-party requests only, no markers for hidden groups, no counts altered by zoom, fresh location and cutoff/replay/late-arrival checks. |
 | 5 | `feat: discover invitation events and queue bounded notifications` | Background eligible users receive server-discovered events without polling; matching unaffected by permission. Atomic outbox, recipient cleanup, crash/retry recovery, dedup, rate limits and stale/declined-event removal. Local fake sink reports events without sensitive logs. |
 | 6 | `feat: add optional PWA notification lifecycle` | Manifest/first-party service worker, explicit permission UI, bounded opt-in resume record, cancel/expiry/opt-out cleanup. Never cache private API data; no automatic offline participation. Browser tests cover granted/denied/unsupported/closed-and-reopened cases. |
 | 7 | `feat: deliver encrypted expiring Web Push updates` | Reviewed dependency, private VAPID keys, generic payloads, SSRF constraints, endpoint removal, TTL/retry caps. Deterministic fake-transport tests plus separately recorded real browser/device smoke when available; missing interoperability checks stay unverified. |
 | 8 | `feat: follow public areas and notify on released activity` | Independent optional area handle, current published thresholds, no willingness side effect, bounded follow expiry/replacement and flood dedup. Alert links resolve released data and permit late join only after explicit valid action. |
 | 9 | `test: simulate complete activity and notification journeys` | Extend 3,000-person Tirana runs to consume the real published API/fake delivery rather than inject every discovered gathering. Three seeds, sparse/dense/churn/low-follow-through, all four browser journeys and adversarial compositions; report accepted/rejected/late/missed/stale deliveries and release ages. |
-| 10 | `docs: publish activity feature verification evidence` | Re-run relevant local checks; committed schema/data-flow/retention/examples and reviewed simulation results. Distinguish implemented/tested, unsafe withheld surfaces, untested real push and remaining deployment/100k gates. Reproducible local commands from a clean checkout. |
+| 10 | `docs: publish activity feature verification evidence` | Re-run relevant local checks; committed schema/data-flow/retention/examples and reviewed simulation results. Distinguish implemented/tested, accepted inference limitations and suppressed values, untested real push and remaining deployment/100k gates. Reproducible local commands from a clean checkout. |
 
 Unit fixtures must test outcomes rather than mirror the publisher. Include a small
 independent exact synthetic oracle to check count definitions against controlled
@@ -330,7 +333,7 @@ part of local feature work.
 ## 7. Effort and boundaries
 
 Planning estimate for one developer: **75–125 focused hours**, roughly **2–4 working
-weeks**, plus any privacy-policy redesign or device/provider troubleshooting exposed
+weeks**, plus any capture or device/provider troubleshooting exposed
 by the acceptance gates. Commits 1–4 should provide the first complete local
 statistics/map slice in approximately **35–55 hours**. These are development effort
 estimates, not promises about coding-agent wall time or a security certification.

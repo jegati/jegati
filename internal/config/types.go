@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 6
+const SchemaVersion = 7
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -53,6 +53,9 @@ type Arrivals struct {
 }
 
 type PublicActivity struct {
+	AreaSizeMeters            int   `yaml:"area_size_meters" json:"area_size_meters"`
+	CaptureMaxSeconds         int   `yaml:"capture_max_seconds" json:"capture_max_seconds"`
+	MaxSnapshotBytes          int   `yaml:"max_snapshot_bytes" json:"max_snapshot_bytes"`
 	MinimumCount              int   `yaml:"minimum_count" json:"minimum_count"`
 	CountBuckets              []int `yaml:"count_buckets" json:"count_buckets"`
 	ReleaseSeconds            int   `yaml:"release_seconds" json:"release_seconds"`

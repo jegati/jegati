@@ -1,5 +1,5 @@
 # Explicit 100m profile, now matching the default; retained for experiment reproducibility.
-schema_version: 6
+schema_version: 7
 profile: simulation
 availability:
   minimum_minutes: 30
@@ -31,6 +31,9 @@ arrivals:
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:
+  area_size_meters: 1000
+  capture_max_seconds: 30
+  max_snapshot_bytes: 1000000
   minimum_count: 20
   count_buckets: [20, 50, 100, 250, 500, 1000]
   release_seconds: 300

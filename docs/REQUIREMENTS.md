@@ -48,12 +48,16 @@ Declining/cancelling is neutral, easy and never guilt-inducing.
 ## Notifications, map and statistics
 
 Support JEMI GATI, relevant gathering information and JEMI KËTU notifications.
+Background push is off by default and explicitly chosen by each user; participation
+and in-app updates work without it.
 Optional area follows and sufficiently large nearby activity alerts are included.
 They must reveal only necessary information and offer an actionable join flow.
 
 Show significant GATI areas, bucketed activity such as **50+ GATI**, activated
 gatherings, sufficiently confirmed gathering areas and simple aggregate statistics
-over time. A map represents collective areas/destinations, never individuals.
+over time. The public statistics map represents collective cells, never individuals
+or exact gathering destinations. Gatherings use the same public cells as willingness;
+exact crossroads remain available through the private invitation/admission flow.
 After JAM GATI, show published approximate nearby willingness. Gathering cards must
 show approximate going and fresh-arrival statistics before and after JAM KËTU.
 Keep the Tirana collective activity map available throughout these states. These
@@ -74,15 +78,15 @@ location history. Location is coarse wherever possible, temporary, purpose-limit
 and discarded when no longer needed. No tracking, analytics/advertising SDKs,
 secret participant database or hidden individual admin interface.
 
-Protect against location inference, repeated-query/differencing attacks, temporary
-signal correlation, database compromise and administrator abuse. Public interfaces
-must not allow individual participation reconstruction. Do not claim that listing
-residual risks satisfies an absolute guarantee; track unresolved properties visibly.
-The user elected to retain nearest-destination matching after the demonstrated
-colluding-input inference failure, correcting the landmark to a crossroad. Continue
-local MVP development under this bounded claim; the original absolute inference
-guarantee remains unmet. See decision 0004. Device-only UI does not fix API spoofing
-or collusion. This acceptance is not authorization for public deployment.
+Reduce exposure to location inference, repeated-query/differencing and correlation,
+and document database-compromise and administrator risks. The user explicitly
+accepted inferred information for implementation (decision 0007), including the
+public statistics surfaces; do not block development on eliminating these attacks.
+Keep suppression, fixed delayed buckets, temporary credentials and cell-only public
+gathering geography. No raw counts, individual records or exact participant positions
+may be published. The original absolute inference guarantee remains unmet; describe
+counterexamples honestly. Device-only UI does not fix spoofing or establish unique
+humans. This acceptance is not authorization for public deployment.
 
 Assume fake mass willingness, fake arrivals, notification flooding, API abuse,
 scraping, DoS, identification attempts and manipulated statistics. Use appropriate

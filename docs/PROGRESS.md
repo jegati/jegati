@@ -71,14 +71,12 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Begin commit 1 of ACTIVITY_IMPLEMENTATION_PLAN.md: finalize count semantics,
-public-grid/epoch contracts and cross-surface privacy fixtures before building the
-aggregate publisher. Then implement the statistics cards, city map/public joining,
-server-discovered notification events and optional delivery lifecycle in its stated
-order. Current code status remains in FUNCTIONALITY_STATUS.md; this plan does not
-complete milestone 09/10. Keep the selected 100 m private grid / 50 m device-error
-limit and 30/20 thresholds. Historical population evidence is in
-reports/population-3000.md. Known nearest-intersection inference remains disclosed.
+Implement commit 2 of ACTIVITY_IMPLEMENTATION_PLAN.md: bounded store capture,
+immutable delayed publication and the public activity endpoint, then connect cards
+and the cell-only city map. Decision 0007 accepts documented inference limitations;
+no new inference-approval gate is required. Push remains explicitly opt-in/off by
+default. Preserve private 100 m cells / 50 m device-error / 30/20 thresholds.
+The schema-7 public policy is implemented and tested; no aggregate API/UI exists yet.
 No credential or toolchain blocker remains for local work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
@@ -392,3 +390,22 @@ reviewed W3C/Apple push lifecycle and platform guidance, checked Markdown links 
 git diff formatting. No application tests were rerun and no missing feature was
 implemented. Local implementation needs no new credentials through fake delivery;
 real device/secure-origin interoperability is a separately recorded final check.
+
+## Activity implementation — policy and user correction
+
+Decision 0007 records accepted inferred information, public gathering geography in
+the same 1 km cells as willingness, and optional user-chosen push. Updated the
+requirements, activity/development plans, agent instructions and threat model.
+Schema 7 adds typed public area size, capture duration and snapshot-byte limits.
+The pure activity builder implements willingness/going/fresh-arrival semantics,
+minimum suppression, configured buckets, delayed release/retention timestamps,
+deterministic bytes, and cell-only gathering entries. It rejects duplicate inputs,
+invalid cells, oversized output and excessive capture duration.
+
+Validation: `go test -race ./internal/activity ./internal/config` and
+`npm --prefix web run check` passed. Initial tests caught an overbroad field-name
+assertion (map dataset version is public) and the fast simulation's capture deadline
+exceeding its release interval; both corrected. Existing installed pinned tools
+were found through scripts/env.sh; no additional installation was necessary.
+The threshold-transition fixture records accepted inference, not a privacy proof.
+Public publisher/API/UI and push remain incomplete at this commit.

@@ -91,8 +91,10 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
   and test actual settings; do not claim configuration comments enforce privacy.
 - Public APIs expose fixed, delayed, suppressed/bucketed aggregate releases only.
   No individual markers, member lists, arbitrary count queries, exact counts or
-  complementary totals that reveal suppressed groups. Public gathering markers
-  represent destinations and must pass publication rules.
+  explicit complementary totals. Public gathering entries use the same aggregate
+  cells as willingness, without intersection IDs/coordinates/labels. Private
+  invitations/admission retain actionable destinations. Decision 0007 accepts
+  inferred information: document counterexamples without blocking implementation.
 - Review all observable surfaces together: maps, private invitations, admission
   responses, arrival updates, history, area alerts, caches and configuration.
   Test differencing, colluding inputs and nearest-intersection inference.

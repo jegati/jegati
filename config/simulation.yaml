@@ -1,5 +1,5 @@
 # Rejected by normal builds; only -tags simulation permits this profile.
-schema_version: 6
+schema_version: 7
 profile: simulation
 availability:
   minimum_minutes: 30
@@ -31,6 +31,9 @@ arrivals:
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:
+  area_size_meters: 1000
+  capture_max_seconds: 5
+  max_snapshot_bytes: 1000000
   minimum_count: 3
   count_buckets: [3, 5, 10, 20, 50]
   release_seconds: 10

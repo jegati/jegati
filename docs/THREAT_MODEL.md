@@ -156,3 +156,19 @@ creation/read is now atomic using Valkey time. Real-store tests cover epoch-boun
 expiry and concurrent API replicas, without storing raw addresses or adding logs.
 Secrets retain the existing bounded ten-minute lifecycle. These local controls do
 not establish protection from an upstream DoS or privileged operator observation.
+
+### Accepted public inference and cell-only gathering statistics (decision 0007)
+
+The user authorizes statistics and map implementation despite inferential leakage.
+Buckets, suppression and delay do not prevent colluding threshold probes, temporal
+comparisons, nested-count or origin/destination correlation. These remain documented
+limitations; they are not blocking gates for this authorized local feature work.
+Public entries must omit intersection IDs, names and coordinates and share the
+willingness public grid. An eligible observer can still learn destinations through
+private joining. Public snapshots can be archived indefinitely by others.
+Push is explicitly opt-in and off by default; provider correlation and possible
+longer-lived endpoint metadata remain. Opted-in IndexedDB resume retains a bounded
+credential whose server expiry invalidates access; closed clients cannot guarantee
+physical deletion on schedule. No opt-in means no added background resume storage.
+Publication correctness, suppression, coordinate omission, expiry, replay protection,
+SSRF and queue bounds remain required implementation tests.
