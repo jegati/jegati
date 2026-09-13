@@ -11,6 +11,7 @@ import (
 	"github.com/jegati/jegati/internal/config"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/matching"
+	"github.com/jegati/jegati/internal/monitor"
 	"github.com/jegati/jegati/internal/notification"
 	"github.com/jegati/jegati/internal/store"
 	"sync"
@@ -18,6 +19,7 @@ import (
 )
 
 type Engine struct {
+	Monitor          *monitor.Registry
 	Push             *notification.Service
 	Store            *store.Store
 	Planner          matching.Planner
@@ -46,7 +48,9 @@ func (e *Engine) Run(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(e.Config.Matching.MaximumDebounceSeconds) * time.Second)
 	defer ticker.Stop()
 	for {
-		_ = e.Step(ctx)
+		e.Monitor.Begin(monitor.Matcher)
+		err := e.Step(ctx)
+		e.Monitor.End(monitor.Matcher, err)
 		select {
 		case <-ctx.Done():
 			return

@@ -134,17 +134,29 @@ func TestSimulationAndIndependentThresholdConfiguration(t *testing.T) {
 	}
 }
 func FuzzDecode(f *testing.F) {
-	b, _ := os.ReadFile("../config/testdata/default.yaml")
-	f.Add(string(b))
-	f.Add("")
-	f.Add("profile: null")
-	f.Fuzz(func(t *testing.T, text string) {
-		c, err := Decode(strings.NewReader(text), false)
-		if err == nil {
-			if err := c.Validate(false); err != nil {
-				t.Fatal(err)
+	seed, e := os.ReadFile("testdata/default.yaml")
+	if e != nil {
+		f.Fatal(e)
+	}
+	f.Add(seed)
+	f.Add([]byte("{}"))
+	f.Add([]byte("a: &a [*a]"))
+	f.Fuzz(func(t *testing.T, data []byte) {
+		if len(data) > MaxBytes+1 {
+			return
+		}
+		c, e := Decode(strings.NewReader(string(data)), false)
+		if e == nil {
+			raw, _ := c.Canonical()
+			again, e := Decode(strings.NewReader(string(raw)), false)
+			if e != nil {
+				t.Fatal("canonical configuration rejected")
 			}
-			c.Canonical()
+			_, h := c.Canonical()
+			_, h2 := again.Canonical()
+			if h != h2 {
+				t.Fatal("canonical hash changed")
+			}
 		}
 	})
 }

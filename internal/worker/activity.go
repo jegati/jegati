@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"github.com/jegati/jegati/internal/monitor"
 	"sync"
 	"time"
 
@@ -12,10 +13,11 @@ import (
 // ActivityPublisher has its own lease and loop so capture never holds the matcher
 // mutex. Only safe aggregates are staged; the API enforces their release deadline.
 type ActivityPublisher struct {
-	Store  *store.Store
-	Config config.Config
-	owner  string
-	mu     sync.Mutex
+	Monitor *monitor.Registry
+	Store   *store.Store
+	Config  config.Config
+	owner   string
+	mu      sync.Mutex
 }
 
 func NewActivityPublisher(s *store.Store, c config.Config) *ActivityPublisher {
@@ -25,7 +27,9 @@ func (p *ActivityPublisher) Run(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(p.Config.Matching.ReconciliationSeconds) * time.Second)
 	defer ticker.Stop()
 	for {
-		_ = p.Step(ctx)
+		p.Monitor.Begin(monitor.Publisher)
+		err := p.Step(ctx)
+		p.Monitor.End(monitor.Publisher, err)
 		select {
 		case <-ctx.Done():
 			return

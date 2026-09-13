@@ -692,3 +692,28 @@ No new test executions, implementation changes or deployment occurred in this re
 The next recommended local batch is test isolation, failure recovery and retention
 soak/fuzzing. Live push contact/device verification remains unresolved separately;
 it does not block these local checks. Preserve commands.txt.
+
+## Automated hardening: monitoring and fuzz foundation — 2026-09-13
+
+User authorized the proposed automated checks, including monitoring during scale
+runs. Added an optional private Unix monitoring socket: fixed completed-window,
+suppressed/bucketed request statistics and four task-health summaries, no participant
+labels or raw errors. First-party collection bounds retention and validates fields;
+its failure cannot gate participant requests. Decision 0010 and MONITORING describe
+scope and limits. Functional schema/thresholds remain unchanged.
+
+`make test-monitor` passed Go race/socket/suppression/expiry/canary checks and four
+Python collector/alert/bounds checks. `make test-store` passed with real restricted
+Valkey after instrumentation. Four bounded fuzz targets (configuration, request
+parsers, capabilities and geography) ran for 30 seconds each and passed; the existing
+configuration fuzz target was strengthened rather than duplicated. These runs do
+not replace unbounded fuzzing or a security audit. The first compile exposed a
+duplicate fuzz name and incorrect parser arity, corrected before passing checks.
+
+The owned browser lab passed all 28 checks. It now uses authenticated store readiness;
+the first TCP-only readiness attempt raced startup and failed, with no passing claim.
+Monitored 1k/10k load smoke passed; the full 100k run, normal-delay real publisher
+journey, failure recovery and 15-minute short-TTL churn tests are still running.
+Initial memory collection sampled the container supervisor; the larger run measures
+the actual Valkey process. Recovery exposed dynamic Docker port changes across a
+restart; the owned lab now binds an explicit private test port. Results follow.

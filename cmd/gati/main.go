@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jegati/jegati/internal/geography"
+	"github.com/jegati/jegati/internal/monitor"
 	"github.com/jegati/jegati/internal/notification"
 	"github.com/jegati/jegati/internal/store"
 	"github.com/jegati/jegati/internal/worker"
@@ -39,6 +40,7 @@ func run() error {
 	intersectionFile := flag.String("intersections", "data/tirana/intersections.json", "versioned public intersection dataset")
 	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
 	pushKeyFile := flag.String("push-key-file", ".runtime/vapid.json", "mounted VAPID service key file (only read when optional push is enabled)")
+	monitorSocket := flag.String("monitor-socket", "", "optional owner-only Unix socket for bounded operational summaries")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
@@ -86,6 +88,18 @@ func run() error {
 	if c.Notifications.PushEnabled && backend == nil {
 		return errors.New("optional push requires the temporary store")
 	}
+	var metrics *monitor.Registry
+	if *monitorSocket != "" {
+		metrics = monitor.New()
+		socket, e := metrics.Listen(*monitorSocket)
+		if e != nil {
+			return errors.New("cannot bind monitoring socket")
+		}
+		defer socket.Close()
+		ops := &http.Server{Handler: metrics.Handler(), ReadHeaderTimeout: 2 * time.Second, WriteTimeout: 2 * time.Second, IdleTimeout: 5 * time.Second, ErrorLog: log.New(io.Discard, "", 0)}
+		defer ops.Close()
+		go ops.Serve(socket)
+	}
 	var engine *worker.Engine
 	if backend != nil {
 		raw, e := os.ReadFile(*intersectionFile)
@@ -102,16 +116,20 @@ func run() error {
 			return e
 		}
 		engine = worker.New(backend, index, c)
+		engine.Monitor = metrics
 		engine.Push, e = notification.New(c, backend, *pushKeyFile)
 		if e != nil {
 			return e
 		}
 	}
+	if engine != nil && engine.Push != nil {
+		engine.Push.Monitor = metrics
+	}
 	handler, e := configureHandler(c, backend, roads, engine)
 	if e != nil {
 		return e
 	}
-	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
+	server := &http.Server{Handler: metrics.Wrap(handler), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if engine != nil && backgroundWorkers {
@@ -119,7 +137,9 @@ func run() error {
 		if engine.Push != nil {
 			go engine.Push.Run(ctx)
 		}
-		go worker.NewActivityPublisher(backend, c).Run(ctx)
+		publisher := worker.NewActivityPublisher(backend, c)
+		publisher.Monitor = metrics
+		go publisher.Run(ctx)
 	}
 	if backend != nil && backgroundWorkers {
 		go func() {
@@ -130,12 +150,16 @@ func run() error {
 				case <-ctx.Done():
 					return
 				case <-ticker.C:
+					metrics.Begin(monitor.Cleanup)
+					var cleanupError error
 					for i := 0; i < 10; i++ {
 						n, e := backend.Cleanup(ctx, c.Limits.CleanupBatchSize)
+						cleanupError = e
 						if e != nil || n < c.Limits.CleanupBatchSize {
 							break
 						}
 					}
+					metrics.End(monitor.Cleanup, cleanupError)
 				}
 			}
 		}()

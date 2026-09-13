@@ -88,3 +88,10 @@ dev-push: push-keys
 	$(COMPOSE) -f compose.yaml -f compose.push.yaml up --build
 security-check:
 	go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
+
+.PHONY: test-fuzz test-monitor
+test-fuzz:
+	bash scripts/fuzz.sh
+test-monitor:
+	go test -race ./internal/monitor
+	python3 -m unittest discover -s scripts -p 'test_monitor.py'

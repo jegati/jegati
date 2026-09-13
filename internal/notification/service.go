@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/jegati/jegati/internal/monitor"
 	"io"
 	"math"
 	"net/http"
@@ -39,11 +40,12 @@ type Registration struct {
 	ExpiresAt int64  `json:"expires_at"`
 }
 type Service struct {
-	Store  *store.Store
-	config config.Config
-	keys   Keys
-	aead   cipher.AEAD
-	client webpush.HTTPClient
+	Monitor *monitor.Registry
+	Store   *store.Store
+	config  config.Config
+	keys    Keys
+	aead    cipher.AEAD
+	client  webpush.HTTPClient
 }
 
 func GenerateKeys() (Keys, error) {
@@ -148,7 +150,9 @@ func (s *Service) Run(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(s.config.Notifications.PushWorkerSeconds) * time.Second)
 	defer ticker.Stop()
 	for {
-		_ = s.Step(ctx)
+		s.Monitor.Begin(monitor.Push)
+		err := s.Step(ctx)
+		s.Monitor.End(monitor.Push, err)
 		select {
 		case <-ctx.Done():
 			return
