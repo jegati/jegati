@@ -1,6 +1,15 @@
 # Deployment preparation and scaling priorities
 
-Date: 2026-09-13. **Proposal, not implemented deployment or capacity evidence.**
+Date: 2026-09-13; implementation update 2026-09-14. **No public deployment.**
+The original priorities below remain the design rationale. Implemented locally:
+bounded rank-cursor snapshots, changed-cell refresh with periodic reconciliation,
+binary reachability membership, deadline monitoring, API/worker roles, production
+Caddy/Compose and an isolated two-replica browser/security rehearsal. See the
+[measured results](reports/scaling-2026-09-14.md) and [release runbook](DEPLOYMENT.md).
+Full candidate planning, open-gathering refresh and publication still contain linear
+work; geographic partitioning, incremental destination indexing and streaming
+publication remain conditional future optimizations, not claimed completed work.
+Current monitored 100k traffic meets its tested targets without those additions.
 Ready to plan deployment and prepare a limited pilot; public launch still requires
 the gates below. No purchase, remote push or public deployment is authorized by
 this discussion. Current evidence: [automated checks](reports/predeployment-automation.md),
@@ -209,6 +218,6 @@ is honest. Preserve deployable releases and encrypted operational secrets for
 recovery, but never back up participant state. Rollbacks must handle config/schema
 compatibility and stale browser caches; a deliberate store reset loses live sessions.
 
-Next local action: commit 1's baseline/lag instrumentation, followed by the bounded
-scan fix. Provider credentials, domain choice and the acceptable provider-visibility
-boundary are needed later, not to begin this preparation.
+Next: finish release-artifact/rollback verification, then provision an authorized
+staging host and real edge rules. Provider credentials, domain choice and the
+acceptable provider-visibility boundary are required for that external stage.

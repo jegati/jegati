@@ -47,7 +47,9 @@ func TestRealPublicActivityCacheAndNoQueryContract(t *testing.T) {
 	handler := Handler(c, s, nil)
 	read := func(path, auth, etag string) *httptest.ResponseRecorder {
 		req := httptest.NewRequest("GET", path, nil)
-		req.Header.Set("Authorization", auth)
+		if auth != "" {
+			req.Header.Set("Authorization", auth)
+		}
 		req.Header.Set("If-None-Match", etag)
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, req)

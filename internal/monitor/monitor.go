@@ -23,10 +23,11 @@ const (
 	Publisher
 	Cleanup
 	Push
+	View
 	taskCount
 )
 
-var taskNames = [taskCount]string{"matcher", "publisher", "cleanup", "push"}
+var taskNames = [taskCount]string{"matcher", "publisher", "cleanup", "push", "view"}
 var latencyBounds = [...]int64{10, 50, 100, 300, 1000, 3000, 10000}
 
 type window struct {

@@ -377,3 +377,15 @@ Sharing links/QR and new purpose copy are excluded from this work. Existing
 configuration, cell-only public releases and documented inference limits remain.
 
 Local automated hardening commands and their exact scope are now documented in [AUTOMATED_TESTING.md](AUTOMATED_TESTING.md). Local 100k synthetic runs do not close the separate reference-host, combined-traffic, cached-edge or matching/expiry-lag gates above. See PROGRESS.md for measured evidence.
+
+## Deployment preparation implementation — 2026-09-14
+
+Implemented measured rank-cursor/cell-refresh/reachability optimizations, direct
+worker deadline monitoring, API-only and worker roles, two-replica Caddy rehearsal,
+built production images and bounded private Compose resources. Configuration keeps
+100 m cells and the existing functional thresholds. [Measured results](reports/scaling-2026-09-14.md)
+include the slower 10k snapshot and higher cached RSS; do not equate sparse-cell
+read speed with whole-app throughput. Remaining linear candidate/publication work
+is documented and is not a claimed 1M solution. Release preparation, verification
+and compatible rollback are described in [DEPLOYMENT.md](DEPLOYMENT.md); execution
+evidence and outstanding external gates are recorded in PROGRESS.md.

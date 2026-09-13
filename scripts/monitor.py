@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """First-party local monitoring. Fixed summaries only; no participant event logs."""
-import collections, http.client, json, os, pathlib, socket, threading, time, tempfile
+import collections, http.client, json, os, pathlib, re, socket, subprocess, threading, time, tempfile
 
 class UnixHTTP(http.client.HTTPConnection):
     def __init__(self, path):
@@ -9,8 +9,18 @@ class UnixHTTP(http.client.HTTPConnection):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.settimeout(self.timeout); self.sock.connect(self.path)
 
-def snapshot(path):
-    client = UnixHTTP(path)
+class ContainerHTTP:
+    def __init__(self,container,path):self.container=container;self.path=str(path)
+    def request(self,*_):pass
+    def getresponse(self):
+        result=subprocess.run(['docker','exec',self.container,'/gati','-mode','monitor-snapshot','-monitor-socket',self.path],stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=4,check=False)
+        self.status=200 if result.returncode==0 else 503;self.raw=result.stdout
+        return self
+    def read(self,size):return self.raw[:size]
+    def close(self):pass
+
+def snapshot(path,container=None):
+    client = ContainerHTTP(container,path) if container else UnixHTTP(path)
     try:
         client.request('GET', '/metrics'); response = client.getresponse(); raw = response.read(8193)
         if response.status != 200 or len(raw) > 8192: raise ValueError('invalid metrics')
@@ -22,7 +32,7 @@ def snapshot(path):
         for key in ['requests','failures']:
             if v[key] not in ['suppressed','20+','50+','100+','250+','500+','1000+','5000+','10000+']: raise ValueError('invalid bucket')
         if v['p95_upper_ms'] not in [-1,0,10,50,100,300,1000,3000,10000]: raise ValueError('invalid latency')
-        if not isinstance(v['workers'],dict) or not set(v['workers']) <= {'matcher','publisher','cleanup','push'}: raise ValueError('invalid workers')
+        if not isinstance(v['workers'],dict) or not set(v['workers']) <= {'matcher','publisher','cleanup','push','view'}: raise ValueError('invalid workers')
         for w in v['workers'].values():
             if not isinstance(w,dict):raise ValueError('invalid worker object')
             expected={'state','last_start_seconds','last_finish_seconds','last_success_seconds'}
@@ -49,7 +59,9 @@ def alerts(metrics):
     return result
 
 class Collector:
-    def __init__(self, target, output, pid=None, interval=5, retention=3600, store_pid=None):
+    def __init__(self, target, output, pid=None, interval=5, retention=3600, store_pid=None, container=None):
+        if container is not None and not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",container):raise ValueError("invalid local container name")
+        self.container=container
         if not 1<=interval<=60 or not 120<=retention<=86400 or retention//interval>8640: raise ValueError('invalid monitoring bounds')
         self.store_pid=store_pid; self.target=pathlib.Path(target);self.output=pathlib.Path(output);self.pid=pid
         self.interval=interval;self.retention=retention;self.rows=collections.deque(maxlen=retention//interval)
@@ -57,8 +69,8 @@ class Collector:
     def sample(self):
         row={'at':int(time.time())}
         try:
-            start=time.monotonic();row['service']=snapshot(self.target);row['probe_ms']=round((time.monotonic()-start)*1000);row['alerts']=alerts(row['service'])
-        except (OSError,ValueError,http.client.HTTPException): row['alerts']=['monitor_unavailable']
+            start=time.monotonic();row['service']=snapshot(self.target,self.container);row['probe_ms']=round((time.monotonic()-start)*1000);row['alerts']=alerts(row['service'])
+        except (OSError,ValueError,http.client.HTTPException,subprocess.SubprocessError): row['alerts']=['monitor_unavailable']
         if self.pid:
             try: row['resources']=process_resources(self.pid)
             except (OSError,ValueError,IndexError): pass
@@ -92,7 +104,7 @@ class Collector:
 
 if __name__=='__main__':
     import argparse
-    p=argparse.ArgumentParser();p.add_argument('--socket',required=True);p.add_argument('--output',required=True);p.add_argument('--pid',type=int);p.add_argument('--interval',type=int,default=5);p.add_argument('--retention',type=int,default=3600)
-    a=p.parse_args();collector=Collector(a.socket,a.output,a.pid,a.interval,a.retention)
+    p=argparse.ArgumentParser();p.add_argument('--socket',required=True);p.add_argument('--output',required=True);p.add_argument('--pid',type=int);p.add_argument('--container');p.add_argument('--interval',type=int,default=5);p.add_argument('--retention',type=int,default=3600)
+    a=p.parse_args();collector=Collector(a.socket,a.output,a.pid,a.interval,a.retention,container=a.container)
     try:collector.run()
     except KeyboardInterrupt:collector.close()

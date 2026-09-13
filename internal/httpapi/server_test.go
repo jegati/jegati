@@ -66,3 +66,28 @@ func TestNoParticipantOrSimulationEndpoints(t *testing.T) {
 		t.Fatal("query rejection leaked input")
 	}
 }
+
+func TestCredentialHeadersNeverMakePublicRoadsCacheable(t *testing.T) {
+	c, err := config.Load("../config/testdata/default.yaml", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := Handler(c, nil, []byte(`{"type":"FeatureCollection","features":[]}`))
+	for _, method := range []string{"GET", "HEAD"} {
+		for _, header := range []string{"", "Authorization", "Cookie"} {
+			r := httptest.NewRequest(method, "/api/map/roads", nil)
+			if header != "" {
+				r.Header.Set(header, "synthetic-private-canary")
+			}
+			w := httptest.NewRecorder()
+			h.ServeHTTP(w, r)
+			want := "public, max-age=3600"
+			if header != "" {
+				want = "no-store"
+			}
+			if w.Code != 200 || w.Header().Get("Cache-Control") != want || strings.Contains(w.Body.String(), "canary") {
+				t.Fatalf("%s %s: %d %s", method, header, w.Code, w.Header().Get("Cache-Control"))
+			}
+		}
+	}
+}

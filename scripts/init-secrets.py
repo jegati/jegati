@@ -4,8 +4,9 @@ from pathlib import Path
 import hashlib, os, secrets, argparse
 parser=argparse.ArgumentParser()
 parser.add_argument("--simulation", action="store_true")
+parser.add_argument("--directory", type=Path, help="private operational-secret directory for a deployment")
 args=parser.parse_args()
-root=Path(__file__).resolve().parent.parent / '.runtime'
+root=args.directory or Path(__file__).resolve().parent.parent / '.runtime'
 root.mkdir(mode=0o700,exist_ok=True)
 if args.simulation:
     root=root/'simulation';root.mkdir(mode=0o700,exist_ok=True)

@@ -31,4 +31,15 @@ if [[ ! -x "$gati_tools/compose-$GATI_COMPOSE_VERSION/docker-compose" ]]; then
   mkdir -p "$gati_tools/compose-$GATI_COMPOSE_VERSION"
   install -m 755 "$staging/docker-compose" "$gati_tools/compose-$GATI_COMPOSE_VERSION/docker-compose"
 fi
+if [[ ! -x "$gati_tools/buildx-$GATI_BUILDX_VERSION/docker-buildx" ]]; then
+  fetch "https://github.com/docker/buildx/releases/download/v$GATI_BUILDX_VERSION/buildx-v$GATI_BUILDX_VERSION.linux-amd64" docker-buildx "$GATI_BUILDX_SHA256"
+  mkdir -p "$gati_tools/buildx-$GATI_BUILDX_VERSION"
+  install -m 755 "$staging/docker-buildx" "$gati_tools/buildx-$GATI_BUILDX_VERSION/docker-buildx"
+fi
+# Docker discovers CLI plugins here. Preserve any separately managed installation.
+gati_plugin_dir="${DOCKER_CONFIG:-$HOME/.docker}/cli-plugins"
+mkdir -p "$gati_plugin_dir"
+if [[ ! -e "$gati_plugin_dir/docker-buildx" && ! -L "$gati_plugin_dir/docker-buildx" ]]; then
+  ln -s "$gati_tools/buildx-$GATI_BUILDX_VERSION/docker-buildx" "$gati_plugin_dir/docker-buildx"
+fi
 printf 'Installed pinned tools in %s\nUse: source scripts/env.sh\nDocker Engine must be installed separately.\n' "$gati_tools"

@@ -132,3 +132,10 @@ reproduce-build:
 .PHONY: test-pressure
 test-pressure:
 	python3 scripts/pressure.py --output "$(or $(OUTPUT),reports/local/pressure-$(shell date -u +%Y%m%dT%H%M%S))"
+
+.PHONY: production-build test-deployment
+production-build:
+	$(COMPOSE) -f compose.production.yaml config --quiet
+	$(COMPOSE) -f compose.production.yaml build api web
+test-deployment: production-build
+	python3 scripts/deployment-lab.py --output "$(or $(OUTPUT),reports/local/deployment-$(shell date -u +%Y%m%dT%H%M%S))"

@@ -71,6 +71,9 @@ func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*wo
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { writeError(w, http.StatusNotFound) })
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if len(r.Header.Values("Authorization")) > 0 || len(r.Header.Values("Cookie")) > 0 {
+			w = privateResponse{w}
+		}
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
@@ -83,6 +86,20 @@ func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*wo
 		mux.ServeHTTP(w, r)
 	})
 }
+
+type privateResponse struct{ http.ResponseWriter }
+
+func (w privateResponse) WriteHeader(status int) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Del("Expires")
+	w.ResponseWriter.WriteHeader(status)
+}
+func (w privateResponse) Write(data []byte) (int, error) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Del("Expires")
+	return w.ResponseWriter.Write(data)
+}
+func (w privateResponse) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func writeError(w http.ResponseWriter, status int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)

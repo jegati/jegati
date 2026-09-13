@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/jegati/jegati/internal/geography"
+	"github.com/jegati/jegati/internal/httpapi"
 	"github.com/jegati/jegati/internal/monitor"
 	"github.com/jegati/jegati/internal/notification"
 	"github.com/jegati/jegati/internal/store"
@@ -32,7 +33,7 @@ func main() {
 	}
 }
 func run() error {
-	mode := flag.String("mode", "api", "api, config-check or config-show")
+	mode := flag.String("mode", "api", "api, config-check, config-show, health-check or monitor-snapshot")
 	path := flag.String("config", "config/gati.yaml", "functional configuration path")
 	address := flag.String("listen", "127.0.0.1:8080", "HTTP bind address")
 	storeAddress := flag.String("store-address", "", "Valkey address (empty disables participant writes)")
@@ -41,9 +42,24 @@ func run() error {
 	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
 	pushKeyFile := flag.String("push-key-file", ".runtime/vapid.json", "mounted VAPID service key file (only read when optional push is enabled)")
 	monitorSocket := flag.String("monitor-socket", "", "optional owner-only Unix socket for bounded operational summaries")
+	role := flag.String("role", "combined", "combined, api or worker process role")
+	trustedProxies := flag.String("trusted-proxies", "", "comma-separated exact proxy CIDRs; requires canonical X-Gati-Client-IP")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
+	}
+	if *role != "combined" && *role != "api" && *role != "worker" {
+		return errors.New("unsupported process role")
+	}
+	if buildmode.AllowSimulation && (*role != "combined" || *trustedProxies != "") {
+		return errors.New("deployment roles/proxies are unavailable in simulation")
+	}
+	if *mode == "monitor-snapshot" {
+		value, err := monitor.ReadSocket(*monitorSocket)
+		if err != nil {
+			return err
+		}
+		return json.NewEncoder(os.Stdout).Encode(value)
 	}
 	c, err := config.Load(*path, buildmode.AllowSimulation)
 	if err != nil {
@@ -59,15 +75,20 @@ func run() error {
 		fmt.Println(string(data))
 		return nil
 	case "api":
+	case "health-check":
 	default:
 		return errors.New("unsupported mode")
 	}
 	if err := validateBind(*address, buildmode.AllowSimulation); err != nil {
 		return err
 	}
-	listener, err := net.Listen("tcp", *address)
-	if err != nil {
-		return errors.New("cannot bind HTTP listener")
+	var listener net.Listener
+	if *role != "worker" && *mode != "health-check" {
+		listener, err = net.Listen("tcp", *address)
+		if err != nil {
+			return errors.New("cannot bind HTTP listener")
+		}
+		defer listener.Close()
 	}
 	var backend *store.Store
 	if *storeAddress != "" {
@@ -80,6 +101,35 @@ func run() error {
 			return e
 		}
 		defer backend.Client.Close()
+	}
+	if *mode == "health-check" {
+		if backend == nil {
+			return errors.New("health check requires the store")
+		}
+		if *role == "worker" {
+			value, err := monitor.ReadSocket(*monitorSocket)
+			if err != nil {
+				return err
+			}
+			worker, ok := value.Workers["matcher"]
+			if !ok || worker.State == "error" || worker.LastStartSeconds < 0 || worker.LastStartSeconds > 30 || worker.LastSuccessSeconds > 30 {
+				return errors.New("worker unavailable")
+			}
+			return nil
+		}
+		client := http.Client{Timeout: 2 * time.Second, Transport: &http.Transport{}, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+		response, err := client.Get("http://" + *address + "/healthz")
+		if err != nil {
+			return errors.New("API unavailable")
+		}
+		defer response.Body.Close()
+		if response.StatusCode != 200 {
+			return errors.New("API unavailable")
+		}
+		return nil
+	}
+	if *role != "combined" && backend == nil {
+		return errors.New("separate roles require the store")
 	}
 	roads, e := os.ReadFile(*mapFile)
 	if e != nil {
@@ -129,10 +179,17 @@ func run() error {
 	if e != nil {
 		return e
 	}
+	handler, e = httpapi.TrustedProxy(handler, *trustedProxies)
+	if e != nil {
+		return e
+	}
 	server := &http.Server{Handler: metrics.Wrap(handler), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	if engine != nil && backgroundWorkers {
+	if engine != nil && backgroundWorkers && *role == "api" {
+		go engine.RunView(ctx)
+	}
+	if engine != nil && backgroundWorkers && *role != "api" {
 		go engine.Run(ctx)
 		if engine.Push != nil {
 			go engine.Push.Run(ctx)
@@ -141,7 +198,7 @@ func run() error {
 		publisher.Monitor = metrics
 		go publisher.Run(ctx)
 	}
-	if backend != nil && backgroundWorkers {
+	if backend != nil && backgroundWorkers && *role != "api" {
 		go func() {
 			ticker := time.NewTicker(time.Duration(c.Matching.ReconciliationSeconds) * time.Second)
 			defer ticker.Stop()
@@ -167,6 +224,10 @@ func run() error {
 				}
 			}
 		}()
+	}
+	if *role == "worker" {
+		<-ctx.Done()
+		return nil
 	}
 	done := make(chan error, 1)
 	go func() { done <- server.Serve(listener) }()

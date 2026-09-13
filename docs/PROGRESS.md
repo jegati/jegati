@@ -957,3 +957,37 @@ revision on this laptop, not maximum throughput, VPS sizing or 1M-user evidence.
 
 Next local work: finish and verify the already prepared production roles/proxy,
 immutable release/rollback tooling and host/edge runbook. No publication authorized.
+
+## Production roles, ingress and release tooling — 2026-09-14
+
+Added API-only/dedicated-worker roles, private docker-exec monitoring, trusted proxy
+validation, credential-header cache bypass, pinned production web/Caddy image and
+private Compose deployment with bounded resources. Default remains one combined
+process. The optional two-replica topology shares atomic state/network budgets and
+has one matching owner. Optional push has a separate outbound/mount overlay;
+functional settings remain in the published YAML. Added local immutable release,
+file/image/runtime/public-asset verification and compatible rollback commands plus
+host preflight. User-local Buildx 0.37.1 was installed using its verified publisher
+checksum; no administrator credentials or remote publication were used.
+
+Validation: make test (race/simulation/vet/TypeScript), make test-store and make
+test-monitor passed. Three release guard unit tests passed. Production Compose and
+push overlay validate. The real production-image rehearsal at
+reports/local/deployment-roles-cache-fixed passed eight grouped checks in 71.97s:
+actual container/store controls, trusted ingress/spoof/query/body limits, cache
+isolation, Chromium built-client map/willingness/cancellation, two-API activation
+and concurrent arrival replay, one-API failure, separate worker/monitoring roles,
+and network budgets across replicas. No real Cloudflare/TLS/push provider was used.
+
+The rehearsal caught and fixed address allocation collisions, Caddy route/header
+ordering, loss of the copied client-IP header and the upstream Caddy executable
+capability preventing startup with ALL dropped. A pre-existing test sent an empty
+Authorization header while expecting shared-cache eligibility; it now omits that
+header for anonymous cases and keeps credential-cache rejection assertions.
+
+The host preflight correctly fails on this developer PC because host swap is
+active; it was not disabled. Container no-swap checks pass, which does not certify
+host/provider privacy. Next: export the committed release, run its actual private
+activation/served-artifact/rollback rehearsal, and compare two clean builds. Then
+finish documentation/evidence and request only the domain/host/account access and
+public authorization needed for the external staging step. Preserve commands.txt.

@@ -78,7 +78,8 @@ func (s signalAPI) authorized(w http.ResponseWriter, r *http.Request) (string, b
 		return "", false
 	}
 	ip = ip.Unmap()
-	// Ignore X-Forwarded-For from clients. Trusted edge forwarding is later scope.
+	// Direct requests ignore forwarding headers. Explicit TrustedProxy middleware
+	// may replace RemoteAddr only after authenticating the configured proxy peer.
 	network := ip.String()
 	if ip.Is6() {
 		network = netip.PrefixFrom(ip, 56).Masked().String()

@@ -278,3 +278,22 @@ and late arrival. Browser emulation adapters are test-only and leave production
 location checks unchanged. See AUTOMATED_TESTING.md and PROGRESS.md for results,
 failed harness assumptions corrected, and untested release gates. These checks do
 not eliminate location spoofing, Sybil, inference or malicious-operator risks.
+
+## Production ingress and release boundary — 2026-09-14
+
+[Decision 0012](decisions/0012-production-boundaries.md) adds exact-peer proxy trust,
+canonical client IP validation, forwarding-header removal, credential-cache bypass,
+private container networks and built browser CSP. The local production rehearsal
+tests actual runtime persistence/log/swap/core settings, forged requests, real
+replica switching and private monitoring. Caddy file capabilities are removed so
+ALL can remain dropped. Host swap is enabled on this developer PC: container
+validation does not certify host privacy. Public activation checks host prerequisites
+and still requires provider/edge inspection. No participant backups or public
+monitoring are introduced.
+
+Cloudflare/tunnel is a trusted ingress and plaintext TLS intermediary; compromise
+can reveal request IPs/coarse cells/capabilities or defeat network budgets. It cannot
+be claimed blind or governed by application TTL. Host administrators can inspect
+live Valkey/API memory. Immutable releases, independently compared browser assets
+and privileged image/config checks improve verifiability, not remote attestation.
+See [the runbook and residual gates](DEPLOYMENT.md).

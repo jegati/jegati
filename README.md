@@ -86,5 +86,9 @@ Additional local validation: [automated testing and monitored load](docs/AUTOMAT
 [System architecture, diagram and 1M-signal estimate](docs/ARCHITECTURE.md) distinguishes measured 100k evidence from untested scaling assumptions.
 
 [Deployment preparation and scaling priorities](docs/DEPLOYMENT_PREPARATION.md)
-proposes the database/worker improvements, first-host topology, Cloudflare trust
-boundary, cost allowance and remaining release gates; it is not a deployed setup.
+records the first-host topology, Cloudflare trust boundary and remaining release gates.
+[Measured optimizations](docs/reports/scaling-2026-09-14.md) include repeated 10k–1M
+component benchmarks and a monitored 100k mixed-load comparison, including regressions.
+[Production images, local replica tests and the release runbook](docs/DEPLOYMENT.md)
+are available; no public deployment has been performed. Run `make test-deployment`
+for the isolated production proxy/browser/worker rehearsal.

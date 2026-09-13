@@ -1,0 +1,95 @@
+{
+ admin off
+ auto_https off
+ persist_config off
+ log default {
+  output discard
+ }
+ servers {
+  max_header_size 8KB
+  timeouts {
+   read_header 5s
+   read_body 10s
+   write 15s
+   idle 60s
+  }
+ }
+}
+
+http://:8080 {
+ route {
+ @localHealth {
+  remote_ip 127.0.0.1/32 ::1/128
+  path /healthz
+  method GET
+ }
+ respond @localHealth "ok" 200
+ # Only the named tunnel connector may enter. The production file publishes no port.
+ @notConnector not remote_ip 172.30.10.2/32
+ respond @notConnector "Kërkesa nuk mund të përpunohet." 403
+ @wrongHost not host {$GATI_PUBLIC_HOST:localhost}
+ respond @wrongHost "Kërkesa nuk mund të përpunohet." 403
+ @query expression `{http.request.uri.query} != ""`
+ respond @query "Kërkesa nuk mund të përpunohet." 400
+
+ header {
+  -Server
+  X-Content-Type-Options nosniff
+  Referrer-Policy no-referrer
+  Permissions-Policy "geolocation=(self), camera=(), microphone=(), payment=()"
+ }
+ @authorization header Authorization *
+ header @authorization {
+  Cache-Control no-store
+  defer
+ }
+ @cookie header Cookie *
+ header @cookie {
+  Cache-Control no-store
+  defer
+ }
+ request_body {
+  max_size 4096
+ }
+ handle /api/* {
+  vars gati_client_ip {http.request.header.CF-Connecting-IP}
+  reverse_proxy {
+   dynamic a {
+    name api
+    port 8080
+    refresh 5s
+    versions ipv4
+   }
+   # The connector is authenticated by the tunnel and isolated network.
+   # Preserve the complete header value; the API validates one canonical IP.
+   header_up X-Gati-Client-IP {vars.gati_client_ip}
+   header_up -CF-Connecting-IP
+   header_up -CF-Ray
+   header_up -Forwarded
+   header_up -X-Real-IP
+   header_up -X-Forwarded-For
+   transport http {
+    dial_timeout 2s
+    response_header_timeout 10s
+    max_conns_per_host 256
+   }
+  }
+ }
+ handle {
+  @write not method GET HEAD
+  respond @write "Kërkesa nuk mund të përpunohet." 405
+  root * /srv
+  header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'"
+  @mutable not path /assets/*
+  header @mutable Cache-Control no-cache
+  @immutable path /assets/*
+  header @immutable Cache-Control "public, max-age=31536000, immutable"
+  encode zstd gzip
+  file_server
+ }
+ }
+ handle_errors {
+  header Cache-Control no-store
+  respond "Kërkesa nuk mund të përpunohet." {err.status_code}
+ }
+}

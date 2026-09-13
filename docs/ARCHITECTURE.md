@@ -1,6 +1,6 @@
 # GATI architecture and one-million-signal assessment
 
-Update 2026-09-14: [decision 0011](decisions/0011-incremental-matching-working-set.md) replaces growing-OFFSET traversal and introduces changed-cell reads plus a bounded private matching working set. The original measurements and 1M extrapolations below remain historical evidence, not measurements of the revised code. Final speedup evidence is tracked in PROGRESS.md.
+Update 2026-09-14: [decision 0011](decisions/0011-incremental-matching-working-set.md) replaces growing-OFFSET traversal and introduces changed-cell reads plus a bounded private matching working set. [Repeated benchmarks and monitored 100k comparison](reports/scaling-2026-09-14.md) measure both speedups and increased cache RSS. [Production roles and topology](DEPLOYMENT.md) now support built Caddy assets, two API-only replicas and a dedicated worker. The original measurements, diagram and 1M extrapolations below remain historical evidence, not measurements of the revised code. A 1M component benchmark is not a 1M-user capacity test.
 
 Reviewed 2026-09-13 against source at 9e2bd39 and the recorded monitored 100k runs.
 This document describes implementation, distinguishes planned deployment components,

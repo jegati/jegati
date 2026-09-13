@@ -68,3 +68,12 @@ archived v1 and current v2 and alerts on deadline lag of 30 seconds or more.
 and up to 1,000 real going confirmations sampled from private invitations. It
 requires at least one invitation and records each HTTP phase separately. This
 does not test arrivals, all-population admission, synchronized expiry or a CDN.
+
+Production Compose places the socket in an owner-only container tmpfs. Use
+`python3 scripts/monitor.py --container gati-production-api-1 --socket /run/ops/gati.sock --output /PRIVATE/monitor-api.json`
+to read the binary's bounded monitor-snapshot command through docker exec. No TCP
+port or writable host mount enters the application container. Use private RAM-backed
+output and honor expires_at. API-only replicas expose the fixed view worker; monitor
+each expected process. The collector records local alerts but does not send messages.
+Real tunnel/certificate/provider checks and an operator-selected alert destination
+remain deployment tasks. See [production wiring](DEPLOYMENT.md).

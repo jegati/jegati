@@ -91,6 +91,10 @@ func TestConcurrentMonitoringAndSocketBoundary(t *testing.T) {
 	server := &http.Server{Handler: m.Handler()}
 	go server.Serve(listener)
 	defer server.Close()
+	value, err := ReadSocket(path)
+	if err != nil || value.Version != 2 {
+		t.Fatal("container monitoring reader", err)
+	}
 	client := &http.Client{Transport: &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 		return (&net.Dialer{}).DialContext(ctx, "unix", path)
 	}}}

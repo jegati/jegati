@@ -1,0 +1,21 @@
+# Opt-in only: the functional config must also enable push. The stable service
+# key is operational data; it contains no participant subscriptions.
+services:
+  api:
+    volumes:
+      - type: bind
+        source: ${GATI_RUNTIME_DIR:-./.runtime}/vapid.json
+        target: /run/secrets/vapid.json
+        read_only: true
+        bind: {create_host_path: false}
+    networks: [application, backend, push-egress]
+  worker:
+    volumes:
+      - type: bind
+        source: ${GATI_RUNTIME_DIR:-./.runtime}/vapid.json
+        target: /run/secrets/vapid.json
+        read_only: true
+        bind: {create_host_path: false}
+    networks: [backend, push-egress]
+networks:
+  push-egress: {}
