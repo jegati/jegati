@@ -789,3 +789,39 @@ worker startup, followed by the full Chromium suite; no retries hid failures and
 production push code changed. Verified browser prerequisites, CI fast gates, command
 documentation and scoped evidence are included in this milestone. Clean-source byte
 reproducibility is the next check and requires this implementation commit first.
+
+## Automated predeployment batch complete — 2026-09-13
+
+`make reproduce-build OUTPUT=reports/local/reproduction-final` passed for clean
+commit 4da585e: two clean exports with separate compilation caches produced identical
+hashes for the backend and all seven frontend artifacts. Backend SHA-256:
+1dd8f14687a80bc69d43ab1ba40d92fcca83d093c6698deafab82a088d66f23b.
+Go 1.27.1 / Node 24.21.0, same Linux host. Dependency inventories record Go modules
+and 92 npm entries, all with license metadata; this is not a full license or
+independent supply-chain audit. The production binary also rejected the simulation
+configuration. Only evidence documentation changed after the reproduced commit.
+
+The implemented local batch is complete: private monitoring; isolated real browser
+journey; browser/accessibility/resilience checks; seeded state/fuzz/race probes;
+process/store/replica recovery; bounded fake-provider fanout; short-TTL churn and
+no-eviction pressure; two monitored 100k ramps/bursts; report gates/charts; and clean
+local build comparison. Exact results and known failed attempts/corrections are in
+reports/predeployment-automation.md and its summary JSON; commands and boundaries
+are in AUTOMATED_TESTING.md. Long reports remain under ignored reports/local.
+
+Remaining release work is explicit: overnight/full-API realistic 120-minute session
+churn, simultaneous mixed traffic and mass admission/synchronized expiry, direct
+matching/expiry-lag measurements, 10k cached public reads/s, remote reference-host
+sizing, provider/public-release freshness monitoring, real devices/live optional
+push, volunteer usability, pedestrian destination review, independent human audit,
+actual host/edge controls, deployment/rollback and served-artifact verification.
+A real public operator contact and device setup remain needed for live optional
+push; they do not block default local functionality. This batch does not certify
+production readiness, location authenticity, unique humans or absolute anonymity.
+No remote push or public deployment occurred. Preserve untracked commands.txt.
+
+Final `make security-check` reported zero reachable vulnerabilities and zero in
+imported packages. The previously documented advisory in an unused required module
+remains; it is not silently omitted. All owned lab processes exited and tracked
+changes pass `git diff --check`. Next local testing priority: realistic-lifetime
+full-API churn and direct matching/expiry-lag evidence before reference-host sizing.

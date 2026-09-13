@@ -1301,5 +1301,46 @@
     "emulation_timestamp_adapter": true,
     "chromium_complete": 33,
     "push_injection_lifecycle_repeats": 5
+  },
+  "build_reproduction": {
+    "source_revision": "4da585e287ab5bb099a63a15a2bfb01356c7b9ab",
+    "equal": true,
+    "artifacts": [
+      {
+        "gati": "1dd8f14687a80bc69d43ab1ba40d92fcca83d093c6698deafab82a088d66f23b",
+        "web/dist/assets/index-CfVwsARg.css": "ee3f400cce26155d7d31729c1eb80db1ea3a13ebaf6d7204ceb17b10fcfa0dff",
+        "web/dist/assets/index-DCJfnwUN.js": "b048c921e1d40eb5060c9afe5feea639887567e1bcec72eb1d6cddb65a9c4eb3",
+        "web/dist/assets/maplibre-gl-worker-DsvDs_fr.js": "291cdeadf73d0eec1467427d6c43267ae3b440d7b9dd6c60312358253d5fb93d",
+        "web/dist/icon.svg": "c1228e36d00c63cd914c1f1af2fcac629c027cef7afc68e06e621a2987e731c2",
+        "web/dist/index.html": "2c7e57c0f9c6d5cf1b9de6446bbbb36ff35fc48b7bc47fab0c44677b3814e76c",
+        "web/dist/manifest.webmanifest": "e9de535be180bee75ab1aa3c90f7b9d76e19a441f9a04f2d96eac3688980ea6c",
+        "web/dist/push-worker.js": "0ec6c1b6b7442feb6db22b24e538d6d1d8ed4e495355116f3bedda1a53c12c8e"
+      },
+      {
+        "gati": "1dd8f14687a80bc69d43ab1ba40d92fcca83d093c6698deafab82a088d66f23b",
+        "web/dist/assets/index-CfVwsARg.css": "ee3f400cce26155d7d31729c1eb80db1ea3a13ebaf6d7204ceb17b10fcfa0dff",
+        "web/dist/assets/index-DCJfnwUN.js": "b048c921e1d40eb5060c9afe5feea639887567e1bcec72eb1d6cddb65a9c4eb3",
+        "web/dist/assets/maplibre-gl-worker-DsvDs_fr.js": "291cdeadf73d0eec1467427d6c43267ae3b440d7b9dd6c60312358253d5fb93d",
+        "web/dist/icon.svg": "c1228e36d00c63cd914c1f1af2fcac629c027cef7afc68e06e621a2987e731c2",
+        "web/dist/index.html": "2c7e57c0f9c6d5cf1b9de6446bbbb36ff35fc48b7bc47fab0c44677b3814e76c",
+        "web/dist/manifest.webmanifest": "e9de535be180bee75ab1aa3c90f7b9d76e19a441f9a04f2d96eac3688980ea6c",
+        "web/dist/push-worker.js": "0ec6c1b6b7442feb6db22b24e538d6d1d8ed4e495355116f3bedda1a53c12c8e"
+      }
+    ],
+    "go": "go version go1.27.1 linux/amd64",
+    "node": "v24.21.0",
+    "scope": "two clean exports and independent compilation caches on this same host/toolchain; no independent reviewer, separate OS or remote attestation"
+  },
+  "host_memtotal_kib": 24281032,
+  "dependency_inventory": {
+    "npm_entries": 92,
+    "npm_entries_missing_license_metadata": 0,
+    "scope": "pinned metadata inventory; not complete legal/license or supply-chain audit"
+  },
+  "security_scan": {
+    "reachable_vulnerabilities": 0,
+    "imported_package_vulnerabilities": 0,
+    "unused_required_module_advisories": 1,
+    "tool": "govulncheck v1.8.0"
   }
 }
