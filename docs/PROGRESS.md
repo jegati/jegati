@@ -71,12 +71,12 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement commit 2 of ACTIVITY_IMPLEMENTATION_PLAN.md: bounded store capture,
-immutable delayed publication and the public activity endpoint, then connect cards
-and the cell-only city map. Decision 0007 accepts documented inference limitations;
+Implement commits 3/4 of ACTIVITY_IMPLEMENTATION_PLAN.md: connect statistics cards
+and the cell-only city map to the implemented delayed public activity endpoint. Decision 0007 accepts documented inference limitations;
 no new inference-approval gate is required. Push remains explicitly opt-in/off by
 default. Preserve private 100 m cells / 50 m device-error / 30/20 thresholds.
-The schema-7 public policy is implemented and tested; no aggregate API/UI exists yet.
+The schema-7 public policy, bounded capture/publisher and aggregate API are
+implemented and tested; aggregate UI and notifications remain incomplete.
 No credential or toolchain blocker remains for local work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
@@ -409,3 +409,29 @@ exceeding its release interval; both corrected. Existing installed pinned tools
 were found through scripts/env.sh; no additional installation was necessary.
 The threshold-transition fixture records accepted inference, not a privacy proof.
 Public publisher/API/UI and push remain incomplete at this commit.
+
+## Activity implementation — publisher and API
+
+Added separate publisher loop/lease, bounded ZSCAN activity capture with deduplicated
+credential reads, end-of-capture expiry checks, and cell-only aggregate staging.
+Observation spans an interval: concurrent transitions may be sampled on either
+side, not a fictitious atomic instant. Stable index members are visited; churn is
+sampled once per credential. Cancellation after a sampled read can remain in that
+interval's aggregate, just as cancellation after publication cannot recall it.
+Capture deadline/capacity/work errors discard the entire attempt.
+
+`GET /api/activity/latest` reads only bounded precomputed aggregate keys, enforces
+release/expiry with store time, rejects query filters, and supplies ETags/cache
+lifetimes bounded by expiry. Authenticated requests remain no-store. Empty/unready
+publication returns 204, not a zero count. Epoch keys are config-scoped, immutable
+SET NX with owner fencing, native TTL and logical deadlines. No participant capture
+is persisted. Added restricted ZSCAN permission for the activity index; secrets
+remain unchanged. Simulation clock steps also drive the isolated publisher.
+
+Validation: `make verify-local` passed (Go/race/simulation/vet, TypeScript/build,
+configuration, Compose parsing, HTTP smoke). `make test-store` passed against actual
+Valkey: paging, duplicate creates, cancellation/churn, cancelled capture, lease
+fencing, immutable release, delayed visibility, native/logical expiry, cached HTTP,
+100 concurrent identical public reads, auth no-store and query rejection. These are
+functional checks, not a 100k benchmark. Logs: /tmp/gati-activity-verify.log and
+/tmp/gati-activity-store.log. Next: statistics/map browser implementation and checks.

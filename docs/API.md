@@ -59,3 +59,20 @@ The own-session view includes `state: here` and `arrival_until` while fresh. A
 gathering becomes `jemi_ketu` after configured stable presence; it resets if current
 accepted arrivals fall below threshold. Internal nonce/member/cohort data is never
 returned. Wrong-area claims are 409; unavailable/expired/used-retracted claims 410.
+
+## Public activity (schema 7)
+
+`GET /api/activity/latest` returns a canonical delayed Tirana release, or 204 when
+none is available. Query parameters are rejected. No capability or location is
+required. Response fields: version, id, config_sha256, map_version, observed_from,
+observed_until, release_at, expires_at, grid, areas and gatherings. Times are epoch
+milliseconds. Areas have cell/willing lower-bound buckets. Gatherings have opaque
+id, public cell, ends_at, sampled state and optional going/here lower-bound buckets.
+No intersection identifier/label/coordinates or individual record is present.
+Missing buckets are unavailable/suppressed, never zero. Going includes arrivals.
+The fixed public grid is common to both layers; private admission remains unchanged.
+
+ETag supports 304. Shared max-age is at most 30 seconds and never beyond expiry;
+authenticated requests are always no-store. Public reads inspect only aggregate
+keys. Origin retention includes pending release and cannot revoke external copies.
+Known inference limitations are accepted in decision 0007.

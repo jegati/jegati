@@ -107,6 +107,7 @@ func run() error {
 	defer stop()
 	if engine != nil && backgroundWorkers {
 		go engine.Run(ctx)
+		go worker.NewActivityPublisher(backend, c).Run(ctx)
 	}
 	if backend != nil && backgroundWorkers {
 		go func() {

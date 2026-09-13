@@ -18,6 +18,7 @@ import (
 // cross-origin requests, non-loopback peers and callers without the run secret.
 func SimulationHandler(c config.Config, backend *store.Store, roads []byte, control string, engines ...*worker.Engine) http.Handler {
 	normal := Handler(c, backend, roads, engines...)
+	publisher := worker.NewActivityPublisher(backend, c)
 	expected := sha256.Sum256([]byte("Bearer " + control))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/api/simulation/clock" {
@@ -78,6 +79,12 @@ func SimulationHandler(c config.Config, backend *store.Store, roads []byte, cont
 		}
 		if runWorker && len(engines) > 0 && engines[0] != nil {
 			if e := engines[0].Step(r.Context()); e != nil {
+				writeError(w, 503)
+				return
+			}
+		}
+		if runWorker {
+			if e := publisher.Step(r.Context()); e != nil {
 				writeError(w, 503)
 				return
 			}

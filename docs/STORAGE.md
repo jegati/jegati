@@ -108,3 +108,18 @@ the configured current-arrival threshold resets the state; subsequent recovery
 requires another stability interval. Sorted-set cleanup runs in bounded batches;
 its key cannot outlive the gathering. Own-session reads also clear expired arrival
 metadata. Physical cleanup delays under overload require the hardening/load tests.
+
+## Public activity capture and releases
+
+The worker temporarily reads live index/session/gathering state into private process
+memory, once per credential, bounded by capture seconds, active-signal capacity and
+scan work. It discards these copies after producing aggregate-only bytes or failure.
+A paginated capture is a bounded observation interval; concurrent changes can be
+sampled before or after a transition. It is not instantaneous occupancy.
+`gati:activity:lease` expires after capture maximum + 5 seconds. Keys
+`gati:activity:<config hash>:<epoch>` contain only the public release; SET NX and a
+lease-owner check prevent changes to an existing epoch. Native TTL and read-time
+checks enforce <=15 minutes from observation start, including publication delay.
+Simulation uses the disjoint gati-sim prefix. No new participant backup or durable
+outbox is implemented in this slice. Public reads require only clock and aggregate
+keys. ZSCAN is added to the restricted application's command allowlist.

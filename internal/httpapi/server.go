@@ -23,6 +23,7 @@ func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*wo
 		Config        json.RawMessage `json:"config"`
 	}{config.SchemaVersion, hash, data})
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /api/activity/latest", activityHandler(c, backend))
 	grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
 	signal := signalAPI{config: c, grid: grid, store: backend}
 	if len(engines) > 0 {
