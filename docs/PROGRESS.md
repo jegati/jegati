@@ -597,3 +597,16 @@ OpenPGP module advisory documented in THIRD_PARTY. Compose base/optional parsing
 passed. No real endpoint/provider was contacted. Browser opt-in/resume/worker source
 is being integrated and has not yet completed its dedicated tests; the existing
 19 browser tests still pass with push off. Next: step G/H browser lifecycle checks.
+
+
+## Notification race and index review — 2026-09-13
+
+Opt-out now advances a temporary signal revision, rejecting delayed earlier
+registrations. Ordinary signal responses strip the revision. Expiry cleanup removes
+notification index entries before releasing shared admission capacity. Stable state
+changes wait for the rate gap before starting queue TTL; otherwise the default
+10-minute effective gap could discard a 5-minute queued JEMI KËTU update entirely.
+`make test-store` passed actual restricted-Valkey race checks after these fixes,
+including stale registration, quota preservation, stable post-gap presence and
+index cleanup while another long-lived subscription keeps the shared key alive.
+`make verify-local` passed. Browser lifecycle integration and final evidence follow.

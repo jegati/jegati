@@ -31,6 +31,7 @@ type Keys struct {
 	Private string `json:"private_key"`
 }
 type Registration struct {
+	Revision  int64  `json:"revision"`
 	Binding   string `json:"binding"`
 	Endpoint  string `json:"endpoint"`
 	P256DH    string `json:"p256dh"`
@@ -91,7 +92,7 @@ func newService(c config.Config, s *store.Store, keys Keys, client webpush.HTTPC
 }
 func (s *Service) PublicKey() string { return s.keys.Public }
 func (s *Service) Validate(r Registration) error {
-	if !regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(r.Binding) || r.ExpiresAt <= 0 {
+	if !regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(r.Binding) || r.ExpiresAt <= 0 || r.Revision < 0 {
 		return errors.New("invalid subscription")
 	}
 	if _, e := endpointURL(r.Endpoint, s.config.Notifications.PushEndpointHosts); e != nil {
@@ -122,7 +123,7 @@ func (s *Service) Register(ctx context.Context, hash string, r Registration) (in
 	aad := []byte(hash + ":" + r.Binding)
 	encrypted := s.aead.Seal(nonce, nonce, raw, aad)
 	digest := sha256.Sum256(append(aad, raw...))
-	return s.Store.RegisterPush(ctx, hash, store.PushBinding{Binding: r.Binding, Digest: hex.EncodeToString(digest[:]), Ciphertext: base64.RawURLEncoding.EncodeToString(encrypted), ExpiresAt: r.ExpiresAt})
+	return s.Store.RegisterPush(ctx, hash, store.PushBinding{Revision: r.Revision, Binding: r.Binding, Digest: hex.EncodeToString(digest[:]), Ciphertext: base64.RawURLEncoding.EncodeToString(encrypted), ExpiresAt: r.ExpiresAt})
 }
 func (s *Service) decrypt(hash string, job store.PushJob) (Registration, error) {
 	raw, e := base64.RawURLEncoding.DecodeString(job.Ciphertext)
@@ -226,7 +227,7 @@ func (s *Service) send(ctx context.Context, hash string, job store.PushJob, poll
 		return "retry", poll
 	}
 	until := min(job.Until, job.ExpiresAt, r.ExpiresAt, signal.ExpiresAt, signal.GatheringUntil)
-	if signal.Gathering == "" || until-now < 1000 {
+	if signal.PushRevision != r.Revision || signal.Gathering == "" || until-now < 1000 {
 		return "sent", poll
 	}
 	payload, _ := json.Marshal(struct {

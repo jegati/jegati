@@ -20,7 +20,7 @@ import (
 )
 
 func TestPushBodyIsStrict(t *testing.T) {
-	valid := `{"binding":"b","endpoint":"e","p256dh":"p","auth":"a","expires_at":123}`
+	valid := `{"revision":0,"binding":"b","endpoint":"e","p256dh":"p","auth":"a","expires_at":123}`
 	if _, e := readPush(strings.NewReader(valid)); e != nil {
 		t.Fatal(e)
 	}

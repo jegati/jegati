@@ -15,7 +15,7 @@ it is not an audit trail or guaranteed delivery of every transition. It does not
 change participant state. Decline, cancelled/expired sessions, closed gatherings and
 expired presence are rechecked before claiming. In-flight delivery cannot be recalled.
 
-Endpoint/key material will be authenticated-encrypted outside Valkey with a key
+Endpoint/key material is authenticated-encrypted outside Valkey with a key
 derived from the service's mounted VAPID private key, bound to the session hash and
 random subscription binding. Valkey stores ciphertext, bounded scheduling metadata
 and the last relevant state only. No endpoint/credential logs or backup. One record
@@ -27,13 +27,13 @@ hard key TTLs handle records disappearing before index cleanup. Retry attempts a
 queue lifetime are capped. The interval is at least both the configured minimum and
 3600 / max-per-hour; retry attempts within one queued notification are separately capped.
 
-Production delivery will require exact configured HTTPS endpoint hosts, verified
+Production delivery requires exact configured HTTPS endpoint hosts, verified
 public DNS addresses at connection time, TLS hostname verification, no proxy or
 redirect forwarding, bounded concurrency, request time and response size. An
 upstream Web Push implementation supplies standard encryption and VAPID. Test
 transport injection remains a Go test concern, not a production HTTP control route.
 
-Browser opt-in will explicitly disclose provider involvement and temporary browser
+Browser opt-in explicitly discloses provider involvement and temporary browser
 storage. Only opted-in users may retain an unexpired capability in IndexedDB for
 closed/reopened-page delivery; ordinary participation remains sessionStorage-only.
 The worker must not cache private requests or responses. Notifications use generic
@@ -46,3 +46,10 @@ providers can observe delivery metadata and may retain endpoints beyond our TTL.
 
 Actual code and test status belong in PROGRESS. Real provider/device interoperability
 is separate from local fake-transport/browser tests; do not claim it from mocks.
+
+Opt-out increments a revision on the existing temporary signal; registration must
+echo the current private revision. This rejects delayed pre-opt-out writes without
+adding a permanent identifier. Signal cleanup removes push index members before
+freeing admission capacity. A changed current state waits for the rate gap before
+starting its queue lifetime, so a stable JEMI KËTU update is not lost simply because
+the configured gap exceeds queue TTL. Intermediate changes may still coalesce.

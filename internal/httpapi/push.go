@@ -50,7 +50,8 @@ func (s signalAPI) push(w http.ResponseWriter, r *http.Request) {
 			Enabled   bool   `json:"enabled"`
 			Binding   string `json:"binding,omitempty"`
 			ExpiresAt int64  `json:"expires_at,omitempty"`
-		}{e == nil, b.Binding, b.ExpiresAt})
+			Revision  int64  `json:"revision"`
+		}{e == nil, b.Binding, b.ExpiresAt, b.Revision})
 		return
 	}
 	if s.engine == nil || s.engine.Push == nil {
@@ -90,7 +91,7 @@ func readPush(reader io.Reader) (notification.Registration, error) {
 		return notification.Registration{}, invalid
 	}
 	fields := map[string]json.RawMessage{}
-	allowed := map[string]bool{"binding": true, "endpoint": true, "p256dh": true, "auth": true, "expires_at": true}
+	allowed := map[string]bool{"revision": true, "binding": true, "endpoint": true, "p256dh": true, "auth": true, "expires_at": true}
 	for dec.More() {
 		key, e := dec.Token()
 		if e != nil {

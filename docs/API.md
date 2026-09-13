@@ -15,9 +15,9 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | `POST /api/going` | Admit existing willingness to a reachable live gathering |
 | `POST /api/decline` | Decline the current gathering while retaining willingness |
 | `GET /api/push-config` | Whether transport is configured, and its public VAPID key; no capability required |
-| `GET /api/push` | Authenticated subscription enabled/binding/expiry only |
+| `GET /api/push` | Authenticated subscription enabled/binding/expiry and opt-out revision |
 | `POST /api/push` | Explicit expiring subscription registration; no participation transition |
-| `DELETE /api/push` | Idempotent subscription removal even if transport is disabled |
+| `DELETE /api/push` | Subscription removal with a stale-registration fence even if transport is disabled |
 | `POST /api/gathering-preview` | Check a currently published gathering and disclose its private destination without enrollment |
 | `POST /api/join` | Atomically create/reuse willingness and admit a recipient |
 | `POST /api/arrival-nonce` | Issue an expiring arrival challenge for a going session |
@@ -101,7 +101,7 @@ This endpoint expands accepted destination inference as documented in decision 0
 
 ## Optional push registration (schema 8)
 
-`POST /api/push` requires a live willingness capability and exactly `binding`,
+`POST /api/push` requires a live willingness capability and exactly `revision`, `binding`,
 `endpoint`, `p256dh`, `auth`, `expires_at`. Binding is a random 32-byte hex delivery
 label, not an authorization credential. Keys must represent a valid P-256 point
 and 16-byte Web Push auth secret. The endpoint must use an exact configured HTTPS
@@ -110,7 +110,9 @@ body size, network creation and global write limits apply. Expiry cannot exceed
 willingness or an earlier browser deadline. Only expiry is returned; no subscription
 or key material is echoed. Identical retry preserves binding/deadline. A different
 binding requires opt-out first. Registration/cancellation do not alter willingness,
-going or arrival. `GET /api/push` exposes only the authenticated binding/deadline;
+going or arrival. `GET /api/push` exposes the authenticated binding/deadline and revision;
+registration must echo that revision. Each opt-out advances the revision within
+the existing temporary signal, rejecting a delayed earlier registration;
 `DELETE` remains available when the operator disables transport. Generic error
 responses never include provider URLs/keys. `/api/push-config` exposes the public
 service key only. Push is off by default and needs local mounted service keys plus

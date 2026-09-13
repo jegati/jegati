@@ -13,6 +13,7 @@ import (
 // application capability. Ciphertext is authenticated with the signal hash as AAD
 // by the notification service. This record is also the bounded coalescing outbox.
 type PushBinding struct {
+	Revision   int64  `json:"revision"`
 	Binding    string `json:"binding"`
 	Digest     string `json:"digest"`
 	Ciphertext string `json:"ciphertext"`
@@ -32,6 +33,7 @@ var registerPush = newScript(`
 __CLOCK__
 local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
 local s=cjson.decode(raw);if s.expires_at<=now then return 'GONE' end
+local proposed=cjson.decode(ARGV[1]);if proposed.revision~=(s._push_revision or 0) then return 'CONFLICT' end
 local old=redis.call('GET',KEYS[2]);local b=cjson.decode(ARGV[1])
 if old then
  local previous=cjson.decode(old)
@@ -63,10 +65,15 @@ func (s *Store) RegisterPush(ctx context.Context, hash string, binding PushBindi
 	return strconv.ParseInt(result, 10, 64)
 }
 
-var dropPush = newScript(`redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);return 1`)
+var dropPush = newScript(`
+__CLOCK__
+local raw=redis.call('GET',KEYS[3])
+if raw then local s=cjson.decode(raw);if s.expires_at>now then s._push_revision=(s._push_revision or 0)+1;redis.call('SET',KEYS[3],cjson.encode(s),'KEEPTTL') end end
+redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);return 1
+`)
 
 func (s *Store) DropPush(ctx context.Context, hash string) error {
-	if e := dropPush.Run(ctx, s.Client, []string{keyPrefix + "push:" + hash, keyPrefix + "push-due"}, hash).Err(); e != nil {
+	if e := dropPush.Run(ctx, s.Client, []string{keyPrefix + "push:" + hash, keyPrefix + "push-due", keyPrefix + "s:" + hash}, hash).Err(); e != nil {
 		return errors.New("notification removal unavailable")
 	}
 	return nil
@@ -111,6 +118,12 @@ end
 -- Keep only the latest relevant state; never a transition history. This bounded
 -- reconciler can coalesce short-lived transitions between checks.
 if b.seen~=current then
+ -- Do not start a short queue TTL while rate limiting forbids delivery. Re-read
+ -- the latest live state when the gap opens; stable changes must not be lost.
+ local gap=tonumber(redis.call('GET',KEYS[4]) or '0')
+ if current~='' and gap>now then
+  b.pending=nil;b.claim=nil;b.lease_until=nil;save(math.min(gap,now+tonumber(ARGV[3])));return ''
+ end
  b.seen=current;b.pending=nil;b.claim=nil;b.lease_until=nil
  if current~='' then b.pending=current;b.until_at=math.min(deadline,now+tonumber(ARGV[4]));b.attempts=0;b.retry_at=now end
 end
@@ -170,10 +183,13 @@ func (s *Store) FinishPush(ctx context.Context, hash, claim, outcome string, pol
 var pushStatus = newScript(`
 __CLOCK__
 local raw=redis.call('GET',KEYS[1]);local signal=redis.call('GET',KEYS[2])
-if not raw or not signal then return '' end
-local b=cjson.decode(raw);local s=cjson.decode(signal)
-if b.expires_at<=now or s.expires_at<=now then return '' end
-return cjson.encode({binding=b.binding,expires_at=b.expires_at})
+if not signal then return 'GONE' end
+local s=cjson.decode(signal);if s.expires_at<=now then return 'GONE' end
+local revision=s._push_revision or 0
+if not raw then return cjson.encode({revision=revision}) end
+local b=cjson.decode(raw)
+if b.expires_at<=now then return cjson.encode({revision=revision}) end
+return cjson.encode({binding=b.binding,expires_at=b.expires_at,revision=revision})
 `)
 
 func (s *Store) PushStatus(ctx context.Context, hash string) (PushBinding, error) {
@@ -181,10 +197,13 @@ func (s *Store) PushStatus(ctx context.Context, hash string) (PushBinding, error
 	if e != nil {
 		return PushBinding{}, errors.New("notification status unavailable")
 	}
-	if raw == "" {
+	if raw == "GONE" {
 		return PushBinding{}, ErrGone
 	}
 	var b PushBinding
 	e = json.Unmarshal([]byte(raw), &b)
+	if e == nil && b.Binding == "" {
+		return b, ErrGone
+	}
 	return b, e
 }

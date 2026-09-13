@@ -136,16 +136,19 @@ or live gathering list is empty and advances during bounded reconciliation work.
 Its absolute deadline is the cursor signal’s expiry, checked on every worker tick
 even after loss of the writer lease. It is never logged or persisted.
 
-## Optional push store (schema 8; transport integration pending)
+## Optional push store (schema 8)
 
 `push:<signal-hash>` holds a random binding, digest, encrypted endpoint material and
 absolute expiry; private `seen`/`pending` state, queue deadline, attempt count and
 claim fence are bounded within it. Its TTL never exceeds the live signal or earlier
 subscription deadline. `push-due` is a scored scheduling index with a hard latest
-subscription TTL and bounded dead-member cleanup during claims. `push-gap:<hash>`
+subscription TTL and bounded dead-member cleanup during claims. Signal-expiry
+cleanup removes its push index entry before freeing the shared admission slot,
+so churn cannot grow that index beyond the bounded signal index. `push-gap:<hash>`
 is only the next allowed new-notification time; it expires with the signal and
 survives opt-out to prevent quota reset. Cancellation deletes both keys and the index
 member atomically, including when the signal is already absent. No plaintext
-endpoint or permanent identifier is required by this store interface. Encryption,
-transport and opt-in UI are being connected next; registration routes are not yet
-exposed. Decision 0009 documents reconciliation/coalescing and provider limits.
+endpoint or permanent identifier is required by this store interface. The existing
+signal holds `_push_revision`, incremented on opt-out to reject stale registrations;
+it expires with the signal and is stripped from ordinary signal responses.
+Endpoint encryption, authenticated registration and bounded transport are connected. Decision 0009 documents reconciliation/coalescing and provider limits.

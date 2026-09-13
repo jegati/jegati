@@ -94,14 +94,54 @@ func TestPushLifecycleClaimsAndCancellation(t *testing.T) {
 	if e = s.DropPush(ctx, hash); e != nil {
 		t.Fatal(e)
 	}
+	if _, e = s.RegisterPush(ctx, hash, other); e != ErrConflict {
+		t.Fatal("delayed registration survived opt-out")
+	}
+	currentRevision, _ := s.Status(ctx, hash)
+	other.Revision = currentRevision.PushRevision
 	if _, e = s.RegisterPush(ctx, hash, other); e != nil {
 		t.Fatal(e)
 	}
 	if job, e := s.ClaimPush(ctx, hash, fresh(), policy); e != nil || job != nil {
 		t.Fatal("opt-out/opt-in bypassed notification gap")
 	}
+	// A stable JEMI KËTU change survives a delivery gap longer than the queue TTL.
+	g, _ := s.GatheringByID(ctx, id)
+	arrivalHash := p.Founders[2].Hash
+	if _, e = s.SetIntent(ctx, arrivalHash, id, "going", grid.ID(p.Founders[2].Area.Cell), 3, 32, 1000, 1000); e != nil {
+		t.Fatal(e)
+	}
+	nonce := fresh()
+	if _, e = s.IssueArrivalNonce(ctx, arrivalHash, nonce, 1000); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.ConfirmArrival(ctx, arrivalHash, nonce, g, 30000); e != nil {
+		t.Fatal(e)
+	}
+	if e = s.ReconcilePresence(ctx, id, 1, 1000, 1, 1000); e != nil {
+		t.Fatal(e)
+	}
+	time.Sleep(5 * time.Millisecond)
+	if e = s.ReconcilePresence(ctx, id, 1, 1000, 1, 1000); e != nil {
+		t.Fatal(e)
+	}
+	now, _ := s.Now(ctx)
+	if e = s.Client.Set(ctx, keyPrefix+"push-gap:"+hash, now+200, time.Second).Err(); e != nil {
+		t.Fatal(e)
+	}
+	short := policy
+	short.QueueMS = 100
+	if job, e := s.ClaimPush(ctx, hash, fresh(), short); e != nil || job != nil {
+		t.Fatal("delivery ignored interval")
+	}
+	time.Sleep(220 * time.Millisecond)
+	if job, e := s.ClaimPush(ctx, hash, fresh(), short); e != nil || job == nil {
+		t.Fatal("stable presence update lost during longer rate gap", e)
+	}
+
 	// The other founder exercises the attempt ceiling without provider traffic.
 	second := p.Founders[1].Hash
+	other.Revision = 0
 	other.ExpiresAt = expiry
 	if _, e = s.RegisterPush(ctx, second, other); e != nil {
 		t.Fatal(e)
@@ -136,6 +176,15 @@ func TestPushLifecycleClaimsAndCancellation(t *testing.T) {
 func TestPushNativeExpiry(t *testing.T) {
 	s := connectTest(t)
 	ctx := context.Background()
+	keeper := fresh()
+	keep, e := s.Create(ctx, keeper, "tirana-v1:1000:5:5", 3, 30, 5*time.Second, 1000)
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer s.Cancel(ctx, keeper)
+	if _, e = s.RegisterPush(ctx, keeper, PushBinding{Binding: fresh(), Digest: fresh(), Ciphertext: "synthetic", ExpiresAt: keep.ExpiresAt}); e != nil {
+		t.Fatal(e)
+	}
 	hash := fresh()
 	signal, e := s.Create(ctx, hash, "tirana-v1:1000:5:5", 3, 30, 60*time.Millisecond, 1000)
 	if e != nil {
@@ -156,7 +205,20 @@ func TestPushNativeExpiry(t *testing.T) {
 			found = true
 		}
 	}
-	// The whole index may already have expired; either case must fail closed.
+	// A live peer keeps the index key alive. Signal cleanup must remove its dead
+	// push member before freeing an admission slot, bounding index cardinality.
+	if !found {
+		t.Fatal("expiry fixture lost its shared index")
+	}
+	if _, e = s.Cleanup(ctx, 1000); e != nil {
+		t.Fatal(e)
+	}
+	after, _ := s.PushDue(ctx, 1000)
+	for _, v := range after {
+		if v == hash {
+			t.Fatal("signal cleanup retained push member")
+		}
+	}
 	if found {
 		if job, e := s.ClaimPush(ctx, hash, fresh(), PushPolicy{}); e != nil || job != nil {
 			t.Fatal("expired subscription delivered")

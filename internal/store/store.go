@@ -25,6 +25,7 @@ var ErrConflict = errors.New("capability already used")
 var ErrCapacity = errors.New("admission capacity reached")
 
 type Signal struct {
+	PushRevision        int64           `json:"_push_revision,omitempty"`
 	ArrivalUntil        int64           `json:"arrival_until,omitempty"`
 	ArrivalMember       string          `json:"_arrival_member,omitempty"`
 	InviteAfter         int64           `json:"_invite_after,omitempty"`
@@ -157,6 +158,8 @@ for _,member in ipairs(expired) do
  if split then
   local hash=string.sub(member,1,split-1);local cell=string.sub(member,split+1)
   redis.call('ZREM','gati:cell:'..cell,hash)
+  redis.call('DEL','gati:push:'..hash,'gati:push-gap:'..hash)
+  redis.call('ZREM','gati:push-due',hash)
  end
  redis.call('ZREM',KEYS[1],member)
 end
@@ -220,6 +223,7 @@ func newScript(source string) *redis.Script {
 
 // Public removes private matching bookkeeping from the own-session API contract.
 func (s Signal) Public() Signal {
+	s.PushRevision = 0
 	s.ArrivalMember = ""
 	s.InviteAfter = 0
 	s.Pending = ""
