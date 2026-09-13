@@ -1,5 +1,10 @@
 # GATI 🦩 — development and verification plan
 
+The current deployment/scaling proposal is in
+[DEPLOYMENT_PREPARATION.md](DEPLOYMENT_PREPARATION.md): measured bottlenecks,
+incremental matching, worker roles, trusted proxies, edge privacy and release gates.
+This supplements the original milestone order; PROGRESS.md remains the evidence index.
+
 The next implementation slice is detailed in
 [ACTIVITY_IMPLEMENTATION_PLAN.md](ACTIVITY_IMPLEMENTATION_PLAN.md): the four requested
 nearby-statistics, invitation, arrival-statistics and citywide-map journeys. It

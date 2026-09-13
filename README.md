@@ -84,3 +84,7 @@ guidance are implemented. Previewing or cancelling a preview never enrolls you.
 Additional local validation: [automated testing and monitored load](docs/AUTOMATED_TESTING.md), [private operational monitoring](docs/MONITORING.md). These checks create disposable synthetic stores and do not deploy the app.
 
 [System architecture, diagram and 1M-signal estimate](docs/ARCHITECTURE.md) distinguishes measured 100k evidence from untested scaling assumptions.
+
+[Deployment preparation and scaling priorities](docs/DEPLOYMENT_PREPARATION.md)
+proposes the database/worker improvements, first-host topology, Cloudflare trust
+boundary, cost allowance and remaining release gates; it is not a deployed setup.

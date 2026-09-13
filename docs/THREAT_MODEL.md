@@ -8,6 +8,15 @@ defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.
 
 ## Assets and trust boundaries
 
+The proposed deployment boundary and its unimplemented controls are detailed in
+[DEPLOYMENT_PREPARATION.md](DEPLOYMENT_PREPARATION.md). In particular, the current
+API uses the direct peer IP for network limits: a trusted forwarding boundary must
+be implemented and tested before using a shared production proxy. An HTTPS edge
+provider can inspect temporary authorization capabilities and coarse-cell request
+contents; provider-side retention is outside application TTL guarantees. Tunnel
+origin isolation does not remove that provider visibility. These are planning
+findings, not evidence that a Cloudflare deployment is configured or audited.
+
 Protect coarse participation, session capabilities, transient admission/arrival
 links, notification subscriptions and service integrity. Exact participant
 coordinates belong only on the device. Public map features and reviewed released

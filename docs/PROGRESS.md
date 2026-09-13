@@ -849,3 +849,36 @@ No runtime test rerun was needed for these documentation/vector-only changes.
 Next scaling action remains a bounded larger lab benchmark with representative
 lifetimes/mixed traffic and direct matching/publication/expiry-lag measurement,
 preceded by review of the identified scan/backlog bottlenecks. Preserve commands.txt.
+
+## Deployment preparation and optimization proposal — 2026-09-13
+
+Reviewed matching/store loops, proxy admission, cleanup, local Compose and current
+vendor documentation for the user's deployment/cost/anonymity discussion. Added
+DEPLOYMENT_PREPARATION.md with a proposed seven-step commit/release sequence,
+linked from README/development plan/threat model. This is planning only: no runtime
+or functional configuration changed, no account/purchase or public deployment occurred.
+
+Priorities: measure direct matching/release/cleanup lag; remove growing-OFFSET
+traversal; schedule expiring geographic eligibility and dirty/deadline work;
+index gathering offers; separate API/worker roles before adding parallel ownership.
+One matching lease and multi-key Lua operations mean more replicas or Valkey
+Cluster do not automatically scale matching. Periodic full reconciliation may
+remain linear; no claim of constant-time citywide matching was made.
+
+Found a concrete deployment prerequisite: network rate limits deliberately use
+RemoteAddr, so production forwarding needs an explicitly trusted proxy boundary
+and spoof/shared-NAT tests. Current Compose is a development scaffold with Vite,
+small Valkey limits and no Caddy/edge configuration. Proposed first-host setup is
+Caddy/Go/private Valkey behind an outbound Cloudflare tunnel, subject to a documented
+provider-visibility decision. Cloudflare's TLS proxy can inspect IPs, coarse inputs
+and capabilities; origin concealment and WHOIS redaction are not provider anonymity.
+Pricing is dated and qualified by stock/tax; it is not a purchased capacity promise.
+
+Validation: reviewed cited primary vendor pages and source paths; checked 39 local
+link targets across the four affected reference documents and git diff whitespace.
+No runtime tests were rerun for these documentation-only edits. The new document
+clearly labels proposed work and distinguishes a capped pilot from public/1M
+readiness. Next local action is representative mixed-load lag instrumentation and
+the bounded scan fix. Later staging needs domain/provider choice, credentials via
+interactive/local secret setup, and explicit authorization for remote publication.
+Preserve untracked commands.txt.
