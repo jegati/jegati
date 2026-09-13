@@ -150,7 +150,7 @@ func Build(c config.Config, start, end int64, participants []Participant, gather
 			continue
 		}
 		v := Event{ID: id, Cell: g.Cell, EndsAt: g.EndsAt, State: "jemi_gati", Going: Bucket(going[id], p.CountBuckets), Here: Bucket(here[id], p.CountBuckets)}
-		if v.Here > 0 && g.State == "jemi_ketu" {
+		if v.Here > 0 && here[id] >= c.Arrivals.ConfirmationCount && g.State == "jemi_ketu" {
 			v.State = "jemi_ketu"
 		}
 		r.Gatherings = append(r.Gatherings, v)

@@ -87,5 +87,5 @@ passed after the publisher/API implementation. Browser suite: 17 checks passed,
 including four explicit public-response fixtures plus the real participation flow.
 Fixtures are deliberately distinguished from real publisher evidence above. A
 focused activity recheck verifies the final Albanian time formatting and map-ready
-screenshot. The 3,000-person publisher-enabled run is tracked separately in PROGRESS;
-no full 18-case rerun or 100k result is claimed.
+screenshot. The 3,000-person publisher-enabled seed-42 run and report checks passed (see
+reports/activity-3000.md); no full 18-case rerun or 100k result is claimed.

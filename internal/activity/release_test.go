@@ -152,3 +152,22 @@ func TestNestedCountsRetainDocumentedInferenceWithoutExactRemainder(t *testing.T
 		t.Fatal("exact complementary count exposed")
 	}
 }
+
+func TestExpiredPresenceCannotRetainStrongerPrivateThresholdLabel(t *testing.T) {
+	c, v, g := fixture(t)
+	c.Arrivals.ConfirmationCount = 50
+	for i := range v {
+		v[i].State = "here"
+		v[i].ArrivalUntil = 2000000
+	}
+	for i := 20; i < len(v); i++ {
+		v[i].ArrivalUntil = 600000
+	}
+	r, _, e := Build(c, 600000, 601000, v, g)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if r.Gatherings[0].Here != 20 || r.Gatherings[0].State != "jemi_gati" {
+		t.Fatal("stale private state falsely retained confirmed public presence")
+	}
+}

@@ -466,6 +466,16 @@ publisher/API extension: private confirmed presence can remain publicly suppress
 `make check-containers` passed after the rebuilt web server became ready (an initial
 immediate post-restart socket-close check was retried only after HTTP readiness).
 The running Compose app uses schema 7, private 100 m/public 1000 m grids. The
-publisher-enabled 3,000-person seed-42 run is underway, not yet counted as passed.
+publisher-enabled 3,000-person seed-42 run and report checker passed; evidence is in
+reports/activity-3000.md. All count metrics match the prior 100 m seed-42 baseline.
 Logs: /tmp/gati-activity-browser.log, /tmp/gati-activity-browser-focused.log,
 /tmp/gati-activity-simulation.log, /tmp/gati-activity-container-check.log.
+
+Final activity review added a regression guard: public JEMI KËTU also requires the
+captured fresh-arrival count to meet the configured private confirmation threshold,
+so stale stored state cannot retain the label after expiry. Focused activity race
+tests passed. The 3,000-person run accepted 3000 credentials, invited 1891, recorded
+1067 unique arriving credentials / 1498 arrival confirmations, and observed 41
+meetings (30 ever confirmed), in 221.33 wall seconds. It ran concurrently with other
+checks; no load/capacity claim is made. See reports/activity-3000.md for source-dirty
+provenance and the distinction between real publication and injected discovery.
