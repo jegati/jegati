@@ -1,0 +1,6 @@
+[out:json][timeout:120][bbox:41.28,19.75,41.38,19.90];
+(
+  node[highway=crossing];
+  way[highway];
+);
+out body geom;

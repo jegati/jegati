@@ -12,6 +12,7 @@ retain their own licenses. Tool binaries and their bundled notices remain outsid
 this repository. Container references are pinned by digest in deploy/images.env
 and Dockerfiles; they contain separately licensed operating-system/runtime packages.
 
-No OpenStreetMap extract or map tiles are included yet. When milestone 03 adds map
-fixtures, record the source date/checksum, ODbL attribution and reproduction recipe
-beside those assets. Do not apply this project's license to third-party map data.
+Tirana public map data is now included under `data/tirana`, with OpenStreetMap
+attribution, ODbL-1.0 terms, a source manifest, archived input and reproducible import.
+See data/tirana/README.md. Geographic calculations use github.com/paulmach/orb
+(MIT); its exact version/checksum is pinned in go.mod/go.sum.

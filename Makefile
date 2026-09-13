@@ -43,3 +43,9 @@ verify-local: test build config-check config-check-simulation compose-check
 .PHONY: check-containers
 check-containers:
 	COMPOSE="$(COMPOSE)" node scripts/check-containers.mjs
+
+.PHONY: map-import map-check
+map-import:
+	go run ./cmd/map-import
+map-check:
+	bash scripts/check-map.sh

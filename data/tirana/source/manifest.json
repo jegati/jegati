@@ -1,0 +1,10 @@
+{
+  "source_url": "https://overpass-api.de/api/interpreter",
+  "query_file": "query.overpass",
+  "fetched_at": "2026-09-13",
+  "osm_base_timestamp": "2026-09-13T12:40:51Z",
+  "raw_sha256": "cbcddab6a085eaadc9aca50e55e7e3ef80fa52779105d5a606412d9bd37448b3",
+  "gzip_sha256": "9285b76120e304657fa805e5c2a3015197810aec2b4bb9c3abb8720346cd108b",
+  "license": "ODbL-1.0",
+  "attribution": "\u00a9 OpenStreetMap contributors"
+}

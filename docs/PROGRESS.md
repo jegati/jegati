@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestone 02 complete; milestone 03 geography/map import in progress.
+Updated: 2026-09-13. Status: milestones 02–03 complete; next is expiring willingness.
 
 ## Current task and authorization
 
@@ -18,7 +18,8 @@ is authorized, and GitHub authentication/write access remains unverified.
   Go config/health API, Albanian client preparation screen and native HTTP smoke.
 - AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
 - Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API does not yet connect to Valkey.
-- No willingness, matching, arrival, map, notification or participant-storage code.
+- Fixed coarse Tirana grid, public map import/provenance and static crossing reachability index.
+- No willingness, activation engine, arrival, map UI, notification or participant-storage code.
   The configuration fields for those features describe future functional inputs.
 
 ## Milestone tracker
@@ -27,7 +28,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | --- | --- | --- |
 | 01 — Product/threat boundaries | Documented | Requirements, plan, decision 0001, THREAT_MODEL |
 | 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
-| 03 — Coarse geography and crossing fixtures | In progress | Reproducible map import, attribution and boundary/selection checks |
+| 03 — Coarse geography and crossing fixtures | Complete | 2,571 imported crossings, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
 | 04 — Expiring willingness | Not started | Capability API, restricted store credentials/ACLs, retention/index and replay tests |
 | 05 — Albanian willingness UI | Not started | Duration/radius/coarse area participation flow and browser network inspection |
 | 06 — Seeded Tirana simulation | Not started | Isolated real-API driver and deterministic scenarios |
@@ -70,11 +71,11 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 03: versioned Tirana map import/attribution, fixed coarse grid,
-crossing index and selection/boundary tests. Docker Engine 29.1.3 and Compose 5.5.1
-are usable. Scaffold containers run on loopback (web 5173, API 8080); Valkey is private.
+Implement milestone 04: restricted temporary Valkey storage, expiring capabilities,
+create/status/cancel APIs and meaningful real-store lifecycle tests. Docker Engine
+29.1.3 and Compose 5.5.1 are usable. Scaffold containers run on loopback.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
-The map download may depend on public Overpass availability; preserve actual source
-checksums and timestamps, never substitute invented map features as real data.
+The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
+rebuild needs no network. `make map-check` and geographic race tests passed.
 Keep updating this tracker with tests, failures and the next concrete action.
