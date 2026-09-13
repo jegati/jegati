@@ -3,6 +3,16 @@ from unittest.mock import patch
 from release import verify_files,activate,runtime_dir
 
 class ReleaseTests(unittest.TestCase):
+ def test_existing_acl_changes_are_rejected_without_rewrite(self):
+  import subprocess
+  script=pathlib.Path(__file__).with_name('init-secrets.py')
+  with tempfile.TemporaryDirectory() as d:
+   args=['python3',str(script),'--directory',d]
+   subprocess.run(args,check=True,stdout=subprocess.DEVNULL)
+   subprocess.run(args+['--check'],check=True,stdout=subprocess.DEVNULL)
+   acl=pathlib.Path(d)/'users.acl';acl.chmod(0o600);acl.write_text('synthetic changed ACL')
+   self.assertNotEqual(subprocess.run(args+['--check'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode,0)
+   self.assertEqual(acl.read_text(),'synthetic changed ACL')
  def manifest(self,root):
   (root/'config').mkdir();(root/'config/gati.yaml').write_text('synthetic config')
   digest=hashlib.sha256((root/'config/gati.yaml').read_bytes()).hexdigest()

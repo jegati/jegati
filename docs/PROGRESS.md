@@ -991,3 +991,30 @@ host/provider privacy. Next: export the committed release, run its actual privat
 activation/served-artifact/rollback rehearsal, and compare two clean builds. Then
 finish documentation/evidence and request only the domain/host/account access and
 public authorization needed for the external staging step. Preserve commands.txt.
+
+## Release rehearsal and reproducible artifacts — 2026-09-14
+
+Committed release 81ea543 was exported and built at reports/local/release-81ea543.
+Its source/config/files, four image identities and served browser assets are
+recorded in release.json; the roughly 94 MiB images.tar contains no participant
+state or credentials. Two clean exports with independent compilation caches
+produced byte-identical native API and browser artifacts (Go1.27.1/Node24.21.0),
+recorded at reports/local/reproduction-81ea543. This is same-host/toolchain evidence,
+not independent-host or remote-backend attestation.
+
+The actual combined-role activation, public-asset/config comparison and rollback
+rehearsal passed in 124.87s. Two switches between identical code/config release
+directories preserved Valkey's container ID and start time and a synthetic live
+capability's original expiry; cancellation still worked. All owned rehearsal
+containers/networks were removed afterward. It does not certify arbitrary schema
+rollback. A subsequent guard rejects an existing operational ACL change without
+rewriting it; four release guard tests pass. The guard and final evidence will be
+included in one final local release export and rehearsal before handoff.
+
+Sanitized deployment/browser/rollback/reproduction evidence is retained at
+[deployment-preparation-summary.json](reports/deployment-preparation-summary.json).
+Remaining external steps require a selected hostname/VPS, privately arranged SSH
+and Cloudflare authentication, and explicit public-deployment authorization. Keep
+host privacy controls, actual edge/cache behavior, target-host capacity, real-device
+location/push and private alert routing as separate gates. No remote push or public
+service has been created. Preserve commands.txt.

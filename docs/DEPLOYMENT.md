@@ -197,7 +197,7 @@ python3 scripts/release.py rollback --release /opt/gati/releases/PREVIOUS --curr
 ```
 
 Use the same project, replica count and `--edge` choice as the active deployment.
-Automatic rollback requires identical functional config and stable store settings;
+Automatic rollback requires identical functional config, ACL and stable store settings;
 code/state schema compatibility still requires review. Do not run `compose down`
 between releases. Any deliberate store reset/recreation loses live sessions; users
 must start again. Old clients reload the new built assets and revalidate state.

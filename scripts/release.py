@@ -113,7 +113,7 @@ def activate(root,project,manifest,replicas,edge,current=None):
   if 'GATI_PUBLIC_HOST=localhost\n' in (root/'deployment.env').read_text():raise ValueError('public deployment needs a real hostname release')
  runtime.mkdir(mode=0o700,exist_ok=True)
  if manifest.get('push_enabled') and not (runtime/'vapid.json').is_file():raise ValueError('optional push requires its privately provisioned VAPID key')
- run('python3',str(root/'scripts/init-secrets.py'),'--directory',str(runtime))
+ run('python3',str(root/'scripts/init-secrets.py'),'--directory',str(runtime),*(['--check'] if (runtime/'app-password').is_file() else []))
  if not (runtime/'valkey.conf').exists():
   import shutil
   shutil.copyfile(root/'deploy/valkey.production.conf',runtime/'valkey.conf')
