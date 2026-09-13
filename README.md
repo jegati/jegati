@@ -8,10 +8,11 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-Milestones 02–04 are complete: configuration, coarse Tirana geography and expiring
-willingness APIs are implemented and tested against real Valkey. The browser is
-still a preparation screen; its participation flow is the next milestone. Matching,
-arrivals, collective maps and notifications are not implemented yet.
+Milestones 02–05 are complete: configuration, coarse Tirana geography, expiring
+willingness APIs and the Albanian browser participation flow. The UI supports
+manual coarse areas, optional one-shot location, availability/radius choices,
+reload recovery and cancellation. Matching, arrivals, collective maps and
+notifications are not implemented yet.
 
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 
@@ -34,17 +35,18 @@ bash scripts/doctor.sh
 ```
 
 Missing required tools produce exit status 1. The checker does not install tools or
-verify Docker daemon access. To run the current scaffold without Docker:
+verify Docker daemon access. To run the willingness flow locally:
 
 ```sh
 bash scripts/bootstrap.sh
 make deps
 make verify-local
-make dev-native
+make dev
 ```
 
-Open http://127.0.0.1:5173. This is a preparation screen, not the full participation
-flow. Use `make dev` once Docker is available to validate the Compose stack.
+Open http://127.0.0.1:5173. Docker is required for the temporary store.
+`make dev-native` remains a read-only UI/API preview without a store.
+Run `make browser-install` once, then `make test-browser` with the Compose API up.
 
 ## License
 

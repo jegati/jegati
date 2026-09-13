@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–04 complete; next is the Albanian willingness UI.
+Updated: 2026-09-13. Status: milestones 02–05 complete; next is isolated Tirana simulation.
 
 ## Current task and authorization
 
@@ -17,10 +17,11 @@ is authorized, and GitHub authentication/write access remains unverified.
 - Typed YAML configuration, production/simulation validation, canonical JSON/hash,
   Go config/health API, Albanian client preparation screen and native HTTP smoke.
 - AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
-- Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API does not yet connect to Valkey.
+- Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API connects to private Valkey with a restricted role.
 - Fixed coarse Tirana grid, public map import/provenance and static crossing reachability index.
 - Expiring willingness APIs, replay tombstones, bounded indexes, rate limits and restricted ephemeral Valkey roles.
-- No activation engine, arrival, map UI or notification code yet.
+- Albanian willingness UI with first-party roads/coarse selection, optional location, expiring client capability and cancellation.
+- No activation engine, arrival, collective map or notification code yet.
   The configuration fields for those features describe future functional inputs.
 
 ## Milestone tracker
@@ -31,7 +32,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
 | 03 — Coarse geography and crossing fixtures | Complete | 2,571 imported crossings, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
-| 05 — Albanian willingness UI | Not started | Duration/radius/coarse area participation flow and browser network inspection |
+| 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
 | 06 — Seeded Tirana simulation | Not started | Isolated real-API driver and deterministic scenarios |
 | 07 — Continuous activation and late admission | Not started | Matching/timers/crosswalk selection, races and joining |
 | 08 — Arrival claims | Not started | Founding/late participants, nonces/freshness/retraction |
@@ -55,9 +56,7 @@ make dev-native
 ```
 
 `make verify-local` runs native tests/builds/config checks, Compose **parsing** and
-an HTTP smoke. It does not start containers. `make dev-native` serves the preparation
-screen at http://127.0.0.1:5173; Ctrl-C stops its API/client processes. It is not yet
-the actual willingness flow. Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup.
+an HTTP smoke. It does not start containers. `make dev-native` serves a read-only UI/API preview at http://127.0.0.1:5173; Ctrl-C stops its API/client processes. It has no Valkey connection; use Compose for willingness. Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup.
 
 `make dev` / `make down` are implemented for Compose but require Docker Engine.
 The planned `make simulate` and `make load` do not exist yet. A simulation-capable
@@ -72,9 +71,9 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 05: Albanian duration/radius/coarse map selection, client
-capabilities, cancellation and browser privacy/accessibility checks. Docker Engine
-29.1.3 and Compose 5.5.1 are usable. Scaffold containers run on loopback.
+Implement milestone 06: isolated seeded Tirana API simulation and controlled
+functional time, with production-route exclusion tests. Docker Engine 29.1.3 and
+Compose 5.5.1 are usable. Local containers run on loopback.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -93,3 +92,21 @@ in API.md/STORAGE.md. Configuration schema 2 adds public abuse/cleanup limits.
 
 Setup tests found/fixed a Redis client logger-interface mismatch and repeated ACL
 file write permissions. No current credential blocker remains.
+
+## Milestone 05 evidence
+
+Pinned MapLibre 6.9.0 and Playwright 1.63.0; installed Playwright Chromium in the
+user cache. Five real-browser scenarios passed against the built production client and local Compose API.
+They verify no external HTTP requests, cookies, localStorage, exact coordinate
+payloads or location history; sessionStorage holds only the bounded capability,
+coarse request and deadline. Actual basemap worker loading is asserted.
+Inspected the generated mobile screenshot in ignored reports/local. Initial checks
+found/fixed MapLibre ESM import and Vite worker bundling issues. Production browser tests
+exposed the missing worker sibling import; the documented ?worker&url pipeline
+now bundles the worker and its dependencies. make verify-local also passed. Browser tests
+exercise synthetic sessions and cancel them; no real location was requested.
+
+The map is currently a first-party road backdrop and the user's own selected coarse
+area, not a public activity map. PWA installation/offline shell, notifications and
+activation are still pending. Browser session restoration/backups are outside
+forensic erasure guarantees. Server deadlines remain authoritative.

@@ -1,9 +1,24 @@
 :root { font-family: system-ui, sans-serif; color: #352c31; background: #fff8f3; color-scheme: light; }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 1.5rem; }
-main { width: min(100%, 35rem); padding-block: 3rem; }
-.brand { letter-spacing: .12em; font-weight: 700; }
-h1 { font-size: clamp(2.5rem, 10vw, 5rem); line-height: 1; letter-spacing: -.04em; margin-block: 2.5rem 1rem; }
-p { line-height: 1.7; }
-.tagline { font-size: 1.35rem; }
-#status { border-top: 1px solid #dac9c8; margin-top: 2.5rem; padding-top: 1.5rem; }
+[hidden] { display: none !important; }
+body { margin: 0; padding: 1.25rem; }
+main { width: min(100%, 42rem); margin: auto; padding-block: 1rem 2rem; }
+header { display: flex; justify-content: space-between; align-items: center; }
+.brand { letter-spacing: .12em; font-weight: 750; }.brand span { font-size: 1.8rem; }
+.city, .muted, .hint, footer { color: #71616a; }
+h1 { font-size: clamp(2.7rem, 10vw, 4.7rem); line-height: 1; letter-spacing: -.05em; margin-block: 2rem 1rem; }
+p { line-height: 1.5; }.tagline { font-size: 1.25rem; margin-bottom: .5rem; }.muted { margin-top: 0; }
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-block: 1.8rem; }
+label { display: flex; flex-direction: column; justify-content: space-between; }
+label, legend { font-weight: 650; font-size: .95rem; }
+select, button { font: inherit; color: inherit; border: 1px solid #baa5ae; background: #fffdf9; border-radius: .7rem; min-height: 46px; padding: .7rem .9rem; }
+select { display: block; width: 100%; margin-top: .5rem; }button { cursor: pointer; font-weight: 650; }button:disabled { opacity: .55; cursor: default; }
+:focus-visible { outline: 3px solid #963754; outline-offset: 3px; }
+fieldset { padding: 0; border: 0; min-width: 0; }.hint { font-size: .9rem; margin-top: .5rem; }
+#map { height: 260px; border: 1px solid #d9cbc5; border-radius: .8rem; overflow: hidden; }
+.area-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }.area-actions button { flex: 1; font-size: .85rem; }
+#area-status { font-size: .85rem; min-height: 1.3rem; }
+.primary { background: #963754; color: #fff; border: none; width: 100%; font-size: 1.2rem; padding: 1rem; }
+#active { background: #f4e8e6; padding: 1.5rem; border-radius: 1rem; margin-top: 2rem; }h2 { margin-top: 0; }#active button { margin: .3rem .3rem .3rem 0; }
+#status { min-height: 1.5rem; }footer { font-size: .8rem; margin-top: 1.5rem; }.maplibregl-ctrl-attrib { font-size: 10px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }

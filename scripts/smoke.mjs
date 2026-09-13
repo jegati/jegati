@@ -55,7 +55,7 @@ try {
   const proxied = await fetch(`http://127.0.0.1:${webPort}/api/config`);
   assert.equal(proxied.status, 200);
   assert.equal((await proxied.json()).sha256, envelope.sha256);
-  console.log('HTTP smoke passed: health, canonical config, headers, absent participant/test routes, Albanian shell and Vite proxy.');
+  console.log('HTTP smoke passed: health, canonical config, headers, absent collection/test routes, Albanian shell and Vite proxy.');
 } finally {
   for (const child of [web, api]) {
     if (child && child.exitCode === null) {

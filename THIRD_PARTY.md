@@ -19,3 +19,7 @@ See data/tirana/README.md. Geographic calculations use github.com/paulmach/orb
 
 Valkey access uses github.com/redis/go-redis/v9 (BSD-2-Clause), with pinned versions
 and transitive checksums in go.mod/go.sum. No client-side state caching is enabled.
+
+The map renderer MapLibre GL JS (6.9.0, BSD-3-Clause) and browser testing framework
+Playwright (1.63.0, Apache-2.0) are pinned in web/package-lock.json. Chromium and
+FFmpeg test artifacts remain in the user's Playwright cache with upstream terms.

@@ -112,3 +112,19 @@ the integration suite. It never runs the suite against your application database
 The running Compose API now connects to private Valkey. `make dev-native` still
 starts a read-only shell with participant writes unavailable unless an explicit
 store address/password-file is supplied. Use Compose for the actual willingness API.
+
+## Willingness browser checks
+
+`make dev` now serves the participation screen and real ephemeral API at
+http://127.0.0.1:5173. Choose an approximate area on the map or use optional one-shot
+location, duration and radius. The local map needs no external tile/font service.
+Matching and arrival are not available yet.
+
+Install the pinned test browser with `make browser-install` (user cache), then run
+`make test-browser` while the Compose API runs. Playwright builds the client and starts its own Vite preview at
+127.0.0.1:5174, uses synthetic coordinates and cancels its synthetic signals.
+No traces/videos are recorded; its synthetic mobile screenshot is ignored under
+reports/local. `make dev-native` previews the UI but needs an explicit store
+connection to accept willingness; prefer Compose for the full implemented flow.
+
+MapLibre worker integration follows its [official Vite instructions](https://maplibre.org/maplibre-gl-js/docs/). Browser checks use built assets so missing worker dependencies cannot hide behind development serving.

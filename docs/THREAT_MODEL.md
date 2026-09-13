@@ -49,3 +49,18 @@ anonymous to network providers or its operator.
   expiry is distinct from removal of bytes or copies made outside the service.
 - Runtime endpoint/config hashes are useful comparison aids; independent remote
   backend honesty remains unproven even when builds reproduce.
+
+### Implemented browser boundary (milestone 05)
+
+The client requests location only after an explicit one-shot action, quantizes it
+using the published grid, and sends only a cell ID. Manual map choice is supported.
+No runtime map/font provider, analytics, cookies, localStorage or service worker
+is used. Same-origin sessionStorage contains one capability, coarse request,
+confirmation flag and deadline; retries reuse it without renewal, cancellation
+success/expiry removes it, and reopening rejects expired state before sending it.
+An unavailable sessionStorage falls back to tab memory; closing that tab can lose
+control while the server signal expires normally. Device backups, restored tabs,
+compromised browser code and local clock tampering remain outside deletion claims.
+The API independently enforces its own time. Browser tests check exact-coordinate
+absence in request URLs/bodies and storage plus failure/reload behavior; this is
+not a complete malicious-browser or administrator audit.

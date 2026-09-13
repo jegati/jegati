@@ -16,3 +16,5 @@ reports/local/
 
 # Generated service secrets (never participant data)
 .runtime/
+web/test-results/
+web/playwright-report/

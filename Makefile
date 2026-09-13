@@ -55,3 +55,9 @@ secrets:
 	python3 scripts/init-secrets.py
 test-store: secrets
 	bash scripts/test-store.sh
+
+.PHONY: browser-install test-browser
+browser-install:
+	cd web && npx playwright install chromium
+test-browser:
+	cd web && npx playwright test

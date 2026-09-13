@@ -26,5 +26,7 @@ jobs:
           curl --fail http://127.0.0.1:5173/
           curl --fail http://127.0.0.1:5173/api/config
           make check-containers COMPOSE='docker compose'
+      - run: cd web && npx playwright install --with-deps chromium
+      - run: make test-browser
       - if: always()
         run: docker compose down

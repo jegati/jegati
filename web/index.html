@@ -9,11 +9,32 @@
   </head>
   <body>
     <main>
-      <p class="brand"><span aria-hidden="true">🦩</span> GATI</p>
+      <header><p class="brand"><span aria-hidden="true">🦩</span> GATI</p><span class="city">Tiranë</span></header>
       <h1>A JE GATI?</h1>
       <p class="tagline">Bëje vullnetin tënd të dukshëm.</p>
-      <p>Gatishmëria nuk është premtim për të marrë pjesë.</p>
-      <p id="status" role="status">GATI po përgatitet.</p>
+      <p class="muted">Gatishmëria nuk është premtim për të marrë pjesë.</p>
+      <form id="willingness" hidden>
+        <div class="choices">
+          <label>Sa kohë ke?<select id="duration" required></select></label>
+          <label>Sa larg mund të shkosh?<select id="radius" required></select></label>
+        </div>
+        <fieldset><legend>Ku je afërsisht?</legend>
+          <p class="hint">Zgjidh zonën në hartë. Dërgohet vetëm zona e përafërt.</p>
+          <div id="map" role="region" aria-label="Harta e Tiranës"></div>
+          <div class="area-actions"><button id="map-center" type="button">Zgjidh zonën në qendër të hartës</button><button id="location" type="button">Përdor vendndodhjen një herë</button></div>
+          <p id="area-status" role="status">Ende nuk ke zgjedhur zonë.</p>
+        </fieldset>
+        <button id="ready" class="primary" type="submit" disabled>JAM GATI</button>
+      </form>
+      <section id="active" hidden aria-label="Gatishmëria jote">
+        <h2 id="active-title">JAM GATI.</h2>
+        <p id="remaining"></p>
+        <p>Mund ta mbyllësh gatishmërinë kur të duash.</p>
+        <button id="retry" type="button" hidden>Provo përsëri</button>
+        <button id="cancel" type="button">Mbyll gatishmërinë</button>
+      </section>
+      <p id="status" role="status">Po hapet GATI…</p>
+      <footer>Pa llogari. Pa profil. Vetëm përkohësisht.</footer>
       <noscript>Kjo faqe ka nevojë për JavaScript.</noscript>
     </main>
     <script type="module" src="/src/main.ts"></script>
