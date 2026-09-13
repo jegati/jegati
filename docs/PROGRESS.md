@@ -72,14 +72,13 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Continue with commit 5 of ACTIVITY_IMPLEMENTATION_PLAN.md: bounded server-side
-invitation discovery and notification outbox, then opt-in PWA/push lifecycle/follows.
-Statistics/map commits 1–4 are implemented locally; acceptance scope is in
-FUNCTIONALITY_STATUS.md. Decision 0007 accepts documented inference limitations;
-no further inference-approval gate is needed. Push must remain off by default and
-chosen by the user. No service worker, push subscription or IndexedDB resume exists
-yet. Preserve private 100 m cells / 50 m device-error / 30/20 thresholds and the fixed
-1 km public grid. No credential or toolchain blocker remains for local work.
+Implement USABILITY_IMPLEMENTATION_PLAN.md / decision 0008: one-action willingness
+and waiting/recovery, private destination preview, then server-side offer discovery
+and optional push delivery/resume. User selected review suggestions 1, 2, 3 and 5;
+sharing links/QR and new purpose copy are excluded. No native location verification
+is claimed. Prior statistics/map slice is implemented/tested; new work is not yet
+complete. Tools are installed and usable through scripts/env.sh. No new credential
+blocker for the first local milestones. Preserve all existing privacy bounds.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -479,3 +478,11 @@ tests passed. The 3,000-person run accepted 3000 credentials, invited 1891, reco
 meetings (30 ever confirmed), in 221.33 wall seconds. It ran concurrently with other
 checks; no load/capacity claim is made. See reports/activity-3000.md for source-dirty
 provenance and the distinction between real publication and injected discovery.
+
+## Selected usability task — plan
+
+Recorded selected suggestions and implementation/test sequence in
+USABILITY_IMPLEMENTATION_PLAN.md and decision 0008. Inspected current code, requirements,
+recent commits and toolchain. This planning commit does not claim new behavior or
+test passes. Next is one-action willingness with waiting/recovery, then eligible
+private preview and optional background delivery. Existing commands.txt is untouched.

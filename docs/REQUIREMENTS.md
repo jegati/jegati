@@ -16,7 +16,7 @@ The core flow is:
 **A JE GATI? → JAM GATI → JEMI GATI → PO, PO SHKOJ → JAM KËTU → JEMI KËTU**
 
 The first meaningful action takes seconds: choose availability, travel radius and
-allow a one-time device-location fix, then press JAM GATI. There
+press JAM GATI to obtain a fresh one-time device-location fix and submit. There
 is no registration, identity form or complex onboarding. Willingness expires
 automatically and is not a commitment to attend. No response means no attendance.
 Declining/cancelling is neutral, easy and never guilt-inducing.
@@ -57,7 +57,8 @@ Show significant GATI areas, bucketed activity such as **50+ GATI**, activated
 gatherings, sufficiently confirmed gathering areas and simple aggregate statistics
 over time. The public statistics map represents collective cells, never individuals
 or exact gathering destinations. Gatherings use the same public cells as willingness;
-exact crossroads remain available through the private invitation/admission flow.
+exact crossroads remain available through private invitations, explicit eligible
+preview and admission. Previewing never enrolls or commits the user.
 After JAM GATI, show published approximate nearby willingness. Gathering cards must
 show approximate going and fresh-arrival statistics before and after JAM KËTU.
 Keep the Tirana collective activity map available throughout these states. These
@@ -130,3 +131,10 @@ Explain and provide evidence for anonymous willingness, coarse matching, expirat
 JEMI GATI, arrival confirmation, aggregate privacy, hostile-use controls, 100k scale,
 maintainability and independent verification. Prefer a simpler implementation when
 an added feature makes the product less anonymous or harder to maintain.
+
+## Selected usability implementation (decision 0008)
+
+Implement optional background notifications, one-action willingness, private
+location-eligible destination preview before PO, PO SHKOJ, and clearer waiting,
+connection recovery and arrival-expiry guidance. Do not add sharing links/QR or
+new purpose/activity copy in this work. See USABILITY_IMPLEMENTATION_PLAN.md.

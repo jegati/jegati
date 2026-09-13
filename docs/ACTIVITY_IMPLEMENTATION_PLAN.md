@@ -6,6 +6,9 @@ The current evidence remains in FUNCTIONALITY_STATUS.md. Existing implementation
 authorization and latest user direction govern work. Inference limitations are
 accepted and documented; they do not block implementation.
 
+Selected usability refinements are now specified in USABILITY_IMPLEMENTATION_PLAN.md
+and decision 0008, including preview before commitment and optional push.
+
 ## 1. Intended experience
 
 | User journey | Result to implement |

@@ -93,7 +93,7 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
   No individual markers, member lists, arbitrary count queries, exact counts or
   explicit complementary totals. Public gathering entries use the same aggregate
   cells as willingness, without intersection IDs/coordinates/labels. Private
-  invitations/admission retain actionable destinations. Decision 0007 accepts
+  invitations/eligible preview/admission retain actionable destinations (0008). Decision 0007 accepts
   inferred information: document counterexamples without blocking implementation.
 - Review all observable surfaces together: maps, private invitations, admission
   responses, arrival updates, history, area alerts, caches and configuration.

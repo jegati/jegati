@@ -348,3 +348,11 @@ References inform the design; defaults and exact APIs must be rechecked against 
 6. Valkey Cluster specification and hash-slot constraints: https://valkey.io/topics/cluster-spec/
 7. Reproducible Builds planning and environment recording: https://reproducible-builds.org/docs/plans/
 8. OpenStreetMap road junctions: https://wiki.openstreetmap.org/wiki/Junctions
+
+## Selected usability refinements
+
+USABILITY_IMPLEMENTATION_PLAN.md and decision 0008 refine the current local slice:
+optional background notifications, one-action device-based willingness, eligible
+private destination preview before commitment, and waiting/recovery guidance.
+Sharing links/QR and new purpose copy are excluded from this work. Existing
+configuration, cell-only public releases and documented inference limits remain.
