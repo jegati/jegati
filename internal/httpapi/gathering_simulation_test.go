@@ -16,6 +16,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
@@ -100,6 +101,22 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 		t.Fatal("activation ignored exact stability deadline")
 	}
 	original := *founder.Invitation
+	// A newly willing session can close its page before discovery. The worker
+	// must create its invitation without any status request or push subscription.
+	backgroundHash := store.Hash([]byte("synthetic-background-participant"))
+	if _, e = backend.Create(ctx, backgroundHash, "tirana-v1:1000:5:5", 3, 30, 30*time.Minute, c.Limits.MaxActiveSignals); e != nil {
+		t.Fatal(e)
+	}
+	if e = engine.Step(ctx); e != nil {
+		t.Fatal(e)
+	}
+	background, e := backend.Status(ctx, backgroundHash)
+	if e != nil || background.State != "invited" || background.Gathering != original.ID || background.ArrivalUntil != 0 {
+		t.Fatal("background willingness required status polling for an offer")
+	}
+	if e = backend.Cancel(ctx, backgroundHash); e != nil {
+		t.Fatal(e)
+	}
 	late := create()
 	var newcomer sessionView
 	w = call("GET", "/api/signal", late, "")

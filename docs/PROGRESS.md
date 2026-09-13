@@ -507,3 +507,16 @@ input, unknown IDs and reachability. `make test-browser` passed 19 Chromium test
 including new/active preview cancellation, offline recovery and stale confirmation;
 public UI fixtures are distinguished from real API integration. No push provider
 was contacted and no production readiness or 100k throughput is claimed.
+
+## Background invitation discovery — 2026-09-13
+
+The matching worker now offers open gatherings to waiting sessions without a
+status request, independently of push preference. It reuses `candidate_batch_size`
+for bounded attempts and a rotating private cursor across reconciliation snapshots;
+atomic intent checks enforce live deadlines, immutable claims and decline cooldown.
+Already assigned/reserved sessions are skipped. Pending destinations still prevent
+competing founding cohorts. This changes when background sessions become invited,
+so older population totals are historical until rerun. `make simulate` passed its
+40-person run and race-enabled fixed-clock real-store test, including direct store
+creation followed by worker-only invitation (no HTTP status poll). Delivery is not
+implemented yet. Next: bounded optional subscription/outbox and transport.

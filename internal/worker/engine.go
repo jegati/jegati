@@ -25,6 +25,7 @@ type Engine struct {
 	mu          sync.RWMutex
 	open        []store.Gathering
 	lastSweep   int64
+	offerCursor string
 }
 
 func randomID() string {
@@ -117,6 +118,9 @@ func (e *Engine) Step(ctx context.Context) error {
 	open := []matching.Gathering{}
 	for _, g := range e.Open() {
 		open = append(open, matching.Gathering{ID: g.ID, Intersection: g.Intersection, EndsAt: g.EndsAt})
+	}
+	if err = e.offerWaiting(ctx, now, signals, open); err != nil {
+		return err
 	}
 	pending, err := e.Store.PendingReservations(ctx, e.Config.Limits.MaxActiveSignals)
 	if err != nil {
