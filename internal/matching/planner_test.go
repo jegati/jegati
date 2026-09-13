@@ -101,3 +101,50 @@ func TestMissingCommonIntersectionAndReservations(t *testing.T) {
 		t.Fatal("invented meeting point without mapped intersection")
 	}
 }
+
+// An independent small-cohort oracle enumerates triples and tests each map point,
+// without using the reachability index or planner's candidate-ranking algorithm.
+func TestPlannerAgainstExhaustiveSmallCohortOracle(t *testing.T) {
+	p, _, now := fixture(t)
+	for trial := 0; trial < 40; trial++ {
+		input := []Signal{}
+		for n := 0; n < 6; n++ {
+			cell := geography.Cell{X: (trial + n*3) % 10, Y: (trial*3 + n) % 9}
+			radius := []float64{.1, .5, 1, 3}[(trial+n)%4]
+			input = append(input, Signal{Hash: fmt.Sprint(n), Area: geography.ParticipantArea{Cell: cell, RadiusKM: radius}, CreatedAt: now - int64(n+1), ExpiresAt: now + int64(10+(trial+n)%3*10)*60000})
+		}
+		// Include short radii in the public static index for this oracle fixture.
+		index, err := geography.NewIndex(p.Index.Grid, p.Index.Intersections, []float64{.1, .5, 1, 3})
+		if err != nil {
+			t.Fatal(err)
+		}
+		p.Index = index
+		exists := false
+		for a := 0; a < 6; a++ {
+			for b := a + 1; b < 6; b++ {
+				for c := b + 1; c < 6; c++ {
+					for _, point := range p.Index.Intersections {
+						ok := true
+						for _, member := range []Signal{input[a], input[b], input[c]} {
+							if member.ExpiresAt < now+int64(p.Config.MinimumRemainingMinutes)*60000 || p.Index.Grid.MaxDistance(member.Area.Cell, point.Point) > member.Area.RadiusKM*1000 {
+								ok = false
+							}
+						}
+						exists = exists || ok
+					}
+				}
+			}
+		}
+		proposal, ok := p.Propose(now, input, nil)
+		if ok != exists {
+			t.Fatalf("trial %d: oracle availability differs from planner", trial)
+		}
+		if ok {
+			for _, member := range proposal.Founders {
+				if p.Index.Grid.MaxDistance(member.Area.Cell, proposal.Intersection.Point) > member.Area.RadiusKM*1000 {
+					t.Fatal("planner violated a founding radius")
+				}
+			}
+		}
+	}
+}

@@ -27,3 +27,5 @@ func configureHandler(c config.Config, backend *store.Store, roads []byte, engin
 	}
 	return httpapi.SimulationHandler(c, backend, roads, token, engine), nil
 }
+
+const backgroundWorkers = false

@@ -70,3 +70,13 @@ simulate:
 # Reproducing the counterexample is deliberately a failing privacy gate.
 privacy-probe:
 	GATI_PRIVACY_PROBE=1 SCENARIO=tirana-evening SEED=42 bash scripts/simulate.sh
+
+.PHONY: simulate-population
+simulate-population:
+	SCENARIO="$(or $(SCENARIO),tirana-population)" SEED="$(or $(SEED),42)" SIM_CONFIG="$(or $(SIM_CONFIG),config/gati.yaml)" OUTPUT="$(or $(OUTPUT),reports/local/tirana-population-$(shell date -u +%Y%m%dT%H%M%S)-seed-$(or $(SEED),42))" INTEGRATION_CHECKS=0 bash scripts/simulate.sh
+
+.PHONY: check-population simulate-suite
+check-population:
+	node scripts/check-population.mjs "$(REPORT)"
+simulate-suite:
+	python3 scripts/run-simulation-suite.py --config "$(CONFIG)" --output "$(or $(OUTPUT),reports/local/tirana-suite-$(shell date -u +%Y%m%dT%H%M%S))"

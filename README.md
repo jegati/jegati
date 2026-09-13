@@ -14,8 +14,9 @@ required one-shot device location, availability/radius choices,
 reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
 implemented. Collective maps and notification subscriptions are not implemented yet. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
-exercise willingness, retries, cancellation, expiry and Sybil bursts with a local
-synthetic map report.
+include a 3,000-person response/journey driver, a standalone map replay,
+expiry/replay checks and smaller Sybil cases. Run `make simulate-population` using
+your current configuration, or `make simulate-suite` for a scenario comparison.
 
 **Known privacy limitation:** a reproducible synthetic collusion test reconstructs
 one participant's coarse cell from the ordinary nearest-intersection invitation.

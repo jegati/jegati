@@ -1,0 +1,32 @@
+seed: 42
+population: 200
+distribution: uniform
+availability_minutes: [30, 60, 90, 120]
+radius_km: [0.1, 0.5, 1, 3]
+cancellation_probability: 0.15
+duplicate_request_fraction: 0.10
+sybil_fraction: 0.0
+sybil_credentials: 1
+behavior:
+  enrollment_minutes: 60
+  duration_minutes: 180
+  network_groups: 256
+  writes_per_second: 200
+  snapshot_seconds: 60
+  accept_probability: 0.60
+  decline_probability: 0.25
+  arrival_probability_given_going: 0.80
+  late_join_probability: 0.20
+  retract_probability: 0.10
+  offline_probability: 0.05
+  offline_seconds: [60, 180]
+  response_seconds: [600, 1200]
+  speed_meters_per_second: [0.8, 1.6]
+  detour_multiplier: [1.2, 1.8]
+  availability_weights: [0.40, 0.35, 0.15, 0.10]
+  radius_weights: [0.25, 0.25, 0.25, 0.25]
+  clusters:
+    - {center: [19.818, 41.327], spread_km: 1.0, weight: 0.40}
+    - {center: [19.822, 41.307], spread_km: 1.0, weight: 0.25}
+    - {center: [19.799, 41.335], spread_km: 1.0, weight: 0.20}
+    - {center: [19.825, 41.33], spread_km: 4.0, weight: 0.15}

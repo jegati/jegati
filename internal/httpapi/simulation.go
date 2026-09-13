@@ -35,9 +35,11 @@ func SimulationHandler(c config.Config, backend *store.Store, roads []byte, cont
 			return
 		}
 		delta := int64(0)
+		runWorker := true
 		if r.Method == "POST" {
 			var value struct {
 				Milliseconds int64 `json:"milliseconds"`
+				RunWorker    *bool `json:"run_worker,omitempty"`
 			}
 			dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, 128))
 			dec.DisallowUnknownFields()
@@ -50,6 +52,9 @@ func SimulationHandler(c config.Config, backend *store.Store, roads []byte, cont
 				return
 			}
 			delta = value.Milliseconds
+			if value.RunWorker != nil {
+				runWorker = *value.RunWorker
+			}
 		} else if r.Method != "GET" {
 			writeError(w, 405)
 			return
@@ -59,7 +64,7 @@ func SimulationHandler(c config.Config, backend *store.Store, roads []byte, cont
 			writeError(w, 503)
 			return
 		}
-		if delta > 0 {
+		if runWorker {
 			for i := 0; i < 100; i++ {
 				n, e := backend.Cleanup(r.Context(), c.Limits.CleanupBatchSize)
 				if e != nil {
@@ -71,7 +76,7 @@ func SimulationHandler(c config.Config, backend *store.Store, roads []byte, cont
 				}
 			}
 		}
-		if len(engines) > 0 && engines[0] != nil {
+		if runWorker && len(engines) > 0 && engines[0] != nil {
 			if e := engines[0].Step(r.Context()); e != nil {
 				writeError(w, 503)
 				return

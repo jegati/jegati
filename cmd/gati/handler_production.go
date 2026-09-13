@@ -13,3 +13,5 @@ import (
 func configureHandler(c config.Config, backend *store.Store, roads []byte, engine *worker.Engine) (http.Handler, error) {
 	return httpapi.Handler(c, backend, roads, engine), nil
 }
+
+const backgroundWorkers = true

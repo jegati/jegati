@@ -1,7 +1,9 @@
 # Tirana population and interaction simulation plan
 
-Status: proposed work, 2026-09-13. Requested before implementing/running the new
-suite. No new population-response simulation has been executed for this plan.
+Status: implementation authorized and underway, 2026-09-13. The user increased
+the main population from 300 to 3,000 and selected their current configuration.
+See SIMULATION.md and PROGRESS.md for implemented commands and validation.
+The design and effort estimates below preserve the original proposal.
 This takes priority over continuing milestone 09. Existing commands and evidence
 are in SIMULATION.md; product settings are explained in MATCHING_PARAMETERS.md.
 
@@ -28,7 +30,7 @@ not demographic or attendance estimates for Tirana.
 
 ## First experiment and scenario matrix
 
-Start with 300 synthetic people over two simulated hours, joining at unaligned
+Start with 3,000 synthetic people over two simulated hours, joining at unaligned
 moments during the first hour. An illustrative distribution is 40% central Tirana,
 25% near the lake, 20% northwest and 15% elsewhere within the supported rectangle.
 Reuse existing cluster centers, make their centers/spread/weights explicit, and
@@ -106,7 +108,9 @@ Retain the existing 3/2 threshold profile for small deterministic regressions.
 
 The current runner hardcodes config/simulation.yaml; add an explicit validated
 simulation-config argument before claiming alternative profiles are selectable.
-The current actor limit is 1,000 people, which covers this experiment.
+The implemented actor limit is now 10,000, with a 30,000-credential worst-case bound
+for response simulations. Current requested thresholds are 30 willing / 20 arrivals,
+with 0.1/0.5/1/3 km radii. The baseline retains 1,000 m cells.
 
 All current HTTP actors share one real network budget: 60 creation requests/minute
 (including retries). Their virtual clock does NOT advance real abuse windows. An

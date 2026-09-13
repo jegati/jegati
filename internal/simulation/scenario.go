@@ -12,23 +12,24 @@ import (
 )
 
 type Scenario struct {
-	Seed             uint64  `yaml:"seed" json:"seed"`
-	Population       int     `yaml:"population" json:"population"`
-	Distribution     string  `yaml:"distribution" json:"distribution"`
-	Availability     []int   `yaml:"availability_minutes" json:"availability_minutes"`
-	Radii            []int   `yaml:"radius_km" json:"radius_km"`
-	Cancellation     float64 `yaml:"cancellation_probability" json:"cancellation_probability"`
-	Duplicate        float64 `yaml:"duplicate_request_fraction" json:"duplicate_request_fraction"`
-	SybilFraction    float64 `yaml:"sybil_fraction" json:"sybil_fraction"`
-	SybilCredentials int     `yaml:"sybil_credentials" json:"sybil_credentials"`
+	Behavior         *Behavior `yaml:"behavior,omitempty" json:"behavior,omitempty"`
+	Seed             uint64    `yaml:"seed" json:"seed"`
+	Population       int       `yaml:"population" json:"population"`
+	Distribution     string    `yaml:"distribution" json:"distribution"`
+	Availability     []int     `yaml:"availability_minutes" json:"availability_minutes"`
+	Radii            []float64 `yaml:"radius_km" json:"radius_km"`
+	Cancellation     float64   `yaml:"cancellation_probability" json:"cancellation_probability"`
+	Duplicate        float64   `yaml:"duplicate_request_fraction" json:"duplicate_request_fraction"`
+	SybilFraction    float64   `yaml:"sybil_fraction" json:"sybil_fraction"`
+	SybilCredentials int       `yaml:"sybil_credentials" json:"sybil_credentials"`
 }
 type Input struct {
-	Person    int    `json:"-"`
-	Cell      string `json:"cell"`
-	Radius    int    `json:"radius_km"`
-	Minutes   int    `json:"availability_minutes"`
-	Cancel    bool   `json:"-"`
-	Duplicate bool   `json:"-"`
+	Person    int     `json:"-"`
+	Cell      string  `json:"cell"`
+	Radius    float64 `json:"radius_km"`
+	Minutes   int     `json:"availability_minutes"`
+	Cancel    bool    `json:"-"`
+	Duplicate bool    `json:"-"`
 }
 
 func Load(path string) (Scenario, error) {
@@ -49,7 +50,7 @@ func Load(path string) (Scenario, error) {
 	return s, s.Validate()
 }
 func (s Scenario) Validate() error {
-	if s.Population < 1 || s.Population > 1000 || s.SybilCredentials < 1 || s.SybilCredentials > 10 || len(s.Availability) == 0 || len(s.Radii) == 0 {
+	if s.Population < 1 || s.Population > 10000 || s.SybilCredentials < 1 || s.SybilCredentials > 10 || len(s.Availability) == 0 || len(s.Availability) > 32 || len(s.Radii) == 0 || len(s.Radii) > 32 {
 		return errors.New("invalid bounded population or choices")
 	}
 	switch s.Distribution {
@@ -63,14 +64,17 @@ func (s Scenario) Validate() error {
 		}
 	}
 	for _, v := range s.Availability {
-		if v != 30 && v != 60 && v != 90 && v != 120 {
+		if v < 30 || v > 120 {
 			return errors.New("unsupported availability")
 		}
 	}
 	for _, v := range s.Radii {
-		if v != 1 && v != 3 && v != 5 {
+		if !geography.ValidRadius(v) {
 			return errors.New("unsupported radius")
 		}
+	}
+	if s.Behavior != nil {
+		return s.Behavior.Validate(s)
 	}
 	return nil
 }

@@ -48,6 +48,9 @@ func NewClient(target, control string) (*Client, error) {
 	return &Client{u.String(), control, &http.Client{Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return errors.New("simulation refuses redirects") }}}, nil
 }
 func (c *Client) do(ctx context.Context, method, path, token string, body any, out any) (int, error) {
+	return c.doHeaders(ctx, method, path, token, body, nil, out)
+}
+func (c *Client) doHeaders(ctx context.Context, method, path, token string, body any, headers map[string]string, out any) (int, error) {
 	var payload []byte
 	if body != nil {
 		payload, _ = json.Marshal(body)
@@ -62,11 +65,15 @@ func (c *Client) do(ctx context.Context, method, path, token string, body any, o
 	if body != nil {
 		r.Header.Set("Content-Type", "application/json")
 	}
+	for key, value := range headers {
+		r.Header.Set(key, value)
+	}
 	response, e := c.http.Do(r)
 	if e != nil {
 		return 0, errors.New("simulation HTTP request failed")
 	}
 	defer response.Body.Close()
+	defer io.Copy(io.Discard, io.LimitReader(response.Body, 65536))
 	if out != nil && response.StatusCode == 200 {
 		if e = json.NewDecoder(io.LimitReader(response.Body, 65536)).Decode(out); e != nil {
 			return response.StatusCode, errors.New("invalid bounded simulation response")

@@ -105,10 +105,10 @@ func run() error {
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	if engine != nil {
+	if engine != nil && backgroundWorkers {
 		go engine.Run(ctx)
 	}
-	if backend != nil {
+	if backend != nil && backgroundWorkers {
 		go func() {
 			ticker := time.NewTicker(time.Duration(c.Matching.ReconciliationSeconds) * time.Second)
 			defer ticker.Stop()

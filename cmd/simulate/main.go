@@ -40,8 +40,22 @@ func run() error {
 	if e != nil {
 		return e
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancel()
+	if s.Behavior != nil {
+		report, err := c.RunPopulation(ctx, s)
+		if err != nil {
+			report.Status = "failed"
+			report.Failure = err.Error()
+			_ = simulation.WritePopulationReport(*output, "data/tirana/roads.geojson", report)
+			return err
+		}
+		if err = simulation.WritePopulationReport(*output, "data/tirana/roads.geojson", report); err != nil {
+			return err
+		}
+		fmt.Printf("Population simulation: %d synthetic people; %d accepted credentials, %d invitations, %d arrivals, %d gatherings observed. %.1f wall seconds.\nReport: %s/index.html\n", s.Population, report.Counts["credentials_accepted"], report.Counts["credentials_invited"], report.Counts["arrivals_accepted"], report.Counts["gatherings_observed"], report.WallSeconds, *output)
+		return nil
+	}
 	report, e := c.Run(ctx, s)
 	if e != nil {
 		return e

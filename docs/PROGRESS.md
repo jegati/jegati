@@ -71,13 +71,12 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-The latest user request prioritizes planning Tirana population-response simulations
-before implementing/running the new suite. Present docs/SIMULATION_PLAN.md and the
-16–28-hour effort estimate; docs/MATCHING_PARAMETERS.md explains every current
-matching field, related settings, validation choices and inactive controls.
-The next implementation step is the scenario schema/event scheduler, followed by
-responses/journeys and replay/reporting. Milestone 09 remains pending behind this
-requested simulation work. No new response-population run has been claimed.
+Complete the authorized 3,000-person population simulation suite and review its
+reports. Current code includes event scheduling, weighted synthetic users, actual
+API responses/journeys/arrival, preserved application budgets, map replay and report
+checks. Run the six scenarios with three seeds plus the explicit finer-cell
+comparison and a repeatability check; finish documentation/commits with exact
+findings. Milestone 09 remains pending behind this simulation work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -258,3 +257,24 @@ this distinction, finer-grid exposure, and a possible explicit comparison.
 Schema 6 adds fractional radii/100 m grid support. Regression config fixtures are
 now separate from the user's editable operating config. Simulation actor/event
 work is ongoing; no completed 3,000-person result is claimed yet.
+
+
+## Population-response implementation and initial validation
+
+Added bounded event scheduling, configurable weighted inputs, real TCP peer groups,
+write pacing, actual API going/decline/late admission/nonce/arrival/retraction, and
+normalization of report-only gathering aliases. One-shot browser location remains
+mandatory in the product. Simulation worker timing is driven only by the authenticated
+virtual clock; normal builds retain real background timing.
+
+Initial exploratory 3,000-person baseline accepted all 3,000, observed 23 gatherings
+and 15 JEMI KËTU events, with 639 arrival claims in 203.5 real seconds. This was
+before the final journey-position/unique-actor reporting refinement; retain it as
+exploration, not the final experiment result. Radius 0.1/0.5 km actors received no
+invitations with 1,000 m cells. The 80-person guaranteed-success scenario passed
+all funnel/config/expiry checks with all 80 arriving and a confirmed gathering.
+
+Unit/race tests, a bounded exhaustive planner oracle, real-store tests, legacy
+simulation integration, and all 13 current-config browser checks passed. The
+standalone replay browser test passed on the exploratory 3,000-person artifact.
+The final 18-run suite and 100 m comparison are next. No real GPS or deployment.

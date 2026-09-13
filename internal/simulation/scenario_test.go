@@ -41,7 +41,7 @@ func TestDeterministicAndBounded(t *testing.T) {
 	if len(Generate(s, g)) != 400 {
 		t.Fatal("synthetic people were confused with credentials")
 	}
-	s.Population = 1001
+	s.Population = 10001
 	if s.Validate() == nil {
 		t.Fatal("unbounded population accepted")
 	}
