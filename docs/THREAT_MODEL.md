@@ -1,0 +1,50 @@
+# Initial threat model and evidence index
+
+Status: design only. No application, infrastructure control or security test has
+been implemented. Keep this document updated with actual test paths and reports
+as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
+defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.
+
+## Assets and trust boundaries
+
+Protect coarse participation, session capabilities, transient admission/arrival
+links, notification subscriptions and service integrity. Exact participant
+coordinates belong only on the device. Public map features and reviewed released
+aggregates are intentionally public.
+
+Boundaries: browser/OS → network/proxy → API → private ephemeral store/worker →
+public cache or optional push provider. The build pipeline and host administration
+are separate trust boundaries. An app without registration is not automatically
+anonymous to network providers or its operator.
+
+## Threats and planned evidence
+
+| Threat / actor | Planned mitigation | Evidence required; current gap |
+| --- | --- | --- |
+| Public scraper infers a participant | Fixed delayed releases, suppression/buckets, no individual/queryable counts | Map/history/cache composition and withdrawal/differencing tests; inference unresolved |
+| Enrolled attacker probes private decisions | Bounded admission/invites, stable threshold, no counts, coarse selection | Colluding enrollment, late-join and crossing-choice probe scenarios; no formal guarantee |
+| Sybil attacker fabricates signals/arrivals | Rate/admission budgets, temporary credentials, bounded challenges if useful | Measure false activations and shared-NAT fairness; unique humans unproven |
+| Client spoofs presence/replays requests | One-use nonce, eligibility, atomic one-claim rule, freshness | Replay/race/expiry tests; genuine physical presence unproven |
+| API client exhausts resources | Schema/body/deadline limits, bounded work/queues, rate limits | Sustained/burst/hotspot tests including accepted and rejected requests |
+| Network attacker overwhelms link | Hosting/edge protection plus cached public artifacts | Provider/deployment choice and operational exercise still required |
+| Store reader obtains live participation | Coarse minimal records, restricted roles, short retention, no persistence | Store ACL/expiry/index tests and restore inspection; live records remain exposed to privileged access |
+| Malicious operator observes/logs individuals | No individual admin UI, auditable configuration, restricted service access | Independent host inspection; privileged covert logging not prevented |
+| Provider correlates requests | First-party assets, no app access logs, optional generic push | Browser network capture and provider inventory; network/provider visibility remains |
+| Browser compromise steals capabilities | No third-party scripts, CSP, bounded client storage, header-only secrets | Browser security/network/storage tests; compromised device outside guarantee |
+| Build/deployment differs from source | Pinned build inputs, signatures/hashes, independent rebuild and host inspection | Artifact comparison and scoped audit; remote version claim is not proof |
+| Simulation reaches production | Separate origin/target allowlist, production excludes control routes | Production artifact/route inspection and rejected non-test destinations |
+
+## Evidence rules
+
+- Test with synthetic inputs only. Do not record real IPs, capabilities, push
+  endpoints, request bodies or participant records in reports.
+- Separate measured behavior, configuration inspection and architectural limits.
+  Do not treat an intended control, green unit test or README claim as deployment
+  evidence.
+- For each milestone link the relevant code/test/report here or in PROGRESS,
+  including failures and skipped checks. If an observable surface is unsafe,
+  withhold it and resolve the issue; do not compensate with a policy statement.
+- TTL must cover record links, indexes, queues, caches and subscriptions. Logical
+  expiry is distinct from removal of bytes or copies made outside the service.
+- Runtime endpoint/config hashes are useful comparison aids; independent remote
+  backend honesty remains unproven even when builds reproduce.

@@ -1,16 +1,33 @@
-## Hi there 👋
+# GATI 🦩
 
-<!--
-**jegati/jegati** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+**Bëje vullnetin tënd të dukshëm.**
 
-Here are some ideas to get you started:
+An anonymous, temporary expression of willingness to join collective real-world activity.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+**JAM GATI → JEMI GATI → JAM KËTU → JEMI KËTU**
+
+## Project status
+
+Preparation stage. No application has been implemented yet.
+
+Read the [development and verification plan](docs/DEVELOPMENT_PLAN.md) for the proposed architecture, 15 implementation commits, local Tirana simulation, privacy/security boundaries, and deployment verification process.
+
+The intended MVP is entirely Albanian, requires no account, and displays collective activity rather than individual participants. Local development and testing come first; public deployment depends on the evidence and release gates in the plan.
+
+## Contributor starting points
+
+- [Agent instructions](AGENTS.md): workflow, autonomy, product and privacy invariants.
+- [Progress and handoff](docs/PROGRESS.md): actual implementation state, checks and next action.
+- [Agreed requirements](docs/REQUIREMENTS.md): product scope and conversation corrections.
+- [Initial architecture decisions](docs/decisions/0001-mvp-boundaries.md): choices and consequences.
+- [Threat model](docs/THREAT_MODEL.md): intended controls, residual risks and evidence needed.
+
+Check local prerequisites without changing the computer:
+
+```sh
+bash scripts/doctor.sh
+```
+
+Missing required tools produce exit status 1. The checker does not install tools or
+verify Docker daemon access. Application startup and test commands will be added
+when implemented; commands in the plan are currently future targets.
