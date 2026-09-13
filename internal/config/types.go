@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 2
+const SchemaVersion = 3
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -28,6 +28,7 @@ type Geography struct {
 }
 
 type Matching struct {
+	InvitationCooldownSeconds   int    `yaml:"invitation_cooldown_seconds" json:"invitation_cooldown_seconds"`
 	ActivationCount             int    `yaml:"activation_count" json:"activation_count"`
 	ActivationStabilitySeconds  int    `yaml:"activation_stability_seconds" json:"activation_stability_seconds"`
 	MaximumDebounceSeconds      int    `yaml:"maximum_debounce_seconds" json:"maximum_debounce_seconds"`
@@ -70,6 +71,7 @@ type Notifications struct {
 }
 
 type Limits struct {
+	MaxDeclinesPerSignal       int `yaml:"max_declines_per_signal" json:"max_declines_per_signal"`
 	MaxBodyBytes               int `yaml:"max_body_bytes" json:"max_body_bytes"`
 	NetworkWindowSeconds       int `yaml:"network_window_seconds" json:"network_window_seconds"`
 	RequestsPerNetworkWindow   int `yaml:"requests_per_network_window" json:"requests_per_network_window"`

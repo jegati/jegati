@@ -26,6 +26,7 @@ var ErrConflict = errors.New("capability already used")
 var ErrCapacity = errors.New("admission capacity reached")
 
 type Signal struct {
+	InviteAfter         int64           `json:"_invite_after,omitempty"`
 	Pending             string          `json:"_pending,omitempty"`
 	PendingUntil        int64           `json:"_pending_until,omitempty"`
 	Gathering           string          `json:"_gathering,omitempty"`
@@ -66,7 +67,7 @@ func decode(raw string) (Signal, error) {
 	return s, nil
 }
 
-var create = newScript(`
+const createLua = `
 __CLOCK__
 local old=redis.call('GET',KEYS[1])
 if old then
@@ -84,8 +85,11 @@ redis.call('SET',KEYS[2],'used','PX',ARGV[4])
 redis.call('ZADD',KEYS[3],expiry,ARGV[6])
 redis.call('ZADD',KEYS[4],expiry,ARGV[7])
 for n=3,4 do if redis.call('PTTL',KEYS[n])<tonumber(ARGV[4]) then redis.call('PEXPIRE',KEYS[n],ARGV[4]) end end
+redis.call('SET','gati:dirty','1','PX',10000)
 return s
-`)
+`
+
+var create = newScript(createLua)
 
 func (s *Store) Create(ctx context.Context, hash, cell string, radius, minutes int, ttl time.Duration, capacity int) (Signal, error) {
 	raw, err := create.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell}, cell, radius, minutes, ttl.Milliseconds(), capacity, hash+"|"+cell, hash).Text()
@@ -127,6 +131,7 @@ local s=cjson.decode(raw)
 redis.call('DEL',KEYS[1])
 redis.call('ZREM',KEYS[2],ARGV[1]..'|'..s.cell)
 redis.call('ZREM','gati:cell:'..s.cell,ARGV[1])
+redis.call('SET','gati:dirty','1','PX',10000)
 return 1
 `)
 
@@ -198,6 +203,7 @@ func newScript(source string) *redis.Script {
 
 // Public removes private matching bookkeeping from the own-session API contract.
 func (s Signal) Public() Signal {
+	s.InviteAfter = 0
 	s.Pending = ""
 	s.PendingUntil = 0
 	s.Gathering = ""

@@ -8,13 +8,14 @@ import (
 	"fmt"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/store"
+	"github.com/jegati/jegati/internal/worker"
 	"net/http"
 	"time"
 
 	"github.com/jegati/jegati/internal/config"
 )
 
-func Handler(c config.Config, backend *store.Store, roads []byte) http.Handler {
+func Handler(c config.Config, backend *store.Store, roads []byte, engines ...*worker.Engine) http.Handler {
 	data, hash := c.Canonical()
 	envelope, _ := json.Marshal(struct {
 		SchemaVersion int             `json:"schema_version"`
@@ -23,10 +24,16 @@ func Handler(c config.Config, backend *store.Store, roads []byte) http.Handler {
 	}{config.SchemaVersion, hash, data})
 	mux := http.NewServeMux()
 	grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
-	signal := signalAPI{c, grid, backend}
+	signal := signalAPI{config: c, grid: grid, store: backend}
+	if len(engines) > 0 {
+		signal.engine = engines[0]
+	}
 	mux.HandleFunc("POST /api/signals", signal.create)
 	mux.HandleFunc("GET /api/signal", signal.status)
 	mux.HandleFunc("DELETE /api/signal", signal.cancel)
+	mux.HandleFunc("POST /api/going", signal.changeIntent)
+	mux.HandleFunc("POST /api/join", signal.join)
+	mux.HandleFunc("POST /api/decline", signal.changeIntent)
 	mux.HandleFunc("GET /api/geography", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		json.NewEncoder(w).Encode(grid)
@@ -59,7 +66,7 @@ func Handler(c config.Config, backend *store.Store, roads []byte) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
-		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(r.Method == "POST" && r.URL.Path == "/api/signals") && !(r.Method == "DELETE" && r.URL.Path == "/api/signal") {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(r.Method == "POST" && (r.URL.Path == "/api/signals" || r.URL.Path == "/api/going" || r.URL.Path == "/api/decline" || r.URL.Path == "/api/join")) && !(r.Method == "DELETE" && r.URL.Path == "/api/signal") {
 			w.Header().Set("Allow", "GET, HEAD")
 			writeError(w, http.StatusMethodNotAllowed)
 			return

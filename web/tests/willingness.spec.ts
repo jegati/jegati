@@ -92,3 +92,37 @@ test('small screen and keyboard map selection', async ({ page }) => {
   await expect(page.locator('#map')).toHaveAttribute('data-ready', 'true');
   await page.screenshot({ path: '../reports/local/willingness-mobile.png', fullPage: true });
 });
+
+test('real collective invitation, going and JO TANI preserve willingness', async ({ page, request }) => {
+  test.setTimeout(65_000);
+  const config = (await (await request.get('/api/config')).json()).config;
+  const tokens: string[] = [];
+  try {
+    // Synthetic founding signals use the same coarse cell as the browser map center.
+    for (let i = 1; i < config.matching.activation_count; i++) {
+      const token = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url'); tokens.push(token);
+      const response = await request.post('/api/signals', { headers: { Authorization: `Bearer ${token}` }, data: { cell: 'tirana-v1:1000:5:5', radius_km: 3, availability_minutes: 30 } });
+      expect(response.status()).toBe(200);
+    }
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Zgjidh zonën në qendër të hartës' }).click();
+    await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
+    await expect(page.locator('#destination-map')).toHaveAttribute('data-ready', 'true');
+    await page.screenshot({ path: '../reports/local/invitation.png', fullPage: true });
+    const destination = await page.locator('#destination').textContent();
+    await page.getByRole('button', { name: 'PO, PO SHKOJ', exact: true }).click();
+    await expect(page.locator('#going-status')).toHaveText('Ke zgjedhur të shkosh.');
+    await page.getByRole('button', { name: 'Nuk po shkoj më' }).click();
+    await expect(page.locator('#status')).toHaveText('Në rregull. Gatishmëria jote vazhdon.');
+    await expect(page.locator('#invitation')).toBeHidden();
+    await expect(page.getByRole('heading', { name: 'JAM GATI.', exact: true })).toBeVisible();
+    expect(destination).toContain('Vendkalim');
+    await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
+    await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
+  } finally {
+    for (const token of tokens) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${token}` } });
+    const activeToken = await page.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('gati-session-v1') ?? 'null')?.token; } catch { return null; } }).catch(() => null);
+    if (activeToken) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${activeToken}` } });
+  }
+});

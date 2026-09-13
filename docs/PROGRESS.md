@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–06 complete; next is continuous activation and late admission.
+Updated: 2026-09-13. Status: milestones 02–07 implemented; next is arrival claims and confirmation.
 
 ## Current task and authorization
 
@@ -34,7 +34,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
 | 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
 | 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
-| 07 — Continuous activation and late admission | In progress | Pure planner and bounded founding-cohort decision tested; Valkey reservations, scheduling, atomic activation/admission and UI remain |
+| 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Not started | Founding/late participants, nonces/freshness/retraction |
 | 09 — Aggregate map/statistics | Not started | Canonical releases and inference review |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
@@ -71,10 +71,10 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 07: continuous threshold stability, crossing allocation,
-fixed destinations/deadlines, invitation state and late admission. Extend the
-simulator with deterministic activation/decline/late-join scenarios as these land.
-Docker and the local Compose willingness app remain available on loopback.
+Implement milestone 08: shared founding/late arrival nonce, fresh coarse location
+claims, retraction/expiry, stable JEMI KËTU and arrival UI. Keep reviewing cross-surface
+privacy and scaling; neither is certified. The public-card client connection to
+atomic direct join belongs with maps/notifications (09–10).
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -141,3 +141,26 @@ founder replacement refusal, replay-stable destination/deadline and removal of
 private bookkeeping from own-session JSON. `make test-store` passed.
 Founding transactions currently support activation thresholds up to 500; validation
 rejects larger thresholds and thresholds exceeding configured signal capacity.
+
+## Milestone 07 integration evidence
+
+The running code now schedules the transactions and serves Albanian invitations,
+going and decline. The engine uses a short Valkey lease, coalesced dirty flag,
+2-second timer checks and 10-second reconciliation defaults. Snapshot records are
+read in bounded pages; only destination records are cached between runs. Atomic
+transitions protect against stale/racing plans. Throughput/failover timing remains
+unbenchmarked; pending/open-index cleanup and worst-case scheduling need hardening.
+
+Schema 3 adds invitation cooldown and maximum temporary decline links. Config, unit,
+race, native build/smoke, real-store and Compose checks passed. Six Chromium checks
+passed against built assets and the real API, including collective invitation,
+going, decline and both map renders. Inspected synthetic destination screenshots.
+Simulation tests exercise the real Tirana index/API at 9,999ms and 10,000ms, late
+admission with fixed destination/end, decline retention, cutoff rejection, atomic
+new-recipient join without side effects on failure and expiry. The normal binary
+still omits simulation controls. The Sybil fixture remains 59/238 accepted credentials.
+
+Outstanding release work includes map-update closure, worker failure observability,
+load/fairness/missed-match measurement, comprehensive lifecycle/privacy review and
+the later arrival/aggregate/notification/deployment features. These are tracked
+gates, not completed protections.

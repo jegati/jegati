@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/jegati/jegati/internal/worker"
 	"io"
 	"mime"
 	"net"
@@ -21,6 +22,7 @@ import (
 )
 
 type signalAPI struct {
+	engine *worker.Engine
 	config config.Config
 	grid   geography.Grid
 	store  *store.Store
@@ -109,7 +111,7 @@ func (s signalAPI) authorized(w http.ResponseWriter, r *http.Request) (string, b
 			return "", false
 		}
 	}
-	if r.Method == "POST" {
+	if r.Method == "POST" && (r.URL.Path == "/api/signals" || r.URL.Path == "/api/join") {
 		ok, err = s.store.Allow(ctx, "creates:"+key, s.config.Limits.NewSignalsPerNetworkWindow, time.Duration(s.config.Limits.NetworkWindowSeconds)*time.Second)
 		if err != nil {
 			writeError(w, 503)
@@ -149,7 +151,7 @@ func (s signalAPI) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(signal.Public())
+	s.respond(w, r, hash, signal)
 }
 func readCreate(body io.Reader) (createRequest, error) {
 	var request createRequest
@@ -209,7 +211,7 @@ func (s signalAPI) status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(value.Public())
+	s.respond(w, r, hash, value)
 }
 func (s signalAPI) cancel(w http.ResponseWriter, r *http.Request) {
 	hash, ok := s.authorized(w, r)

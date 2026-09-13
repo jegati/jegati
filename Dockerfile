@@ -11,6 +11,7 @@ FROM scratch
 COPY --from=build /gati /gati
 COPY config/gati.yaml /config/gati.yaml
 COPY data/tirana/roads.geojson /data/tirana/roads.geojson
+COPY data/tirana/crossings.json /data/tirana/crossings.json
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/gati"]

@@ -43,3 +43,8 @@ are starting controls, not evidence of effective Sybil resistance at production 
 The current bounded activation transaction accepts `matching.activation_count` up
 to 500 and no greater than `limits.max_active_signals`. This is an implementation
 work bound; larger crowds can use late admission without a larger founding write.
+
+Schema 3 adds `matching.invitation_cooldown_seconds` (default 60; production floor
+30; maximum 300) and `limits.max_declines_per_signal` (default 32, maximum 128).
+These bound repeat invitations and temporary declined-gathering links. Once the
+link budget is reached, automatic invitations stop for that willingness session.

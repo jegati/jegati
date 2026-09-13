@@ -79,3 +79,12 @@ a deadline-scored `gatherings` index, with TTL at the fixed end (maximum 60 minu
 No permanent founder/member history is retained in the gathering record.
 Every activation rechecks all surviving founders and the configuration version.
 These records are not public APIs. Worker sweeps/recovery/admission still need wiring.
+
+The worker is now scheduled. `dirty` is a coalesced ten-second flag; `worker:lease`
+is an expiring random process token, unrelated to participants. Worker snapshot
+pages are transient input; the between-run cache contains only gathering
+(destinations/deadlines) records. Founding links remain internal. Decline maps and
+`_invite_after` have the signal's original TTL and configured cardinality/cooldown
+bounds. Going/decline/switch never extend that TTL. Atomic direct join validates a
+live reachable destination before creating willingness, with no orphan signal on
+rejection. No arrival/member counts exist yet.

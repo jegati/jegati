@@ -74,3 +74,19 @@ clock/source records are never served by the product routes. Synthetic reports
 contain no capabilities and live outside production build inputs. Scenarios expose
 that one-network limits still admitted more credentials than synthetic humans.
 They establish neither independent arrivals nor resistance to distributed Sybils.
+
+### Implemented private gathering flow (milestone 07)
+
+Reservations lock the same bounded founding cohort through stability; atomic
+activation rechecks immutable geographic claims, availability and configuration.
+Public serialization removes reservation IDs, founder hashes and decline links.
+Private invitations expose a collective crossing/time event, not counts. New
+recipients can atomically join without an orphan willingness on rejection. Going
+and decline revalidate expiry, reachability and state; retries do not renew time.
+Cached destination offers are revalidated against the live store before admission.
+
+This does not solve colluding threshold probes or nearest-crossing inference. Full
+cross-surface review is still a release gate. The worker's snapshot/selection cost,
+lease recovery, fairness, same-crossing conflicts and temporary-index cleanup need
+stress/failure testing. Config changes invalidate pending reservations; handling a
+removed crossing in an already-open gathering remains hardening work.

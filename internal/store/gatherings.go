@@ -194,3 +194,100 @@ func (s *Store) EligibleSnapshot(ctx context.Context, grid geography.Grid, now i
 	}
 	return result, nil
 }
+
+// OpenGatherings returns private worker input, never a public aggregate endpoint.
+func (s *Store) OpenGatherings(ctx context.Context, now int64, maximum int) ([]Gathering, error) {
+	ids, e := s.Client.ZRangeByScore(ctx, keyPrefix+"gatherings", &redis.ZRangeBy{Min: strconv.FormatInt(now+1, 10), Max: "+inf", Count: int64(maximum)}).Result()
+	if e != nil {
+		return nil, e
+	}
+	out := []Gathering{}
+	for offset := 0; offset < len(ids); offset += 500 {
+		end := min(offset+500, len(ids))
+		pipe := s.Client.Pipeline()
+		commands := []*redis.StringCmd{}
+		for _, id := range ids[offset:end] {
+			commands = append(commands, pipe.Get(ctx, keyPrefix+"gathering:"+id))
+		}
+		_, e = pipe.Exec(ctx)
+		if e != nil && e != redis.Nil {
+			return nil, e
+		}
+		for _, command := range commands {
+			raw, e := command.Result()
+			if e == redis.Nil {
+				continue
+			}
+			if e != nil {
+				return nil, e
+			}
+			var g Gathering
+			if e = json.Unmarshal([]byte(raw), &g); e != nil {
+				return nil, e
+			}
+			if g.EndsAt > now {
+				out = append(out, g)
+			}
+		}
+	}
+	return out, nil
+}
+func (s *Store) PendingReservations(ctx context.Context, maximum int) ([]Reservation, error) {
+	ids, e := s.Client.ZRangeByScore(ctx, keyPrefix+"pending", &redis.ZRangeBy{Min: "-inf", Max: "+inf", Count: int64(maximum)}).Result()
+	if e != nil {
+		return nil, e
+	}
+	out := []Reservation{}
+	for _, id := range ids {
+		raw, e := s.Client.Get(ctx, keyPrefix+"pending:"+id).Result()
+		if e == redis.Nil {
+			continue
+		}
+		if e != nil {
+			return nil, e
+		}
+		var p Reservation
+		if e = json.Unmarshal([]byte(raw), &p); e != nil {
+			return nil, e
+		}
+		out = append(out, p)
+	}
+	return out, nil
+}
+
+var readGathering = newScript(`
+__CLOCK__
+local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
+if cjson.decode(raw).ends_at<=now then return 'GONE' end
+return raw
+`)
+
+func (s *Store) GatheringByID(ctx context.Context, id string) (Gathering, error) {
+	var g Gathering
+	raw, e := readGathering.Run(ctx, s.Client, []string{keyPrefix + "gathering:" + id}).Text()
+	if e != nil {
+		return g, errors.New("gathering unavailable")
+	}
+	if raw == "GONE" {
+		return g, ErrGone
+	}
+	e = json.Unmarshal([]byte(raw), &g)
+	return g, e
+}
+
+var lease = newScript(`
+local old=redis.call('GET',KEYS[1]);if old and old~=ARGV[1] then return 0 end
+redis.call('SET',KEYS[1],ARGV[1],'PX',ARGV[2]);return 1
+`)
+
+func (s *Store) MatchingLease(ctx context.Context, owner string, ttlMS int64) (bool, error) {
+	n, e := lease.Run(ctx, s.Client, []string{keyPrefix + "worker:lease"}, owner, ttlMS).Int()
+	return n == 1, e
+}
+
+var consumeDirty = newScript(`local v=redis.call('GET',KEYS[1]);redis.call('DEL',KEYS[1]);if v then return 1 end;return 0`)
+
+func (s *Store) ConsumeDirty(ctx context.Context) (bool, error) {
+	n, e := consumeDirty.Run(ctx, s.Client, []string{keyPrefix + "dirty"}).Int()
+	return n == 1, e
+}

@@ -14,6 +14,35 @@ let session = sessions.restore(), selected: string | null = null, busy = false;
 let pollSeconds = 30, nextPoll = 0, failures = 0;
 let map: maplibregl.Map | undefined;
 let initialized = false;
+interface Invitation { id: string; crossing: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
+let invitation: Invitation | null = null, going = false, destinationMap: maplibregl.Map | undefined;
+let renderedDestination: string | null = null;
+function invitationView() {
+  const card = el('invitation'); card.hidden = !invitation;
+  if (!invitation) { destinationMap?.remove(); destinationMap = undefined; renderedDestination = null; return; }
+  el('destination').textContent = invitation.crossing.label;
+  el('gathering-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((invitation.ends_at - Date.now()) / 60_000))} minutash.`;
+  el('going-status').textContent = going ? 'Ke zgjedhur të shkosh.' : 'Mund të zgjedhësh nëse do të shkosh.';
+  el<HTMLButtonElement>('going').hidden = going;
+  el<HTMLButtonElement>('going').disabled = busy;
+  el<HTMLButtonElement>('decline').disabled = busy;
+  el('decline').textContent = going ? 'Nuk po shkoj më' : 'JO TANI';
+  if (renderedDestination === invitation.id) return;
+  destinationMap?.remove(); renderedDestination = invitation.id; el('destination-map').removeAttribute('data-ready');
+  try {
+    destinationMap = new maplibregl.Map({ container: 'destination-map', center: invitation.crossing.point, zoom: 15,
+      attributionControl: false, locale: { 'Map.Title': 'Harta e pikës së takimit' },
+      style: { version: 8, sources: { roads: { type: 'geojson', data: '/api/map/roads' } }, layers: [
+        { id: 'background', type: 'background', paint: { 'background-color': '#f0eee6' } },
+        { id: 'roads', type: 'line', source: 'roads', paint: { 'line-color': '#bec3b8', 'line-width': 3 } }] } });
+    destinationMap.on('idle', () => { el('destination-map').setAttribute('data-ready', 'true'); });
+    // This marker is the shared mapped destination, never a person's position.
+    const marker = document.createElement('span'); marker.className = 'destination-marker'; marker.textContent = '🦩'; marker.setAttribute('role', 'img'); marker.setAttribute('aria-label', 'Pika e takimit');
+    new maplibregl.Marker({ element: marker }).setLngLat(invitation.crossing.point).addTo(destinationMap);
+    destinationMap.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '© OpenStreetMap · ODbL' }));
+    destinationMap.getCanvas().setAttribute('aria-label', 'Pika e takimit pranë vendkalimit për këmbësorë');
+  } catch { el('destination-map').textContent = 'Harta nuk mund të hapet në këtë pajisje.'; }
+}
 const message = (text: string) => { status.textContent = text; };
 function render() {
   form.hidden = session !== null; active.hidden = session === null;
@@ -21,15 +50,16 @@ function render() {
   ready.disabled = busy || !selected;
   retry.hidden = !session || session.confirmed;
   el('active-title').textContent = session?.confirmed ? 'JAM GATI.' : 'Po kontrollojmë gatishmërinë…';
+  invitationView();
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
-  session = null; sessions.clear(); selected = null;
+  session = null; sessions.clear(); selected = null; invitation = null; going = false;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
   el('area-status').textContent = 'Ende nuk ke zgjedhur zonë.';
   render(); map?.resize(); message(text);
 }
-async function request(method: string, path: string, body?: sessions.Willingness) {
+async function request(method: string, path: string, body?: unknown) {
   if (!session || session.expires <= Date.now()) { end('Gatishmëria përfundoi.'); throw new Error('expired'); }
   return fetch(path, { method, credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10_000),
     headers: { Authorization: `Bearer ${session.token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
@@ -49,6 +79,7 @@ async function sync(create = false) {
       // own clock/deadline even if this browser's wall clock has been changed.
       session.expires = Math.min(session.expires, signal.expires_at);
       session.confirmed = true; sessions.save(session);
+      invitation = signal.invitation ?? null; going = signal.state === 'going';
       failures = 0; message('Gatishmëria jote është aktive.');
     }
   } catch { failures = Math.min(failures + 1, 4); message('Lidhja u ndërpre. Gatishmëria mund të jetë aktive; provo përsëri.'); }
@@ -72,11 +103,27 @@ cancel.onclick = async () => {
   finally { busy = false; render(); }
 };
 
+async function intent(action: 'going' | 'decline') {
+  if (!session || !invitation || busy) return;
+  busy = true; render();
+  try {
+    const response = await request('POST', `/api/${action}`, { gathering_id: invitation.id });
+    if (response.status === 410) { invitation = null; going = false; message('Ky takim nuk është më i hapur për t’u bashkuar. Gatishmëria jote mund të vazhdojë.'); return; }
+    if (!response.ok) throw new Error('unavailable');
+    const signal = await response.json();
+    invitation = signal.invitation ?? null; going = signal.state === 'going';
+    message(action === 'going' ? 'Zgjedhja u ruajt.' : 'Në rregull. Gatishmëria jote vazhdon.');
+  } catch { message('Zgjedhja nuk u konfirmua. Provo përsëri.'); }
+  finally { busy = false; render(); }
+}
+el<HTMLButtonElement>('going').onclick = () => { void intent('going'); };
+el<HTMLButtonElement>('decline').onclick = () => { void intent('decline'); };
+
 async function start() {
   const [configResponse, gridResponse] = await Promise.all(['/api/config', '/api/geography'].map(url => fetch(url, { credentials: 'omit', cache: 'no-store' })));
   if (!configResponse.ok || !gridResponse.ok) throw new Error('unavailable');
   const configuration = await configResponse.json();
-  if (configuration.schema_version !== 2) throw new Error('unsupported schema');
+  if (configuration.schema_version !== 3) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   pollSeconds = config.notifications.foreground_poll_seconds;
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));
@@ -124,14 +171,15 @@ async function start() {
   message('');
   if (session) await sync();
   setInterval(() => {
-    if (session && session.expires <= Date.now() && !busy) end('Gatishmëria përfundoi.');
+    if (invitation && invitation.ends_at <= Date.now()) { invitation = null; going = false; }
+    if (session && session.expires <= Date.now()) end('Gatishmëria përfundoi.');
     if (session && session.confirmed && !document.hidden && Date.now() >= nextPoll) void sync();
     if (session) render();
   }, 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && session) void sync(); });
 }
 setInterval(() => {
-  if (session && session.expires <= Date.now() && !busy) {
+  if (session && session.expires <= Date.now()) {
     if (initialized) end('Gatishmëria përfundoi.');
     else { session = null; sessions.clear(); active.hidden = true; message('Gatishmëria përfundoi.'); }
   }

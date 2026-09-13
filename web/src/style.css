@@ -22,3 +22,7 @@ fieldset { padding: 0; border: 0; min-width: 0; }.hint { font-size: .9rem; margi
 #active { background: #f4e8e6; padding: 1.5rem; border-radius: 1rem; margin-top: 2rem; }h2 { margin-top: 0; }#active button { margin: .3rem .3rem .3rem 0; }
 #status { min-height: 1.5rem; }footer { font-size: .8rem; margin-top: 1.5rem; }.maplibregl-ctrl-attrib { font-size: 10px; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+#invitation { border-top: 1px solid #cdb8c0; padding-block: 1rem; margin-top: 1rem; }
+#invitation h3 { font-size: 1.8rem; margin-top: 0; }
+#destination-map { height: 220px; border-radius: .8rem; overflow: hidden; }
+.destination-marker { display: grid; place-items: center; width: 48px; height: 48px; font-size: 2rem; background: #fff8f3; border: 2px solid #963754; border-radius: 50%; padding: .25rem; }

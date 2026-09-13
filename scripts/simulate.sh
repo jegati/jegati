@@ -44,4 +44,5 @@ for _ in {1..100};do
 done
 bin/gati-simulate -target "http://127.0.0.1:$api_port" -scenario "simulation/scenarios/${SCENARIO:-tirana-evening}.yaml" -seed "${SEED:-42}"
 
-GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -tags simulation -count=1 ./internal/store -run TestSimulationClockAndNamespace
+kill "$api_pid";wait "$api_pid";api_pid=""
+GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -p 1 -tags simulation -count=1 ./internal/store ./internal/httpapi -run "TestSimulationClockAndNamespace|TestSimulatedContinuousActivationAndLateAdmission"

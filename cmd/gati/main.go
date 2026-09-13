@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/store"
+	"github.com/jegati/jegati/internal/worker"
 	"io"
 	"log"
 	"net"
@@ -32,6 +35,7 @@ func run() error {
 	address := flag.String("listen", "127.0.0.1:8080", "HTTP bind address")
 	storeAddress := flag.String("store-address", "", "Valkey address (empty disables participant writes)")
 	passwordFile := flag.String("store-password-file", "", "mounted service password file")
+	crossingFile := flag.String("crossings", "data/tirana/crossings.json", "versioned public crossing dataset")
 	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
 	flag.Parse()
 	if flag.NArg() != 0 {
@@ -77,13 +81,33 @@ func run() error {
 	if e != nil {
 		return errors.New("cannot read public map asset")
 	}
-	handler, e := configureHandler(c, backend, roads)
+	var engine *worker.Engine
+	if backend != nil {
+		raw, e := os.ReadFile(*crossingFile)
+		if e != nil {
+			return errors.New("cannot read crossing dataset")
+		}
+		var dataset geography.Dataset
+		if json.Unmarshal(raw, &dataset) != nil || dataset.Version != c.Geography.CrossingDataset {
+			return errors.New("crossing dataset version mismatch")
+		}
+		grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
+		index, e := geography.NewIndex(grid, dataset.Crossings, c.Geography.TravelRadiusChoicesKm)
+		if e != nil {
+			return e
+		}
+		engine = worker.New(backend, index, c)
+	}
+	handler, e := configureHandler(c, backend, roads, engine)
 	if e != nil {
 		return e
 	}
 	server := &http.Server{Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if engine != nil {
+		go engine.Run(ctx)
+	}
 	if backend != nil {
 		go func() {
 			ticker := time.NewTicker(time.Duration(c.Matching.ReconciliationSeconds) * time.Second)
