@@ -13,7 +13,7 @@ The operating default is 100 m cells with a 50 m maximum reported device error.
 
 Milestones 02–08 are complete: configuration, coarse Tirana geography, expiring
 willingness APIs and the Albanian browser participation flow. The UI supports
-required one-shot device location, availability/radius choices,
+one-action JAM GATI with required one-shot device location, availability/radius choices,
 reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
 implemented. Delayed aggregate statistics and a cell-only public activity map now
@@ -74,3 +74,7 @@ Run `make browser-install` once, then `make test-browser` with the Compose API u
 
 Original source and documentation are licensed under [AGPL-3.0-or-later](LICENSE).
 See [third-party notices](THIRD_PARTY.md) for dependency and future map-data terms.
+
+Selected usability work is tracked in [the implementation plan](docs/USABILITY_IMPLEMENTATION_PLAN.md).
+Private destination preview before a map join and clearer waiting/offline/arrival-expiry
+guidance are implemented. Previewing or cancelling a preview never enrolls you.

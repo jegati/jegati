@@ -187,3 +187,18 @@ checks nor the accepted nested/threshold-inference fixtures establish anonymity.
 Capture is a bounded interval, so cancellation after observation may remain in that
 release; no per-participant capture history is persisted. Push-related controls in
 the plan remain unimplemented, and no subscriptions/provider calls are active.
+
+### Explicit destination preview (decision 0008)
+
+`POST /api/gathering-preview` can disclose a published gathering's exact mapped
+crossroad to an eligible coarse location claim before attendance commitment. This
+expands the accepted destination-inference surface: willingness is not required for
+this query and a scripted client can invent claims. The header capability is random;
+new preview capabilities stay in page memory and no participant/preview record is
+created. Existing signals must use their immutable claim. Strict body/origin/query
+checks, shared admission/write rate limits, current released-ID gating, live
+reachability/cutoff checks and no-store bound the endpoint. Response lifetime uses
+`geography.location_fix_max_age_seconds` and earlier public/live deadlines. Final
+admission revalidates eligibility; a preview neither reserves a place nor guarantees
+later admission. Public maps/snapshots remain cell-only. Fixed-clock store/API and
+browser tests cover no enrollment, unchanged public release and preview expiry.

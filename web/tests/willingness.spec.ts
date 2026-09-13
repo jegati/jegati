@@ -15,8 +15,7 @@ test('device area, minimum duration, reload and neutral cancellation against rea
   await expect(page.locator('#map')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('html')).toHaveAttribute('lang', 'sq');
   await expect(page.locator('#duration option')).toHaveText(['30 minuta', '60 minuta', '90 minuta', '120 minuta']);
-  await expect(page.getByRole('button', { name: 'JAM GATI', exact: true })).toBeDisabled();
-  await page.getByRole('button', { name: 'Përdor vendndodhjen një herë' }).click();
+  await expect(page.getByRole('button', { name: 'JAM GATI', exact: true })).toBeEnabled();
   const created = page.waitForRequest(r => r.url().endsWith('/api/signals') && r.method() === 'POST');
   await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
   const request = await created;
@@ -43,8 +42,6 @@ test('one-shot device location sends only the coarse cell, including browser sto
   const outbound: string[] = [];
   page.on('request', r => outbound.push(r.url() + (r.postData() ?? '')));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Përdor vendndodhjen një herë' }).click();
-  await expect(page.locator('#area-status')).toContainText('Zona u mor nga pajisja');
   await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'JAM GATI.', exact: true })).toBeVisible();
   const storage = await page.evaluate(() => JSON.stringify({ ...sessionStorage, ...localStorage }));
@@ -55,7 +52,6 @@ test('one-shot device location sends only the coarse cell, including browser sto
 
 test('lost create response reuses capability and deadline; failed cancel is not reported as successful', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Përdor vendndodhjen një herë' }).click();
   let firstToken: string | undefined, firstDeadline: number | undefined;
   await page.route('**/api/signals', async route => {
     firstToken = route.request().headers().authorization;
@@ -91,12 +87,14 @@ test('expired restored credential is removed before any authenticated request', 
 test('small screen and keyboard device-location action', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  const select = page.getByRole('button', { name: 'Përdor vendndodhjen një herë' });
+  const select = page.getByRole('button', { name: 'JAM GATI', exact: true });
   await select.focus(); await page.keyboard.press('Enter');
-  await expect(page.locator('#ready')).toBeEnabled();
+  await expect(page.locator('#active-title')).toHaveText('JAM GATI.');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.locator('#map')).toHaveAttribute('data-ready', 'true');
   await page.screenshot({ path: '../reports/local/willingness-mobile.png', fullPage: true });
+  await page.locator('#cancel').click();
+  await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
 });
 
 test('real collective invitation, arrival retry, retraction and decline', async ({ page, request, context }) => {
@@ -114,8 +112,7 @@ test('real collective invitation, arrival retry, retraction and decline', async 
       expect(response.status()).toBe(200);
     }
     await page.goto('/');
-    await page.getByRole('button', { name: 'Përdor vendndodhjen një herë' }).click();
-    await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
+      await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
     await expect(page.locator('#destination-map')).toHaveAttribute('data-ready', 'true');
     await page.screenshot({ path: '../reports/local/invitation.png', fullPage: true });
@@ -167,8 +164,7 @@ test('cancellation stays available during an in-flight creation and late respons
   });
   try {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Përdor vendndodhjen një herë' }).click();
-    await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
+      await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
     await created;
     await expect(page.getByRole('button', { name: 'Mbyll gatishmërinë' })).toBeEnabled();
     await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
@@ -190,11 +186,11 @@ test('map interactions cannot supply or change location; denied device access st
   await expect(page.locator('#map')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('#map-center')).toHaveCount(0);
   await page.locator('#map').click({ position: { x: 50, y: 50 } });
-  await expect(page.locator('#ready')).toBeDisabled();
-  await page.locator('#location').click();
+  await expect(page.locator('#ready')).toBeEnabled();
+  await page.locator('#ready').click();
   await expect(page.locator('#area-status')).toContainText('Lejo vendndodhjen');
   await page.locator('#map canvas').focus(); await page.keyboard.press('ArrowRight');
-  await expect(page.locator('#ready')).toBeDisabled();
+  await expect(page.locator('#ready')).toBeEnabled();
   expect(writes).toEqual([]);
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
 });
@@ -207,19 +203,26 @@ for (const reason of ['poor accuracy', 'stale fix', 'outside Tirana', 'unavailab
         coords: { latitude: reason === 'outside Tirana' ? 42 : 41.32754321, longitude: 19.81812345, accuracy: reason === 'poor accuracy' ? 5000 : 20 },
       } as GeolocationPosition),
     } }), reason);
-    await page.goto('/'); await page.locator('#location').click();
+    await page.goto('/'); await page.locator('#ready').click();
     await expect(page.locator('#area-status')).toContainText(reason === 'outside Tirana' ? 'vetëm Tiranën' : reason === 'unavailable service' ? 'Lejo vendndodhjen' : 'jo mjaftueshëm e saktë');
-    await expect(page.locator('#ready')).toBeDisabled();
+    await expect(page.locator('#ready')).toBeEnabled();
   });
 }
 
-test('device fix expires before willingness submission without continuous tracking', async ({ page }) => {
-  await page.clock.install();
-  await page.goto('/'); await page.locator('#location').click();
+test('one-action location is never requested on load and cancellation ignores a late device callback', async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as any).locationCalls = 0;
+    Object.defineProperty(navigator, 'geolocation', { value: { getCurrentPosition: (success: PositionCallback) => { (window as any).locationCalls++; (window as any).latePosition = success; } } });
+  });
+  const writes: string[] = []; page.on('request', r => { if (r.method() === 'POST') writes.push(r.url()); });
+  await page.goto('/'); await expect(page.locator('#ready')).toBeEnabled();
+  expect(await page.evaluate(() => (window as any).locationCalls)).toBe(0);
+  await page.locator('#ready').click();
+  await expect(page.locator('#location-cancel')).toBeVisible();
+  await page.locator('#location-cancel').click();
   await expect(page.locator('#ready')).toBeEnabled();
-  await page.locator('#map').click({ position: { x: 40, y: 40 } });
-  await expect(page.locator('#area-status')).toContainText('Zona u mor nga pajisja');
-  await page.clock.fastForward(61_000);
-  await expect(page.locator('#ready')).toBeDisabled();
-  await expect(page.locator('#area-status')).toContainText('Merr sërish vendndodhjen');
+  await page.evaluate(() => (window as any).latePosition({ timestamp: Date.now(), coords: { latitude: 41.327, longitude: 19.818, accuracy: 20 } }));
+  await expect(page.locator('#active')).toBeHidden();
+  expect(writes).toEqual([]); expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
+  expect(await page.evaluate(() => (window as any).locationCalls)).toBe(1);
 });

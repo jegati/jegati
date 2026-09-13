@@ -20,16 +20,19 @@
         </div>
         <fieldset><legend>Ku je afërsisht?</legend>
           <p class="hint">Lejo vendndodhjen nga pajisja. Dërgohet vetëm zona e përafërt.</p>
-          <div class="area-actions"><button id="location" type="button">Përdor vendndodhjen një herë</button></div>
+          <p class="hint">Me JAM GATI merret vendndodhja një herë dhe dërgohet vetëm zona e përafërt.</p>
           <p id="area-status" role="status">Vendndodhja ende nuk është marrë.</p>
         <p class="hint">Vendndodhja e pajisjes mund të ketë pasaktësi.</p>
         </fieldset>
         <p id="join-choice" role="status" hidden></p><button id="join-back" type="button" hidden>Jo tani, vetëm gatishmëri</button>
         <button id="ready" class="primary" type="submit" disabled>JAM GATI</button>
+        <button id="location-cancel" type="button" hidden>Anulo</button>
       </form>
       <section id="active" hidden aria-label="Gatishmëria jote">
         <h2 id="active-title">JAM GATI.</h2>
         <p id="remaining"></p>
+        <p id="waiting-guidance"></p>
+        <button id="refresh-status" type="button">Kontrollo përsëri</button>
         <section id="nearby-statistics" hidden aria-label="GATI afër teje">
           <h3>GATI afër teje</h3><p id="nearby-count"></p>
           <p class="hint" id="nearby-area-description"></p>
@@ -64,11 +67,16 @@
         <button id="activity-all" type="button">Të gjitha zonat</button>
         <div id="activity-gatherings"></div>
       </section>
-      <dialog id="public-join-dialog">
-        <h2>A do të shkosh?</h2><p>Pika e takimit shfaqet pasi të pranohesh. Kontrollo nëse dëshiron të shkosh.</p>
+      <dialog id="public-join-dialog" aria-labelledby="preview-title">
+        <h2 id="preview-title">A do të shkosh?</h2>
+        <p id="preview-destination"></p><div id="preview-map" role="region" aria-label="Parapamja e pikës së takimit"></div>
+        <p class="hint">Në hapësirën për këmbësorë pranë kryqëzimit. Mos qëndro në rrugë.</p>
+        <p id="preview-time"></p><p id="preview-status" role="status"></p>
+        <p>Parapamja nuk të regjistron dhe nuk është premtim për të shkuar.</p>
         <button id="public-join-confirm" class="primary" type="button">PO, PO SHKOJ</button>
         <button id="public-join-cancel" type="button">JO TANI</button>
       </dialog>
+      <p id="connection-status" role="status"></p>
       <p id="status" role="status">Po hapet GATI…</p>
       <footer>Pa llogari. Pa profil. Vetëm përkohësisht.</footer>
       <noscript>Kjo faqe ka nevojë për JavaScript.</noscript>

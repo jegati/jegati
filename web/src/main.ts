@@ -12,18 +12,21 @@ const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as
 const form = el<HTMLFormElement>('willingness'), active = el('active'), status = el('status');
 const duration = el<HTMLSelectElement>('duration'), radius = el<HTMLSelectElement>('radius');
 const ready = el<HTMLButtonElement>('ready'), cancel = el<HTMLButtonElement>('cancel'), retry = el<HTMLButtonElement>('retry');
-let session = sessions.restore(), selected: string | null = null, busy = false;
+let session = sessions.restore(), busy = false;
 let pollSeconds = 30, nextPoll = 0, failures = 0, operations = 0, cancelling = false;
 let here = false, arrivalUntil = 0, nonceSeconds = 120;
 let currentGrid: Grid | undefined;
-let locationMaxAccuracy = 100, locationMaxAge = 60, selectedUntil = 0;
+let locationMaxAccuracy = 100, locationMaxAge = 60;
+let locationRequest: AbortController | null = null;
+let drawArea: (cell: string) => void = () => {};
 let pendingNonce: { token: string; expires: number; issued: boolean } | null = null;
 function begin() { operations++; busy = true; render(); }
 function finish() { operations--; busy = operations > 0; render(); }
 let map: maplibregl.Map | undefined;
 let initialized = false;
 let activityView: ActivityView | undefined;
-let publicJoinTarget: { id: string; ends_at: number } | null = null;
+let preview: { candidate: sessions.Session; invitation: Invitation; expires: number; existing: boolean } | null = null;
+let previewMap: maplibregl.Map | undefined;
 let joinTarget: { id: string; ends_at: number } | null = null;
 interface Invitation { id: string; intersection: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
 let invitation: Invitation | null = null, going = false, destinationMap: maplibregl.Map | undefined;
@@ -36,7 +39,7 @@ function invitationView() {
   el<HTMLButtonElement>('arrive').disabled = busy;
   el<HTMLButtonElement>('retract').hidden = !here;
   el<HTMLButtonElement>('retract').disabled = busy;
-  el('arrival-status').textContent = here ? 'Mbërritja jote është konfirmuar përkohësisht.' : going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
+  el('arrival-status').textContent = here ? `Mbërritja jote është konfirmuar për rreth ${Math.max(1, Math.ceil((arrivalUntil - Date.now()) / 60000))} minuta të tjera.` : going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
   el('destination').textContent = invitation.intersection.label;
   el('gathering-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((invitation.ends_at - Date.now()) / 60_000))} minutash.`;
   el('going-status').textContent = going ? 'Ke zgjedhur të shkosh.' : 'Mund të zgjedhësh nëse do të shkosh.';
@@ -64,19 +67,29 @@ const message = (text: string) => { status.textContent = text; };
 function render() {
   form.hidden = session !== null; active.hidden = session === null;
   cancel.disabled = cancelling; retry.disabled = busy;
-  ready.disabled = busy || !selected || selectedUntil <= Date.now();
-  el<HTMLButtonElement>('location').disabled = busy;
+  ready.disabled = busy || !initialized || !navigator.onLine;
+  duration.disabled = busy; radius.disabled = busy;
+  el<HTMLButtonElement>('join-back').disabled = busy;
+  el('location-cancel').hidden = !locationRequest;
+  el<HTMLButtonElement>('refresh-status').disabled = busy || !navigator.onLine;
+  el('connection-status').textContent = !navigator.onLine ? 'Nuk ka lidhje. Veprimet nuk dërgohen; gatishmëria përfundon në afatin e saj.' : failures ? 'Lidhja me GATI nuk u konfirmua. Mund të provosh përsëri.' : '';
+  el('waiting-guidance').textContent = !session?.confirmed ? 'Po kontrollojmë nëse veprimi u pranua.' : here ? 'Mbërritja është e përkohshme. Mund ta heqësh konfirmimin kur të duash.' : going ? 'Ke zgjedhur të shkosh. Kur të mbërrish, shtyp JAM KËTU.' : invitation ? 'Zgjidh nëse dëshiron të shkosh. JO TANI e mban gatishmërinë aktive.' : 'Gatishmëria jote është aktive. Po presim një takim të përshtatshëm. Mungesa e shifrave publike nuk do të thotë që je vetëm.';
   retry.hidden = !session || session.confirmed;
   el('active-title').textContent = session?.confirmed ? (here ? 'JAM KËTU.' : 'JAM GATI.') : 'Po kontrollojmë gatishmërinë…';
   invitationView();
   activityView?.render();
-  ready.textContent = joinTarget ? 'PO, PO SHKOJ' : 'JAM GATI';
+  if (preview) {
+    const expired = preview.expires <= Date.now();
+    el<HTMLButtonElement>('public-join-confirm').disabled = busy || expired || !navigator.onLine;
+    el('preview-status').textContent = expired ? 'Parapamja përfundoi. Mbylle dhe kontrollo sërish pikën e takimit.' : !navigator.onLine ? 'Nuk ka lidhje. Provo përsëri kur të rikthehet.' : '';
+  }
+  ready.textContent = locationRequest ? 'Po merret vendndodhja…' : joinTarget ? 'Shiko pikën e takimit' : 'JAM GATI';
   el('join-choice').hidden = !joinTarget; el('join-back').hidden = !joinTarget;
-  if (joinTarget) el('join-choice').textContent = 'Për t’u bashkuar, merr vendndodhjen nga pajisja dhe konfirmo. Pika e takimit shfaqet pas pranimit.';
+  if (joinTarget) el('join-choice').textContent = 'Shiko pikën e takimit me vendndodhjen nga pajisja, pastaj zgjidh nëse do të shkosh.';
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
-  joinTarget = null; session = null; sessions.clear(); selected = null; selectedUntil = 0; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
+  closePreview(); locationRequest?.abort(); joinTarget = null; session = null; sessions.clear(); invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
   el('area-status').textContent = 'Vendndodhja ende nuk është marrë.';
   render(); map?.resize(); message(text);
@@ -92,8 +105,8 @@ async function sync(create = false) {
   begin();
   try {
     const response = await request(create ? 'POST' : 'GET', create ? (session.joinGathering ? '/api/join' : '/api/signals') : '/api/signal', create ? { ...session.request, ...(session.joinGathering ? { gathering_id: session.joinGathering } : {}) } : undefined);
-    if (session.joinGathering && [409, 410].includes(response.status)) { end('Nuk mund të bashkohesh në këtë takim. Mund të shprehësh sërish gatishmërinë.'); return; }
-    if (response.status === 410) { end('Gatishmëria përfundoi.'); return; }
+    if (session?.joinGathering && [409, 410].includes(response.status)) { end('Nuk mund të bashkohesh në këtë takim. Mund të shprehësh sërish gatishmërinë.'); return; }
+    if (response.status === 410) { end('Gatishmëria përfundoi ose shërbimi u rinis. Mund të shprehësh sërish gatishmërinë.'); return; }
     if (!response.ok) throw new Error('unavailable');
     const signal = await response.json();
     if (!Number.isFinite(signal.expires_at) || !Number.isFinite(signal.created_at) || signal.expires_at <= signal.created_at) throw new Error('invalid deadline');
@@ -103,21 +116,73 @@ async function sync(create = false) {
       session.expires = Math.min(session.expires, signal.expires_at);
       session.confirmed = true; delete session.joinGathering; joinTarget = null; sessions.save(session);
       applySignal(signal);
-      failures = 0; message('Gatishmëria jote është aktive.');
+      failures = 0; message(here ? 'Mbërritja jote është konfirmuar përkohësisht.' : going ? 'Ke zgjedhur të shkosh.' : 'Gatishmëria jote është aktive.');
     }
   } catch { if (!session) return; failures = Math.min(failures + 1, 4); message('Lidhja u ndërpre. Gatishmëria mund të jetë aktive; provo përsëri.'); }
   finally { finish(); nextPoll = Date.now() + pollSeconds * 1000 * 2 ** failures * (1 + Math.random() * .2); render(); }
 }
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
-  if (busy || !selected || selectedUntil <= Date.now() || session) return;
-  session = sessions.create({ cell: selected, radius_km: Number(radius.value), availability_minutes: Number(duration.value) });
-  if (joinTarget) session.joinGathering = joinTarget.id;
-  sessions.save(session); void sync(true);
+  if (busy || session || !currentGrid || !navigator.onLine) return;
+  const target = joinTarget;
+  const choices = { radius_km: Number(radius.value), availability_minutes: Number(duration.value) };
+  const controller = new AbortController(); locationRequest = controller; begin();
+  el('area-status').textContent = 'Po merret vendndodhja nga pajisja…';
+  let fix: { cell: string; expires: number } | undefined;
+  try {
+    fix = await locateCell(currentGrid, locationMaxAccuracy, locationMaxAge, controller.signal);
+    drawArea(fix.cell);
+  } catch (error) {
+    const text = error instanceof DOMException && error.name === 'AbortError' ? 'Veprimi u anulua. Nuk u dërgua gatishmëri.' : error instanceof Error ? error.message : 'Vendndodhja nuk u mor. Provo përsëri.';
+    el('area-status').textContent = text; message(text);
+  } finally { locationRequest = null; finish(); }
+  if (!fix || controller.signal.aborted) return;
+  const candidate = sessions.create({ cell: fix.cell, ...choices });
+  if (target) await loadPreview(target.id, candidate, Math.min(fix.expires, candidate.expires), false);
+  else { session = candidate; sessions.save(session); void sync(true); }
 });
-el<HTMLButtonElement>('public-join-cancel').onclick = () => { publicJoinTarget = null; el<HTMLDialogElement>('public-join-dialog').close(); };
-el<HTMLButtonElement>('public-join-confirm').onclick = () => { const target = publicJoinTarget; publicJoinTarget = null; el<HTMLDialogElement>('public-join-dialog').close(); if (target && target.ends_at > Date.now()) void intent('going', target.id); };
-el<HTMLButtonElement>('join-back').onclick = () => { joinTarget = null; render(); };
+el<HTMLButtonElement>('location-cancel').onclick = () => locationRequest?.abort();
+el<HTMLButtonElement>('public-join-cancel').onclick = closePreview;
+el<HTMLDialogElement>('public-join-dialog').addEventListener('cancel', closePreview);
+el<HTMLButtonElement>('public-join-confirm').onclick = () => {
+  const chosen = preview;
+  if (!chosen || chosen.expires <= Date.now() || !navigator.onLine || busy) return;
+  closePreview();
+  if (chosen.existing) {
+    if (session?.token === chosen.candidate.token) void intent('going', chosen.invitation.id);
+  } else if (!session) {
+    session = { ...chosen.candidate, expires: Date.now() + chosen.candidate.request.availability_minutes * 60000, joinGathering: chosen.invitation.id };
+    sessions.save(session); void sync(true);
+  }
+};
+el<HTMLButtonElement>('join-back').onclick = () => { joinTarget = null; closePreview(); render(); };
+el<HTMLButtonElement>('refresh-status').onclick = () => { void sync(!session?.confirmed); };
+function closePreview() {
+  preview = null; previewMap?.remove(); previewMap = undefined;
+  el<HTMLDialogElement>('public-join-dialog').close();
+  el('preview-destination').textContent = ''; el('preview-time').textContent = ''; el('preview-status').textContent = '';
+}
+async function loadPreview(id: string, candidate: sessions.Session, expires: number, existing: boolean) {
+  if (busy) return; begin();
+  try {
+    const response = await fetch('/api/gathering-preview', { method: 'POST', credentials: 'omit', cache: 'no-store', signal: AbortSignal.timeout(10000), headers: { Authorization: `Bearer ${candidate.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...candidate.request, gathering_id: id }) });
+    if (!response.ok) throw new Error('Ky takim nuk është i arritshëm ose nuk është më i hapur. Mund të zgjedhësh një tjetër.');
+    const result = await response.json();
+    if (!Number.isFinite(result.preview_expires_at) || result.preview_expires_at <= Date.now() || expires <= Date.now() || (existing && session?.token !== candidate.token)) throw new Error('Parapamja përfundoi. Provo përsëri.');
+    closePreview(); preview = { candidate, invitation: result.invitation, expires: Math.min(expires, result.preview_expires_at), existing };
+    el('preview-destination').textContent = preview.invitation.intersection.label;
+    el('preview-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((preview.invitation.ends_at - Date.now()) / 60000))} minutash.`;
+    el<HTMLButtonElement>('public-join-confirm').disabled = false;
+    el<HTMLDialogElement>('public-join-dialog').showModal();
+    try {
+      previewMap = new maplibregl.Map({ container: 'preview-map', center: preview.invitation.intersection.point, zoom: 15, attributionControl: false, locale: { 'Map.Title': 'Parapamja e takimit' }, style: { version: 8, sources: { roads: { type: 'geojson', data: '/api/map/roads' } }, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#f0eee6' } }, { id: 'roads', type: 'line', source: 'roads', paint: { 'line-color': '#bec3b8', 'line-width': 3 } }] } });
+      const marker = document.createElement('span'); marker.className = 'destination-marker'; marker.textContent = '🦩'; marker.setAttribute('aria-label', 'Pika e takimit');
+      new maplibregl.Marker({ element: marker }).setLngLat(preview.invitation.intersection.point).addTo(previewMap);
+      previewMap.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '© OpenStreetMap · ODbL' }));
+    } catch { el('preview-map').textContent = 'Harta nuk mund të hapet në këtë pajisje.'; }
+  } catch (error) { message(error instanceof Error ? error.message : 'Parapamja nuk u hap. Provo përsëri.'); }
+  finally { finish(); }
+}
 retry.onclick = () => { void sync(true); };
 cancel.onclick = async () => {
   if (cancelling || !session) return;
@@ -221,11 +286,11 @@ async function start() {
     () => ({ cell: session?.confirmed ? session.request.cell : undefined, gathering: invitation?.id }),
     event => {
       if (busy) return;
-      if (session) { publicJoinTarget = event; el<HTMLDialogElement>('public-join-dialog').showModal(); return; }
-      joinTarget = event; selected = null; selectedUntil = 0; render();
-      form.scrollIntoView({ block: 'start' }); el<HTMLButtonElement>('location').focus();
+      if (session) { void loadPreview(event.id, session, session.expires, true); return; }
+      joinTarget = event; render();
+      form.scrollIntoView({ block: 'start' }); ready.focus();
     }, config.matching.late_join_min_remaining_minutes);
-  function drawArea(cell: string) {
+  drawArea = (cell: string) => {
     const ratio = config.public_activity.area_size_meters / grid.size_meters;
     const parts = cell.split(':');
     const publicCell = `${grid.version}:${config.public_activity.area_size_meters}:${Math.floor(Number(parts[2]) / ratio)}:${Math.floor(Number(parts[3]) / ratio)}`;
@@ -237,34 +302,20 @@ async function start() {
     map?.jumpTo({ center: [(coordinates[0][0] + coordinates[2][0]) / 2, (coordinates[0][1] + coordinates[2][1]) / 2] });
     el('area-status').textContent = 'Zona u mor nga pajisja. Pozicioni yt i saktë nuk dërgohet.'; render();
   }
-  el<HTMLButtonElement>('location').onclick = async () => {
-    if (busy || session) return;
-    selected = null; selectedUntil = 0;
-    map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
-    begin(); el('area-status').textContent = 'Po merret vendndodhja nga pajisja…';
-    try {
-      const fix = await locateCell(grid, locationMaxAccuracy, locationMaxAge);
-      selected = fix.cell; selectedUntil = fix.expires; drawArea(fix.cell);
-    } catch (error) {
-      el('area-status').textContent = error instanceof Error ? error.message : 'Vendndodhja nuk u mor. Provo përsëri.';
-    } finally { finish(); }
-  };
   message('');
   if (session) { drawArea(session.request.cell); await sync(); }
   setInterval(() => {
-    if (selected && !session && selectedUntil <= Date.now()) {
-      selected = null; selectedUntil = 0;
-      map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
-      el('area-status').textContent = 'Merr sërish vendndodhjen nga pajisja për të vazhduar.'; render();
-    }
+    if (preview) render();
     if (joinTarget && joinTarget.ends_at <= Date.now()) { joinTarget = null; render(); }
     if (pendingNonce && pendingNonce.expires <= Date.now()) pendingNonce = null;
-    if (here && arrivalUntil <= Date.now()) { here = false; arrivalUntil = 0; }
+    if (here && arrivalUntil <= Date.now()) { here = false; arrivalUntil = 0; message('Konfirmimi i mbërritjes përfundoi. Nëse je ende aty, mund të shtypësh sërish JAM KËTU.'); }
     if (invitation && invitation.ends_at <= Date.now()) { invitation = null; going = false; }
     if (session && session.expires <= Date.now()) end('Gatishmëria përfundoi.');
     if (session && session.confirmed && !document.hidden && Date.now() >= nextPoll) void sync();
     if (session) render();
   }, 1000);
+  window.addEventListener('offline', render);
+  window.addEventListener('online', () => { render(); if (session) void sync(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && session) void sync(); });
 }
 setInterval(() => {

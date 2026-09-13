@@ -223,6 +223,49 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 	if !found || strings.Contains(public.Body.String(), original.Intersection.ID) || strings.Contains(public.Body.String(), `"intersection":`) {
 		t.Fatal("missing cell event or exact destination disclosure")
 	}
+	// An explicit private preview uses a currently released ID but never enrolls,
+	// changes intent, or publishes the destination. The same capability can then join.
+	previewer := newToken()
+	beforeSignal := call("GET", "/api/signal", tokens[1], "").Body.String()
+	previewBody := directBody
+	w = call("POST", "/api/gathering-preview", previewer, previewBody)
+	if w.Code != 200 || w.Header().Get("Cache-Control") != "no-store" || !strings.Contains(w.Body.String(), original.Intersection.ID) {
+		t.Fatalf("eligible private preview: %d %s", w.Code, w.Body.String())
+	}
+	var previewResult struct {
+		ExpiresAt int64 `json:"preview_expires_at"`
+	}
+	json.Unmarshal(w.Body.Bytes(), &previewResult)
+	nowPreview, _ := backend.Now(ctx)
+	if previewResult.ExpiresAt <= nowPreview || previewResult.ExpiresAt > nowPreview+int64(c.Geography.LocationFixMaxAgeSeconds)*1000 {
+		t.Fatal("unbounded preview lifetime")
+	}
+	if call("GET", "/api/signal", previewer, "").Code != 410 {
+		t.Fatal("preview created willingness")
+	}
+	w = call("POST", "/api/gathering-preview", tokens[1], previewBody)
+	if w.Code != 200 || call("GET", "/api/signal", tokens[1], "").Body.String() != beforeSignal {
+		t.Fatal("existing preview changed participation")
+	}
+	for _, tc := range []struct {
+		path, token, body string
+		code              int
+	}{
+		{"/api/gathering-preview?cell=x", previewer, previewBody, 400},
+		{"/api/gathering-preview", "", previewBody, 401},
+		{"/api/gathering-preview", previewer, strings.Replace(previewBody, original.ID, strings.Repeat("f", 32), 1), 409},
+		{"/api/gathering-preview", previewer, strings.Replace(previewBody, "1000:5:5", "1000:0:0", 1), 409},
+		{"/api/gathering-preview", tokens[1], strings.Replace(previewBody, "1000:5:5", "1000:5:6", 1), 409},
+		{"/api/gathering-preview", previewer, strings.Replace(previewBody, `"radius_km":3`, `"radius_km":3,"radius_km":3`, 1), 400},
+		{"/api/gathering-preview", previewer, strings.Replace(previewBody, `"radius_km":3`, `"radius_km":3,"latitude":41.3`, 1), 400},
+	} {
+		if result := call("POST", tc.path, tc.token, tc.body); result.Code != tc.code {
+			t.Fatalf("preview constraint %s: %d want %d", tc.path, result.Code, tc.code)
+		}
+	}
+	if call("GET", "/api/signal", previewer, "").Code != 410 || call("GET", "/api/activity/latest", "", "").Body.String() != public.Body.String() {
+		t.Fatal("preview affected enrollment or public release")
+	}
 	// Cached release stays identical after a new live participant; no live count query.
 	afterPresence := create()
 	w = call("POST", "/api/going", afterPresence, body)

@@ -112,7 +112,7 @@ func (s signalAPI) authorized(w http.ResponseWriter, r *http.Request) (string, b
 			return "", false
 		}
 	}
-	if r.Method == "POST" && (r.URL.Path == "/api/signals" || r.URL.Path == "/api/join") {
+	if r.Method == "POST" && (r.URL.Path == "/api/signals" || r.URL.Path == "/api/join" || r.URL.Path == "/api/gathering-preview") {
 		ok, err = s.store.Allow(ctx, "creates:"+key, s.config.Limits.NewSignalsPerNetworkWindow, time.Duration(s.config.Limits.NetworkWindowSeconds)*time.Second)
 		if err != nil {
 			writeError(w, 503)

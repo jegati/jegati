@@ -72,9 +72,9 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement USABILITY_IMPLEMENTATION_PLAN.md / decision 0008: one-action willingness
-and waiting/recovery, private destination preview, then server-side offer discovery
-and optional push delivery/resume. User selected review suggestions 1, 2, 3 and 5;
+Continue USABILITY_IMPLEMENTATION_PLAN.md steps D–H: server-side offer discovery
+and optional push delivery/resume. Steps B/C (one-action willingness, waiting/recovery
+and private destination preview) are implemented. User selected review suggestions 1, 2, 3 and 5;
 sharing links/QR and new purpose copy are excluded. No native location verification
 is claimed. Prior statistics/map slice is implemented/tested; new work is not yet
 complete. Tools are installed and usable through scripts/env.sh. No new credential
@@ -486,3 +486,24 @@ USABILITY_IMPLEMENTATION_PLAN.md and decision 0008. Inspected current code, requ
 recent commits and toolchain. This planning commit does not claim new behavior or
 test passes. Next is one-action willingness with waiting/recovery, then eligible
 private preview and optional background delivery. Existing commands.txt is untouched.
+
+## Selected usability slice B/C — 2026-09-13
+
+JAM GATI now obtains one fresh device fix and submits, with an abort action and no
+on-load location access. Existing coarse-only, uncertain-response/retry and expiry
+bounds remain. Waiting, offline/recovery, server restart/expiry and arrival freshness
+have explicit Albanian guidance. Public-map joining previews the private crossroad
+and deadline before PO, PO SHKOJ. Preview-only capabilities remain in page memory;
+no signal, reservation, enrollment or intent is created. Existing capabilities must
+use their immutable claim. Preview shares network create/write budgets, accepts
+only current released IDs, checks live reachability/cutoffs, uses no-store and expires
+within the configured location-fix age (and release/gathering/session bounds).
+
+Validation: `make verify-local`, `make test-store`, `make simulate` passed. The
+40-person synthetic run accepted 40, cancelled 6 and verified 34 expiries; its
+fixed-clock real-store HTTP checks now also cover preview eligibility/no enrollment,
+unchanged existing participation/public snapshot, malformed/duplicate/exact-location
+input, unknown IDs and reachability. `make test-browser` passed 19 Chromium tests,
+including new/active preview cancellation, offline recovery and stale confirmation;
+public UI fixtures are distinguished from real API integration. No push provider
+was contacted and no production readiness or 100k throughput is claimed.
