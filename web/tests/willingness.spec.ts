@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { cellAt } from '../src/area';
 
 test.beforeEach(async ({ context }) => {
@@ -32,7 +32,7 @@ test('device area, minimum duration, reload and neutral cancellation against rea
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
   expect(await page.evaluate(() => localStorage.length)).toBe(0);
   expect(await context.cookies()).toEqual([]);
-  expect([...origins]).toEqual(['http://127.0.0.1:5174']);
+  expect([...origins]).toEqual([String(test.info().project.use.baseURL)]);
   expect(errors).toEqual([]);
 });
 
@@ -201,11 +201,11 @@ test('map interactions cannot supply or change location; denied device access st
   expect(await page.evaluate(() => sessionStorage.length)).toBe(0);
 });
 
-for (const reason of ['poor accuracy', 'stale fix', 'outside Tirana', 'unavailable service']) {
+for (const reason of ['poor accuracy', 'stale fix', 'future fix', 'nonfinite timestamp', 'outside Tirana', 'unavailable service']) {
   test(`device location fails closed: ${reason}`, async ({ page }) => {
     await page.addInitScript(reason => Object.defineProperty(navigator, 'geolocation', { value: reason === 'unavailable service' ? undefined : {
       getCurrentPosition: (success: PositionCallback) => success({
-        timestamp: Date.now() - (reason === 'stale fix' ? 61_000 : 0),
+        timestamp: reason === 'nonfinite timestamp' ? NaN : Date.now() + (reason === 'future fix' ? 1000 : reason === 'stale fix' ? -61_000 : 0),
         coords: { latitude: reason === 'outside Tirana' ? 42 : 41.32754321, longitude: 19.81812345, accuracy: reason === 'poor accuracy' ? 5000 : 20 },
       } as GeolocationPosition),
     } }), reason);

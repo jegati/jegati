@@ -1,0 +1,46 @@
+[
+  {
+    "metadata": "Package: libx264-164\nVersion: 2:0.164.3108+git31e19f9-1",
+    "sha256": "7a410be6797c32357a2b7f0cc68ee14ae0e3b652bb17d16cdc941e4d830c7842"
+  },
+  {
+    "metadata": "Package: libsvtav1enc1d1\nVersion: 1.7.0+dfsg-2build1",
+    "sha256": "bac5f768bff928e85cecb39da8e37276a579639ef884692b089ed2de6c1cd2ad"
+  },
+  {
+    "metadata": "Package: gstreamer1.0-libav\nVersion: 1.24.1-1build1",
+    "sha256": "06f33e40a9e13173e0b8593f8d507dc665e9e6acc3af7fea359fb8131944553d"
+  },
+  {
+    "metadata": "Package: libevent-2.1-7t64\nVersion: 2.1.12-stable-9ubuntu2.1",
+    "sha256": "0267a54c9c5678c1ef509e87344b5182b46b93b71b48d12e0132a5f2116d8f1f"
+  },
+  {
+    "metadata": "Package: libgstreamer-plugins-bad1.0-0\nVersion: 1.24.2-1ubuntu4",
+    "sha256": "6e8da41c0cbb2070f3477cf02360c2ce2eb55e825ba09e12b4270b3254e04f45"
+  },
+  {
+    "metadata": "Package: librav1e0\nVersion: 0.7.1-2",
+    "sha256": "be10d7e2dc028d9d7791997a8710b7a9a3147151613750f0f08963fbe9ac993c"
+  },
+  {
+    "metadata": "Package: libdav1d7\nVersion: 1.4.1-1build1",
+    "sha256": "7246303bd3ed4b99a2fb98e6199950ceb2520e7572265aefa0a6e44352adb3f0"
+  },
+  {
+    "metadata": "Package: libgav1-1\nVersion: 0.18.0-1build3",
+    "sha256": "428f353f449e6b15cdcf5823215416e36adcfba75fe9f0fedc1cd132d68e6b3f"
+  },
+  {
+    "metadata": "Package: libavif16\nVersion: 1.0.4-1ubuntu3",
+    "sha256": "b295a9954a4b756af05ff381d9808f3c0c582a111b7e4c7678cfe13de9ae8818"
+  },
+  {
+    "metadata": "Package: libyuv0\nVersion: 0.0~git202401110.af6ac82-1",
+    "sha256": "88bd472e50a7e45469e31f8e0ba232b4d8ed30322f5badb285c58cc1ba0d2176"
+  },
+  {
+    "metadata": "Package: libflite1\nVersion: 2.2-6build3",
+    "sha256": "367f1d0da5cd38759a0515eafc27aa133b2d7bf99308cac34831df0212e96b75"
+  }
+]

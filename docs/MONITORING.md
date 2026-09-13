@@ -34,3 +34,21 @@ and collector-failure tests. `make load` creates an isolated monitored lab and w
 synthetic reports under `reports/local/`; it never points load at the normal local
 app. See [decision 0010](decisions/0010-operational-monitoring.md). Deployment wiring,
 real-device feedback and operational retention review remain separate work.
+
+The monitored lab also samples the actual Valkey process, not the container's init
+supervisor. Load reports include an offline CPU/RSS chart and client-side accepted
+versus rejected latency/counts. Generate another view with
+`python3 scripts/load-report.py reports/local/RUN_DIRECTORY`. These synthetic
+archives are explicitly historical. CPU percentages use one core as 100%; sampled
+peaks are not instantaneous maxima. No generic database statistics, per-cell labels
+or participant queues are exposed by the production monitor.
+
+Local response guide: `monitor_unavailable` means inspect socket/process/collector
+health; worker error/staleness means check private store reachability and worker
+liveness; sustained released failure/latency buckets mean inspect capacity and
+admission behavior. Do not enable individual access logging to diagnose these.
+Recovery tests inject a paused API owner and paused/restarted store, then verify
+alerts and recovery. A stopped collector's file expires; dashboards must honor that
+freshness deadline. Push loop completion alone cannot alert on provider delivery
+failure because individual send outcomes are deliberately not exposed here; this
+and public-release freshness probes remain monitoring gaps, not passing claims.

@@ -80,3 +80,5 @@ See [third-party notices](THIRD_PARTY.md) for dependency and future map-data ter
 Selected usability work is tracked in [the implementation plan](docs/USABILITY_IMPLEMENTATION_PLAN.md).
 Private destination preview before a map join and clearer waiting/offline/arrival-expiry
 guidance are implemented. Previewing or cancelling a preview never enrolls you.
+
+Additional local validation: [automated testing and monitored load](docs/AUTOMATED_TESTING.md), [private operational monitoring](docs/MONITORING.md). These checks create disposable synthetic stores and do not deploy the app.

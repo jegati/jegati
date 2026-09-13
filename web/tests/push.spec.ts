@@ -133,6 +133,9 @@ test('real service worker handles injected push with the app closed, without pri
   cdp.on('ServiceWorker.workerRegistrationUpdated', value => { for (const r of value.registrations) if (r.scopeURL === origin + '/' && !r.isDeleted) registrationId = r.registrationId; });
   await cdp.send('ServiceWorker.enable'); await expect.poll(() => registrationId).not.toBe('');
   await page.close();
+  // CDP injects a provider event. Explicitly start the installed worker first so
+  // delivery does not race its lifecycle after the last app page closes.
+  await cdp.send('ServiceWorker.startWorker', { scopeURL: origin + '/' });
   const deliver = (binding: string, expires: number) => cdp.send('ServiceWorker.deliverPushMessage', { origin, registrationId, data: JSON.stringify({ binding, expires_at: expires }) });
   const notifications = () => control.evaluate(async () => (await (await navigator.serviceWorker.getRegistration('/'))!.getNotifications()).map(n => ({ title: n.title, body: n.body, data: n.data })));
   await deliver(record.binding, Date.now() + 60000);

@@ -37,3 +37,11 @@ no reachable or imported-package vulnerabilities. The module scan flagged
 GO-2026-5932 for x/crypto/openpgp, which GATI does not import or link; the notification
 library uses x/crypto/hkdf. This is not an independent security audit. Tool modules
 are developer tooling, separate from the deployed application dependency graph.
+
+Automated accessibility tests use @axe-core/playwright and axe-core 4.13.0
+(MPL-2.0), pinned as development-only dependencies. They are absent from the
+shipped browser bundle. Firefox/WebKit test binaries retain upstream licenses.
+The optional Ubuntu 24.04 amd64 browser fallback pins Debian package versions
+and SHA-256 values in scripts/toolchain/browser-deps-ubuntu24-amd64.json; extracted
+libraries and their notices remain under ignored .runtime/browser-deps, not in
+production artifacts. It does not change system libraries or the browser binaries.

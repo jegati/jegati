@@ -7,7 +7,7 @@ source scripts/env.sh
 source deploy/images.env
 container=$(docker run -d --rm --read-only --user 999:999 --cap-drop ALL \
   --security-opt no-new-privileges --ulimit core=0 --memory 256m --memory-swap 256m \
-  --tmpfs /data:size=128m -p 127.0.0.1::6379 \
+  --log-driver none --tmpfs /data:size=128m -p 127.0.0.1::6379 \
   -v "$repo_dir/deploy/valkey.dev.conf:/etc/valkey/valkey.conf:ro" \
   -v "$repo_dir/.runtime/users.acl:/run/secrets/users.acl:ro" \
   -v "$repo_dir/.runtime/health-password:/run/secrets/health-password:ro" \
@@ -18,4 +18,9 @@ GATI_TEST_ADDR=$(docker port "$container" 6379/tcp)
 export GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/app-password"
 export GATI_INTEGRATION=1
 # Go integration tests retry the initial connection with a short bounded deadline.
-go test -race -p 1 -count=1 ./internal/store ./internal/httpapi ./internal/notification
+if [[ -n "${GATI_SOAK_SECONDS:-}" ]]; then
+ [[ "$GATI_SOAK_SECONDS" =~ ^[0-9]+$ && "$GATI_SOAK_SECONDS" -ge 5 && "$GATI_SOAK_SECONDS" -le 86400 ]] || exit 1
+ go test -race -count=1 -timeout "$((GATI_SOAK_SECONDS+120))s" -run '^TestLifecycleSoak$' ./internal/store
+else
+ go test -race -p 1 -count=1 ./internal/store ./internal/httpapi ./internal/notification
+fi

@@ -1,6 +1,6 @@
 # Additional testing before deployment
 
-2026-09-13 review. This is proposed work, not new passing evidence. The current
+2026-09-13 review. The table below is the original scope. See [automated testing](AUTOMATED_TESTING.md) and PROGRESS.md for implemented checks, passing evidence and remaining gaps. The current
 baseline is [the selected usability report](reports/usability-final.md): 28 browser
 checks, real-store/race tests and a checked 3,000-person accelerated simulation.
 No tests were rerun for this review. No deployment or product changes are authorized
@@ -45,7 +45,7 @@ follows and daily summaries are implementation gaps, not gaps that testing can f
   artifacts must remain free of test clocks and control routes.
 - Predefine alerts and a response guide for unavailable API/store, stale public
   releases, stuck worker/cleanup and push failure. Exercise alerts locally with
-  injected faults. These monitoring components are proposed, not implemented yet.
+  injected faults. The private monitoring foundation is implemented; see MONITORING.md for its narrower measured scope and alert limitations.
 - Test that monitoring failure cannot block participation or leak private data.
   Review sensitive-data exclusions alongside [OWASP's logging guidance](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html);
   GATI deliberately omits individual access/event logs.

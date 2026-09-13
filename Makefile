@@ -60,7 +60,7 @@ test-store: secrets
 browser-install:
 	cd web && npx playwright install chromium
 test-browser:
-	cd web && npx playwright test
+	python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/browser-$(shell date -u +%Y%m%dT%H%M%S))" -- npm --prefix web exec -- playwright test --config web/playwright.config.ts
 
 .PHONY: simulate
 simulate:
@@ -95,3 +95,36 @@ test-fuzz:
 test-monitor:
 	go test -race ./internal/monitor
 	python3 -m unittest discover -s scripts -p 'test_monitor.py'
+
+LOAD_SIZES ?= 1000,10000,100000
+.PHONY: load
+load:
+	python3 scripts/load.py --output "$(or $(OUTPUT),reports/local/load-$(shell date -u +%Y%m%dT%H%M%S))" --sizes "$(or $(SIZES),$(LOAD_SIZES))" --seconds "$(or $(SECONDS),20)" --distribution "$(or $(DISTRIBUTION),uniform)" $(if $(BURST),--burst,)
+
+.PHONY: test-full-journey
+test-full-journey:
+	python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/full-journey-$(shell date -u +%Y%m%dT%H%M%S))" -- npm --prefix web exec -- playwright test --config web/playwright.full.config.ts
+
+.PHONY: test-recovery
+test-recovery:
+	python3 scripts/recovery.py --output "$(or $(OUTPUT),reports/local/recovery-$(shell date -u +%Y%m%dT%H%M%S))"
+
+.PHONY: test-soak
+test-soak: secrets
+	mkdir -p "$(or $(OUTPUT),reports/local/soak)"
+	GATI_SOAK_SECONDS="$(or $(SOAK_SECONDS),900)" GATI_SOAK_REPORT="$(abspath $(or $(OUTPUT),reports/local/soak))/soak.json" bash scripts/test-store.sh
+
+.PHONY: test-browser-matrix
+test-browser-matrix:
+	GATI_BROWSER=firefox python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/matrix-$(shell date -u +%Y%m%dT%H%M%S))/firefox" -- npm --prefix web exec -- playwright test --config web/playwright.matrix.config.ts
+	GATI_BROWSER=webkit python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/matrix-$(shell date -u +%Y%m%dT%H%M%S))/webkit" -- npm --prefix web exec -- playwright test --config web/playwright.matrix.config.ts
+
+.PHONY: check-load reproduce-build
+check-load:
+	python3 scripts/check-load.py "$(REPORT)"
+reproduce-build:
+	python3 scripts/reproduce-build.py --output "$(or $(OUTPUT),reports/local/reproduction-$(shell date -u +%Y%m%dT%H%M%S))"
+
+.PHONY: test-pressure
+test-pressure:
+	python3 scripts/pressure.py --output "$(or $(OUTPUT),reports/local/pressure-$(shell date -u +%Y%m%dT%H%M%S))"

@@ -736,3 +736,56 @@ Python monitor and load-gate checks passed (eight total). Load checks distinguis
 accepted-request latency from fast rejections; historical combined histograms do
 not silently qualify mixed traffic. Browser compatibility, the normal-delay journey,
 short-TTL churn and final load/reproduction evidence are still being completed.
+
+## Automated hardening: owned monitored lab and retention — 2026-09-13
+
+The owned production-binary lab now supplies private monitoring, independent ports,
+a nonpersistent restricted Valkey, config/binary/source/hardware manifests and
+teardown. It refuses to overwrite an existing run manifest. Load cannot accept an
+arbitrary remote URL; synthetic capability values remain in generator memory.
+
+Passing evidence: two-replica process/store recovery (six checks, 132.52s); the real
+normal-delay publisher journey through public map/preview/late arrival (13.8-minute
+test, 13.9-minute suite); and the 15-minute short-TTL storage soak (901.203s, 695
+cycles, 69,500 creations, 23,196 cancellations, every cycle's indexes restored to
+one expected live keeper). A first soak completed its checks but failed writing a
+relative report path; the path is now absolute and the entire run passed again.
+The initial publisher test allowed only 11 minutes; actual once-per-epoch capture
+plus delayed release can approach 15 minutes from a user's action. The corrected
+bounded wait passed without changing product timing or mocking API responses.
+
+The owned 8-MiB no-eviction pressure test passed: saturation returns 503, a live
+credential retains its deadline after pressure, uncertain creation can be retried,
+and cancellation remains terminal. Temporary filler keys exist only in that lab.
+
+Uniform and hotspot ramps each accepted 100,000 signals. Dense-hotspot client gates
+passed with separate accepted/rejected histograms, no timeout/5xx or dropped jobs.
+The 3,000/s burst accepted 500/s and rejected 2,500/s with explicit 429s; post-burst
+reads recovered. This PC is an AMD Ryzen 7 7435HS, 16 logical CPUs; API/store/clients
+share it, with other isolated checks also running. This is not the planned remote
+4-vCPU/8-GB reference host, simultaneous mixed traffic, cached CDN test, or direct
+matching/expiry-lag proof. Final uniform split-latency report and clean builds follow.
+
+The final uniform ramp now also passes the explicit accepted-latency client gate.
+Both final workloads accepted all 100,000 signals, with accepted p95 <=10ms in each
+phase, zero client timeouts/5xx/dropped jobs, and no observed operational alerts.
+Sampled peak RSS: uniform API 492.18 MiB / Valkey 88.72 MiB; hotspot API 506.37 MiB /
+Valkey 90.22 MiB. Offline CPU/RSS charts and exact synthetic phase counts are retained
+in reports/local; the tracked predeployment summary records scoped evidence/hashes.
+
+Firefox and WebKit each passed 24 core/accessibility/resilience checks. The browser
+adapter corrects only the automation-provided location timestamp (Firefox's future
+value and WebKit's microsecond value); production stale/future/inaccurate location
+rejection remains unchanged and is explicitly tested. The optional verified local
+Ubuntu WebKit library setup avoids sudo and incompatible inherited Snap GIO paths.
+The normal Chromium suite's final push injection test exposed a worker lifecycle
+race and is being retested with explicit CDP worker startup. No production push
+behavior has been changed to accommodate an injected provider event.
+
+Final browser validation passed: 33 Chromium checks (1.0m), 24 Firefox and 24 WebKit
+checks (about 1.1m each), plus the separate normal-delay journey above. The injected
+push regression passed five consecutive focused runs (15.2s) after explicit CDP
+worker startup, followed by the full Chromium suite; no retries hid failures and no
+production push code changed. Verified browser prerequisites, CI fast gates, command
+documentation and scoped evidence are included in this milestone. Clean-source byte
+reproducibility is the next check and requires this implementation commit first.

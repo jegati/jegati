@@ -246,3 +246,24 @@ revocation is checked on resume and worker execution. Local opt-out cannot recal
 already-displayed OS notification or provider request. Suspended browsers can retain
 expired bytes until running again, and browser-managed push subscriptions may outlive
 app records; no forensic erasure or guaranteed background cleanup is claimed.
+
+## Local automated hardening and monitoring (2026-09-13)
+
+The optional operational socket is owner-only, with no public TCP listener or
+participant labels. Completed request windows are suppressed/bucketed, collector
+fields are allowlisted, history is bounded, and output is private from creation.
+Worker errors are fixed states, not raw exception text. Correlation from process
+resource use and task timing remains possible for a privileged observer; these
+metrics are not a formal anonymity mechanism. See decision 0010 and MONITORING.md.
+
+Additional evidence now covers seeded nonce/arrival/cancellation sequences,
+configuration rollover, competing push workers against a 100-subscription fake
+provider outage, native parser/capability/geography fuzzing, and private-monitor
+schema rejection. Owned multi-replica tests inject process/store failures and check
+cancellation/replay and loss of nonpersistent sessions. Load reports contain exact
+synthetic traffic statistics only; those fields are not new production endpoints.
+The actual normal-delay publisher browser journey passed through public preview
+and late arrival. Browser emulation adapters are test-only and leave production
+location checks unchanged. See AUTOMATED_TESTING.md and PROGRESS.md for results,
+failed harness assumptions corrected, and untested release gates. These checks do
+not eliminate location spoofing, Sybil, inference or malicious-operator risks.

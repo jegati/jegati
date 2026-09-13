@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 import { cellAt, type Grid } from '../src/area';
 
 // Public response fixtures test browser presentation; the real publisher/API is

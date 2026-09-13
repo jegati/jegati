@@ -271,7 +271,7 @@ make dev
 make test
 make simulate SCENARIO=tirana-evening SEED=42
 make simulate SCENARIO=tirana-sybil SEED=42
-make load PROFILE=100k
+make load SIZES=1000,10000,100000 BURST=1
 make verify-local
 make down
 ```
@@ -368,3 +368,5 @@ optional background notifications, one-action device-based willingness, eligible
 private destination preview before commitment, and waiting/recovery guidance.
 Sharing links/QR and new purpose copy are excluded from this work. Existing
 configuration, cell-only public releases and documented inference limits remain.
+
+Local automated hardening commands and their exact scope are now documented in [AUTOMATED_TESTING.md](AUTOMATED_TESTING.md). Local 100k synthetic runs do not close the separate reference-host, combined-traffic, cached-edge or matching/expiry-lag gates above. See PROGRESS.md for measured evidence.
