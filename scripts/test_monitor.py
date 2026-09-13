@@ -16,3 +16,13 @@ class MonitoringTests(unittest.TestCase):
  def test_bounds(self):
   for args in [{'interval':0},{'retention':0},{'interval':1,'retention':86401}]:
    with self.assertRaises(ValueError):Collector('/absent','/absent',**args)
+ def test_unexpected_sensitive_fields_fail_closed(self):
+  base={'version':1,'window_seconds':60,'retention_seconds':120,'minimum_samples':20,'observed_epoch':1,'requests':'suppressed','failures':'suppressed','p95_upper_ms':-1,'workers':{}}
+  class Response:
+   status=200
+   def __init__(self,value):self.value=value
+   def read(self,_):return json.dumps(self.value).encode()
+  for value in [{**base,'token':'private-canary'},{**base,'workers':{'participant':{}}},[]]:
+   with patch('monitor.UnixHTTP') as client:
+    client.return_value.getresponse.return_value=Response(value)
+    with self.assertRaises(ValueError):snapshot('/synthetic')

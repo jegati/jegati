@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """First-party local monitoring. Fixed summaries only; no participant event logs."""
-import collections, http.client, json, os, pathlib, socket, threading, time
+import collections, http.client, json, os, pathlib, socket, threading, time, tempfile
 
 class UnixHTTP(http.client.HTTPConnection):
     def __init__(self, path):
@@ -15,6 +15,7 @@ def snapshot(path):
         client.request('GET', '/metrics'); response = client.getresponse(); raw = response.read(8193)
         if response.status != 200 or len(raw) > 8192: raise ValueError('invalid metrics')
         v = json.loads(raw)
+        if not isinstance(v,dict):raise ValueError('invalid metrics object')
         if set(v) != {'version','window_seconds','retention_seconds','minimum_samples','observed_epoch','requests','failures','p95_upper_ms','workers'}: raise ValueError('unexpected metrics')
         if any(type(v[k]) is not int for k in ['version','window_seconds','retention_seconds','minimum_samples','observed_epoch','p95_upper_ms']): raise ValueError('invalid metrics')
         if (v['version'],v['window_seconds'],v['retention_seconds'],v['minimum_samples']) != (1,60,120,20): raise ValueError('unknown privacy policy')
@@ -23,6 +24,7 @@ def snapshot(path):
         if v['p95_upper_ms'] not in [-1,0,10,50,100,300,1000,3000,10000]: raise ValueError('invalid latency')
         if not isinstance(v['workers'],dict) or not set(v['workers']) <= {'matcher','publisher','cleanup','push'}: raise ValueError('invalid workers')
         for w in v['workers'].values():
+            if not isinstance(w,dict):raise ValueError('invalid worker object')
             if set(w) != {'state','last_start_seconds','last_finish_seconds','last_success_seconds'} or w['state'] not in ['ok','error','running']: raise ValueError('invalid worker')
             if any(type(w[k]) is not int or w[k]<-1 for k in w if k!='state'): raise ValueError('invalid age')
         return v
@@ -64,10 +66,17 @@ class Collector:
         return row
     def save(self):
         value={'version':1,'retention_seconds':self.retention,'expires_at':int(time.time())+self.interval*3,'samples':list(self.rows)}
-        temporary=self.output.with_suffix('.tmp')
+        temporary=None
         try:
-            temporary.write_text(json.dumps(value,separators=(',',':'))+'\n');temporary.chmod(0o600);temporary.replace(self.output)
+            fd,name=tempfile.mkstemp(prefix='.gati-monitor-',dir=self.output.parent)
+            temporary=pathlib.Path(name)
+            with os.fdopen(fd,'w') as stream:stream.write(json.dumps(value,separators=(',',':'))+'\n')
+            temporary.replace(self.output)
         except OSError: pass # Monitoring storage failure cannot interrupt the application.
+        finally:
+            if temporary:
+                try:temporary.unlink(missing_ok=True)
+                except OSError:pass
     def run(self):
         while not self.stop.is_set(): self.sample();self.save();self.stop.wait(self.interval)
     def start(self):self.thread=threading.Thread(target=self.run,daemon=True);self.thread.start();return self

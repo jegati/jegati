@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/matching"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -119,5 +120,38 @@ func TestConcurrentReservationsAndStaleArea(t *testing.T) {
 	}
 	if success != 1 {
 		t.Fatalf("%d concurrent reservations succeeded", success)
+	}
+}
+
+func TestConfigurationRolloverDropsPendingButFreezesActiveDestination(t *testing.T) {
+	s := connectTest(t)
+	ctx := context.Background()
+	p, grid := proposalTest(t, s)
+	id := fresh()
+	if _, e := s.Reserve(ctx, id, "old-config", p, grid, 20, 1000, 1000); e != nil {
+		t.Fatal(e)
+	}
+	time.Sleep(30 * time.Millisecond)
+	if _, e := s.Activate(ctx, id, "new-config", 1000, 60000); e != ErrGone {
+		t.Fatal("old reservation survived configuration rollover", e)
+	}
+	for _, founder := range p.Founders {
+		v, e := s.Status(ctx, founder.Hash)
+		if e != nil || v.Pending != "" {
+			t.Fatal("rollover left founder locked", e)
+		}
+	}
+	id = fresh()
+	if _, e := s.Reserve(ctx, id, "new-config", p, grid, 20, 1000, 1000); e != nil {
+		t.Fatal(e)
+	}
+	time.Sleep(30 * time.Millisecond)
+	g, e := s.Activate(ctx, id, "new-config", 1000, 60000)
+	if e != nil {
+		t.Fatal(e)
+	}
+	changed, e := s.Activate(ctx, id, "later-config", 2000, 30000)
+	if e != nil || !reflect.DeepEqual(changed.Intersection, g.Intersection) || changed.EndsAt != g.EndsAt || changed.ActivatedAt != g.ActivatedAt {
+		t.Fatal("active destination/deadline changed on rollover", e)
 	}
 }

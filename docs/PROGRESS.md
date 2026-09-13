@@ -717,3 +717,22 @@ journey, failure recovery and 15-minute short-TTL churn tests are still running.
 Initial memory collection sampled the container supervisor; the larger run measures
 the actual Valkey process. Recovery exposed dynamic Docker port changes across a
 restart; the owned lab now binds an explicit private test port. Results follow.
+
+## Automated hardening: adversarial transitions and provider outage — 2026-09-13
+
+Added a seeded 250-step arrival/retraction/nonce/cancellation model checked against
+private state and independent-credential index counts after each operation. Added
+configuration rollover checks: pending cohorts unlock on version mismatch while an
+already activated destination/deadline stays frozen. Added 100 encrypted synthetic
+push subscriptions with two competing workers and a failing fake provider; exclusive
+claims, configured concurrency, retry backoff and cancellation passed without any
+external delivery. `make test-store` passed with the race detector in 2.722s/1.092s/
+1.651s for store/API/notification packages. Initial test assumptions about duplicate
+nonce issuance and comparable map structs were corrected before this passing run.
+
+The collector now creates temporary output files with mode 0600 from the start,
+rejects invalid object/worker schemas and tests rejection of sensitive extra fields.
+Python monitor and load-gate checks passed (eight total). Load checks distinguish
+accepted-request latency from fast rejections; historical combined histograms do
+not silently qualify mixed traffic. Browser compatibility, the normal-delay journey,
+short-TTL churn and final load/reproduction evidence are still being completed.
