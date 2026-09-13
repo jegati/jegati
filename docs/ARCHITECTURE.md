@@ -1,5 +1,7 @@
 # GATI architecture and one-million-signal assessment
 
+Update 2026-09-14: [decision 0011](decisions/0011-incremental-matching-working-set.md) replaces growing-OFFSET traversal and introduces changed-cell reads plus a bounded private matching working set. The original measurements and 1M extrapolations below remain historical evidence, not measurements of the revised code. Final speedup evidence is tracked in PROGRESS.md.
+
 Reviewed 2026-09-13 against source at 9e2bd39 and the recorded monitored 100k runs.
 This document describes implementation, distinguishes planned deployment components,
 and provides an estimate. No 1M benchmark or configuration change was performed.

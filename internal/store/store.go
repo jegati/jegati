@@ -87,7 +87,7 @@ redis.call('SET',KEYS[2],'used','PX',ARGV[4])
 redis.call('ZADD',KEYS[3],expiry,ARGV[6])
 redis.call('ZADD',KEYS[4],expiry,ARGV[7])
 for n=3,4 do if redis.call('PTTL',KEYS[n])<tonumber(ARGV[4]) then redis.call('PEXPIRE',KEYS[n],ARGV[4]) end end
-redis.call('SET','gati:dirty','1','PX',10000)
+markCell(ARGV[1])
 return s
 `
 
@@ -139,7 +139,7 @@ redis.call('DEL','gati:arrival-nonce:'..ARGV[1])
 redis.call('DEL',KEYS[1])
 redis.call('ZREM',KEYS[2],ARGV[1]..'|'..s.cell)
 redis.call('ZREM','gati:cell:'..s.cell,ARGV[1])
-redis.call('SET','gati:dirty','1','PX',10000)
+markCell(s.cell)
 return 1
 `)
 
@@ -216,7 +216,7 @@ func (s *Store) Allow(ctx context.Context, key string, count int, ttl time.Durat
 }
 
 func newScript(source string) *redis.Script {
-	source = removeArrivalLua + source
+	source = removeArrivalLua + dirtyCellLua + source
 	source = strings.ReplaceAll(source, "__CLOCK__", clockLua)
 	return redis.NewScript(strings.ReplaceAll(source, "gati:", keyPrefix))
 }

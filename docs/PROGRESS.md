@@ -901,3 +901,36 @@ load report unit checks and make test (Go race, simulation build, vet and TypeSc
 passed. Pending: mixed 100k baseline,
 optimization and identical-workload comparisons. Source remains local; no provider
 credentials or publication were needed. Preserve commands.txt.
+
+## Incremental geographic reads — 2026-09-14
+
+Implemented ten-second coarse-cell change markers, private owner-only working
+sets, periodic full reconciliation, independent deadline wakeups and cache discard
+on failure/ownership change. Full snapshots now use an atomic indexed-rank cursor
+with bounded retry, batch record reads and reusable decoder storage. Reachability
+membership uses binary search without an additional per-cell map. Decision 0011
+documents lifecycle and residual linear CPU/full-reconciliation work.
+
+Measurements caught and rejected the first ZSCAN prototype: it reduced allocation
+traffic but made the snapshot benchmark 10–20% slower. Raw evidence is retained at
+reports/local/scaling-after-scan. The subsequent rank traversal without decoder
+reuse was near baseline speed at 100k/1M, with about one-third less allocation
+traffic; it was not described as a substantial throughput speedup. Final repeated
+benchmarks will include the complete changes and changed-cell reads under both
+uniform and hotspot distributions, using an unchanged baseline revision.
+
+The first requested mixed-load run accidentally omitted the mixed flag at the
+Python-to-Go boundary; it only establishes sequential 100k evidence. Fixed the
+forwarding, added expected-phase checks and a clean-revision binary option to the
+owned lab. Corrected reports/local/mixed-100k-before-corrected used original backend
+f9a412e and passed: 100k accepted, simultaneous 66,680 status reads, 20k public
+origin reads and 1,000 going confirmations, all successful with accepted p95 <=10ms.
+It does not measure arrivals, full-lifetime expiry or edge traffic.
+
+Validation: make test-store passed with the added worker integration package;
+make test passed Go race/simulation builds, vet and TypeScript after correcting
+unkeyed test literals reported by vet. Current seeded 3,000-person simulation
+completed in 214.2 wall seconds with 3,000 accepted credentials, 1,922 invited
+actors, 1,562 arrived actors and 44 observed gatherings; its paced synthetic time
+is not a speedup benchmark. Remaining checks/results are recorded in the next
+entry. Local deployment scaffolding is being prepared separately; preserve commands.txt.

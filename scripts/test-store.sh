@@ -22,5 +22,5 @@ if [[ -n "${GATI_SOAK_SECONDS:-}" ]]; then
  [[ "$GATI_SOAK_SECONDS" =~ ^[0-9]+$ && "$GATI_SOAK_SECONDS" -ge 5 && "$GATI_SOAK_SECONDS" -le 86400 ]] || exit 1
  go test -race -count=1 -timeout "$((GATI_SOAK_SECONDS+120))s" -run '^TestLifecycleSoak$' ./internal/store
 else
- go test -race -p 1 -count=1 ./internal/store ./internal/httpapi ./internal/notification
+ go test -race -p 1 -count=1 ./internal/store ./internal/httpapi ./internal/notification ./internal/worker
 fi

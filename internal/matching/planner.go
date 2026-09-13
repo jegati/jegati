@@ -13,6 +13,7 @@ type Signal struct {
 	Area                 geography.ParticipantArea
 	CreatedAt, ExpiresAt int64
 	// Assigned signals and live reservations cannot found a competing gathering.
+	AssignedUntil int64
 	Assigned      bool
 	ReservedUntil int64
 	Declined      map[string]bool

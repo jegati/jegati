@@ -1,5 +1,7 @@
 # Ephemeral storage schema — willingness (schema 1)
 
+The active matching owner also holds a private per-cell working set in process memory. It reconciles within ten seconds, removes expired references on deadline wakeups, and discards the cache on errors, lease changes or shutdown. It is not an HTTP/admin view or authoritative membership store. See [decision 0011](decisions/0011-incremental-matching-working-set.md). Updated deployments must regenerate the restricted ACL and recreate the store with it: MGET, ZRANGE, ZRANK and ZREMRANGEBYSCORE are now required within the private namespace.
+
 All keys are private Valkey keys; no public participant listing exists. The store
 has no RDB/AOF persistence or writable disk volume. Values and command arguments
 must not enter logs. Service identities are infrastructure credentials, not users.
@@ -10,6 +12,7 @@ must not enter logs. Service identities are infrastructure credentials, not user
 | `gati:cap:<capability-sha256>` | Constant `used` replay tombstone; no location | Original deadline, including after cancellation; prevents delayed retries resurrecting a cancelled signal |
 | `gati:expiry` | Sorted members `<hash>\|<cell>` scored by deadline | Key expires at latest member deadline; expired members pruned in bounded batches |
 | `gati:cell:<canonical-cell>` | Sorted capability hashes scored by deadline | Same latest-deadline TTL; cancellation removes membership; cleanup prunes expiry |
+| `gati:dirty-cells` | Coarse cells scored by last relevant state change; no participant IDs | Ten-second logical marker lifetime and key TTL; writes prune old markers, matching atomically takes batches |
 | `gati:rate:secret:<epoch>` | Random shared HMAC secret | Remainder of a ten-minute epoch |
 | `gati:rate:requests:<epoch>:<hmac>` / `creates:...` | Aggregate network admission counters | Configured fixed window, at most ten minutes; no sliding renewal |
 | `gati:rate:writes` | Global write counter | One second |

@@ -21,7 +21,7 @@ for role in ['app','health','control'] if args.simulation else ['app','health']:
     passwords[role]=path.read_text().strip()
 acl=['user default off',
      'user health on #'+hashlib.sha256(passwords['health'].encode()).hexdigest()+' ~* +ping +config|get',
-     'user app on #'+hashlib.sha256(passwords['app'].encode()).hexdigest()+' ~'+prefix+'* +ping +hello +get +set +exists +del +pttl +pexpire +pexpireat +zadd +zrem +zrangebyscore +zscan +zcard +zcount +zscore +eval +evalsha +script|load +time +incr']
+     'user app on #'+hashlib.sha256(passwords['app'].encode()).hexdigest()+' ~'+prefix+'* +ping +hello +get +mget +set +exists +del +pttl +pexpire +pexpireat +zadd +zrem +zremrangebyscore +zrangebyscore +zrange +zrank +zscan +zcard +zcount +zscore +eval +evalsha +script|load +time +incr']
 p=root/'users.acl'
 content='\n'.join(acl)+'\n'
 if not p.exists() or p.read_text()!=content:

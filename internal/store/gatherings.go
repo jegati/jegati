@@ -53,7 +53,7 @@ redis.call('ZADD',KEYS[2],ready,proposal.id)
 if redis.call('PTTL',KEYS[2])<expiry-now then redis.call('PEXPIRE',KEYS[2],expiry-now) end
 for n,hash in ipairs(proposal.founders) do
  local v=records[n];v._pending=proposal.id;v._pending_until=expiry
- redis.call('SET','gati:s:'..hash,cjson.encode(v),'KEEPTTL')
+ redis.call('SET','gati:s:'..hash,cjson.encode(v),'KEEPTTL');markCell(v.cell)
 end
 return cjson.encode(proposal)
 `)
@@ -108,7 +108,7 @@ for _,hash in ipairs(p.founders) do
 end
 if not valid then
  for _,entry in ipairs(records) do
-  local v=entry.value;if v._pending==p.id then v._pending=nil;v._pending_until=nil;redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL') end
+  local v=entry.value;if v._pending==p.id then v._pending=nil;v._pending_until=nil;redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL');markCell(v.cell) end
  end
  redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);if redis.call('GET','gati:destination:'..p.intersection.id)==p.id then redis.call('DEL','gati:destination:'..p.intersection.id) end;return 'GONE'
 end
@@ -119,7 +119,7 @@ redis.call('ZADD',KEYS[4],ends,g.id)
 if redis.call('PTTL',KEYS[4])<ends-now then redis.call('PEXPIRE',KEYS[4],ends-now) end
 for _,entry in ipairs(records) do
  local v=entry.value;v._pending=nil;v._pending_until=nil;v._gathering=g.id;v._gathering_until=ends;v.state='invited'
- redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL')
+ redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL');markCell(v.cell)
 end
 redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1])
 return cjson.encode(g)
@@ -145,52 +145,116 @@ func (s *Store) DueReservations(ctx context.Context, now int64, batch int) ([]st
 	return s.Client.ZRangeByScore(ctx, keyPrefix+"pending", &redis.ZRangeBy{Min: "-inf", Max: strconv.FormatInt(now, 10), Count: int64(batch)}).Result()
 }
 
-// EligibleSnapshot is private worker input, read in bounded pages. Concurrent
-// changes can cause a missed candidate until reconciliation; atomic transitions
-// prevent those stale snapshots from activating unavailable founders.
+// Each page seeks from the previous member's indexed rank in one atomic read.
+// Unlike a score-range OFFSET, this does not traverse all preceding members.
+// Deletion of the cursor forces a bounded retry rather than silently skipping
+// continuously present signals. No lock or participant cursor is persisted.
+var snapshotPage = newScript(`
+if ARGV[1]=='' then
+ return redis.call('ZRANGEBYSCORE',KEYS[1],ARGV[2],'+inf','LIMIT',0,ARGV[3])
+end
+local rank=redis.call('ZRANK',KEYS[1],ARGV[1])
+if not rank then return false end
+return redis.call('ZRANGE',KEYS[1],rank+1,rank+tonumber(ARGV[3]))
+`)
+var errSnapshotChanged = errors.New("snapshot cursor removed")
+
+// EligibleSnapshot is private, bounded worker input. Concurrent additions may
+// wait for reconciliation; activation always rechecks live state atomically.
 func (s *Store) EligibleSnapshot(ctx context.Context, grid geography.Grid, now int64, batch, maximum int) ([]matching.Signal, error) {
-	result := []matching.Signal{}
-	for offset := 0; offset < maximum; offset += batch {
-		members, e := s.Client.ZRangeByScore(ctx, keyPrefix+"expiry", &redis.ZRangeBy{Min: strconv.FormatInt(now, 10), Max: "+inf", Offset: int64(offset), Count: int64(batch)}).Result()
-		if e != nil {
-			return nil, e
+	for attempt := 0; attempt < 3; attempt++ {
+		values, err := s.eligibleSnapshot(ctx, grid, now, batch, maximum, keyPrefix+"expiry", true)
+		if !errors.Is(err, errSnapshotChanged) {
+			return values, err
 		}
-		pipe := s.Client.Pipeline()
-		commands := make([]*redis.StringCmd, 0, len(members))
-		hashes := []string{}
-		for _, member := range members {
-			hash, _, ok := strings.Cut(member, "|")
-			if !ok {
+	}
+	return nil, errSnapshotChanged
+}
+func (s *Store) eligibleSnapshot(ctx context.Context, grid geography.Grid, now int64, batch, maximum int, index string, withCell bool) ([]matching.Signal, error) {
+	if batch < 1 || maximum < 1 {
+		return nil, errors.New("invalid snapshot bounds")
+	}
+	count, err := s.Client.ZCount(ctx, index, strconv.FormatInt(now, 10), "+inf").Result()
+	if err != nil {
+		return nil, err
+	}
+	if count > int64(maximum) {
+		return nil, ErrCapacity
+	}
+	result := make([]matching.Signal, 0, int(count))
+	seen := make(map[string]bool, int(count))
+	cells := map[string]geography.Cell{}
+	var value Signal // Reuse the decoder target; retained strings/maps have their own storage.
+	cursor, work := "", 0
+	for {
+		entries, err := snapshotPage.Run(ctx, s.Client, []string{index}, cursor, now, batch).StringSlice()
+		if err == redis.Nil {
+			return nil, errSnapshotChanged
+		}
+		if err != nil {
+			return nil, err
+		}
+		work += len(entries)
+		if work > maximum*4+batch {
+			return nil, errors.New("snapshot work exceeded")
+		}
+		hashes, keys := []string{}, []string{}
+		for n := range entries {
+			hash := entries[n]
+			if withCell {
+				var ok bool
+				hash, _, ok = strings.Cut(hash, "|")
+				if !ok {
+					return nil, errors.New("invalid expiry index")
+				}
+			}
+			if seen[hash] {
 				continue
+			}
+			seen[hash] = true
+			if len(seen) > maximum {
+				return nil, ErrCapacity
 			}
 			hashes = append(hashes, hash)
-			commands = append(commands, pipe.Get(ctx, keyPrefix+"s:"+hash))
+			keys = append(keys, keyPrefix+"s:"+hash)
 		}
-		_, e = pipe.Exec(ctx)
-		if e != nil && e != redis.Nil {
-			return nil, e
+		for start := 0; start < len(keys); start += batch {
+			end := min(start+batch, len(keys))
+			values, err := s.Client.MGet(ctx, keys[start:end]...).Result()
+			if err != nil {
+				return nil, err
+			}
+			for n, raw := range values {
+				if raw == nil {
+					continue
+				}
+				encoded, ok := raw.(string)
+				if !ok {
+					return nil, errors.New("invalid stored session")
+				}
+				value = Signal{}
+				if err := json.Unmarshal([]byte(encoded), &value); err != nil {
+					return nil, errors.New("invalid stored session")
+				}
+				v := value
+				if v.ExpiresAt <= now {
+					continue
+				}
+				cell, ok := cells[v.Cell]
+				if !ok {
+					cell, err = grid.Parse(v.Cell)
+					if err != nil {
+						return nil, err
+					}
+					cells[v.Cell] = cell
+				}
+				result = append(result, matching.Signal{Hash: hashes[start+n], Area: geography.ParticipantArea{Cell: cell, RadiusKM: v.RadiusKM}, CreatedAt: v.CreatedAt, ExpiresAt: v.ExpiresAt, Assigned: v.GatheringUntil > now, AssignedUntil: v.GatheringUntil, ReservedUntil: v.PendingUntil, Declined: v.Declined})
+			}
 		}
-		for n, command := range commands {
-			raw, e := command.Result()
-			if e == redis.Nil {
-				continue
-			}
-			if e != nil {
-				return nil, e
-			}
-			v, e := decode(raw)
-			if e != nil {
-				return nil, e
-			}
-			cell, e := grid.Parse(v.Cell)
-			if e != nil {
-				return nil, e
-			}
-			result = append(result, matching.Signal{Hash: hashes[n], Area: geography.ParticipantArea{Cell: cell, RadiusKM: v.RadiusKM}, CreatedAt: v.CreatedAt, ExpiresAt: v.ExpiresAt, Assigned: v.GatheringUntil > now, ReservedUntil: v.PendingUntil, Declined: v.Declined})
-		}
-		if len(members) < batch {
+		if len(entries) < batch {
 			break
 		}
+		cursor = entries[len(entries)-1]
 	}
 	return result, nil
 }
@@ -282,8 +346,8 @@ redis.call('SET',KEYS[1],ARGV[1],'PX',ARGV[2]);return 1
 `)
 
 func (s *Store) MatchingLease(ctx context.Context, owner string, ttlMS int64) (bool, error) {
-	n, e := lease.Run(ctx, s.Client, []string{keyPrefix + "worker:lease"}, owner, ttlMS).Int()
-	return n == 1, e
+	won, _, err := s.MatchingLeaseState(ctx, owner, ttlMS)
+	return won, err
 }
 
 var consumeDirty = newScript(`local v=redis.call('GET',KEYS[1]);redis.call('DEL',KEYS[1]);if v then return 1 end;return 0`)

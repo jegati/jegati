@@ -63,12 +63,11 @@ func NewIndex(g Grid, intersections []Intersection, radii []float64) (*Index, er
 }
 func (i *Index) Reachable(p ParticipantArea) []int { return append([]int(nil), i.reachable[p]...) }
 func (i *Index) CanReach(p ParticipantArea, id string) bool {
-	for _, n := range i.reachable[p] {
-		if i.Intersections[n].ID == id {
-			return true
-		}
-	}
-	return false
+	// Reachable indices follow Intersections' stable ID order. Binary search needs
+	// no additional per-cell map and preserves unknown-area/unknown-ID rejection.
+	ids := i.reachable[p]
+	n := sort.Search(len(ids), func(n int) bool { return i.Intersections[ids[n]].ID >= id })
+	return n < len(ids) && i.Intersections[ids[n]].ID == id
 }
 func (i *Index) Closest(group []ParticipantArea) (Intersection, bool) {
 	if len(group) == 0 {

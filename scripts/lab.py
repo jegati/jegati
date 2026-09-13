@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Owned, isolated production-binary lab. No user-supplied remote targets."""
-import contextlib, json, os, pathlib, shutil, socket, subprocess, tempfile, time, urllib.request
+import contextlib, json, os, pathlib, re, shutil, socket, subprocess, tarfile, tempfile, time, urllib.request
 from monitor import Collector
 ROOT=pathlib.Path(__file__).resolve().parent.parent
 
@@ -10,7 +10,9 @@ def free_port():
 def get(base,path):
     with urllib.request.urlopen(base+path,timeout=3) as r:return r.status,json.load(r)
 class Lab:
-    def __init__(self,output,replicas=1,store_mb=512):
+    def __init__(self,output,replicas=1,store_mb=512,source_revision=None):
+        if source_revision is not None and not re.fullmatch(r"[a-f0-9]{40}",source_revision):raise ValueError("source revision must be a full local commit hash")
+        self.source_revision=source_revision;self.source_root=ROOT
         self.output=pathlib.Path(output).resolve()
         if (self.output/'manifest.json').exists():raise ValueError('choose a new output directory; existing lab evidence is preserved')
         self.output.mkdir(parents=True,exist_ok=True)
@@ -22,8 +24,13 @@ class Lab:
     def start(self):
         command('python3','scripts/init-secrets.py',stdout=subprocess.DEVNULL)
         self.binary=self.directory/'gati-lab'
-        command('go','build','-trimpath','-buildvcs=false','-o',str(self.binary),'./cmd/gati')
-        c=json.loads(subprocess.check_output([str(self.binary),'-mode','config-show'],cwd=ROOT));self.config=c
+        if self.source_revision:
+            self.source_root=self.directory/'source';self.source_root.mkdir()
+            archive=self.directory/'source.tar'
+            with archive.open('wb') as stream:command('git','archive',self.source_revision,stdout=stream)
+            with tarfile.open(archive) as tar:tar.extractall(self.source_root,filter='data')
+        subprocess.run(['go','build','-trimpath','-buildvcs=false','-o',str(self.binary),'./cmd/gati'],cwd=self.source_root,check=True)
+        c=json.loads(subprocess.check_output([str(self.binary),'-mode','config-show'],cwd=self.source_root));self.config=c
         (self.output/'config.json').write_text(json.dumps(c,indent=2)+'\n')
         conf=(ROOT/'deploy/valkey.dev.conf').read_text().replace('maxmemory 128mb',f'maxmemory {self.store_mb}mb')
         (self.directory/'valkey.conf').write_text(conf);(self.directory/'valkey.conf').chmod(0o644)
@@ -38,12 +45,12 @@ class Lab:
         self.store_pid=self.find_store_pid()
         for i in range(self.replicas):self.start_api(i)
         import hashlib,platform
-        manifest={'source_revision':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'source_dirty':bool(subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=ROOT)),'platform':platform.platform(),'cpu_model':next((line.split(':',1)[1].strip() for line in pathlib.Path('/proc/cpuinfo').read_text().splitlines() if line.startswith('model name')),'unknown'),'logical_cpus':os.cpu_count(),'store_maxmemory_mb':self.store_mb,'same_host_generator':True,'config_sha256':get(self.base,'/api/config')[1]['sha256'],'binary_sha256':hashlib.sha256(self.binary.read_bytes()).hexdigest()}
+        manifest={'binary_source_revision':self.source_revision,'source_revision':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'source_dirty':bool(subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],cwd=ROOT)),'platform':platform.platform(),'cpu_model':next((line.split(':',1)[1].strip() for line in pathlib.Path('/proc/cpuinfo').read_text().splitlines() if line.startswith('model name')),'unknown'),'logical_cpus':os.cpu_count(),'store_maxmemory_mb':self.store_mb,'same_host_generator':True,'config_sha256':get(self.base,'/api/config')[1]['sha256'],'binary_sha256':hashlib.sha256(self.binary.read_bytes()).hexdigest()}
         (self.output/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     def start_api(self,index):
         port=free_port();sock=self.directory/f'ops-{index}.sock'
         if sock.exists():sock.unlink() # This private lab owns the dead process/socket.
-        args=[str(self.binary),'-listen',f'127.0.0.1:{port}','-config',str(self.output/'config.json'),'-store-address',self.store_address,'-store-password-file',str(ROOT/'.runtime/app-password'),'-monitor-socket',str(sock)]
+        args=[str(self.binary),'-listen',f'127.0.0.1:{port}','-config',str(self.output/'config.json'),'-store-address',self.store_address,'-store-password-file',str(ROOT/'.runtime/app-password'),'-monitor-socket',str(sock),'-roads',str(self.source_root/'data/tirana/roads.geojson'),'-intersections',str(self.source_root/'data/tirana/intersections.json')]
         with (self.output/f'api-{index}-startup.log').open('w') as log:
             process=subprocess.Popen(args,cwd=ROOT,stdout=log,stderr=log)
         value={'process':process,'base':f'http://127.0.0.1:{port}','socket':sock}

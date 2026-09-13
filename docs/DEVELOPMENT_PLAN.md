@@ -1,5 +1,7 @@
 # GATI 🦩 — development and verification plan
 
+Implemented refinement: [decision 0011](decisions/0011-incremental-matching-working-set.md) uses atomic take-before-read batches with cache invalidation and bounded full reconciliation instead of versioned acknowledgements while matching has one owner. Parallel geographic ownership remains a separate future change.
+
 The current deployment/scaling proposal is in
 [DEPLOYMENT_PREPARATION.md](DEPLOYMENT_PREPARATION.md): measured bottlenecks,
 incremental matching, worker roles, trusted proxies, edge privacy and release gates.

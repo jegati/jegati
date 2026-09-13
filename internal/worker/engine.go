@@ -1,7 +1,7 @@
 // Package worker runs the single-codebase private matcher. API replicas can each
 // run an engine; a short store lease elects the writer, and transactions recheck
-// conflicts even if a slow worker outlives its lease. Cached views are destinations,
-// never member lists or individual signals.
+// conflicts even if a slow worker outlives its lease. HTTP sees cached destinations;
+// only the active matching owner keeps a bounded private participant working set.
 package worker
 
 import (
@@ -31,6 +31,7 @@ type Engine struct {
 	lastSweep        int64
 	offerCursor      string
 	offerCursorUntil int64
+	population       *population
 }
 
 func randomID() string {
@@ -45,6 +46,7 @@ func New(s *store.Store, index *geography.Index, c config.Config) *Engine {
 	return &Engine{Store: s, Planner: matching.Planner{Index: index, Config: c.Matching}, Config: c, Hash: hash, owner: randomID()}
 }
 func (e *Engine) Run(ctx context.Context) {
+	defer func() { e.step.Lock(); e.population = nil; e.step.Unlock() }()
 	ticker := time.NewTicker(time.Duration(e.Config.Matching.MaximumDebounceSeconds) * time.Second)
 	defer ticker.Stop()
 	for {
@@ -77,9 +79,14 @@ func (e *Engine) Refresh(ctx context.Context, now int64) error {
 	e.mu.Unlock()
 	return nil
 }
-func (e *Engine) Step(ctx context.Context) error {
+func (e *Engine) Step(ctx context.Context) (err error) {
 	e.step.Lock()
 	defer e.step.Unlock()
+	defer func() {
+		if err != nil {
+			e.population = nil
+		}
+	}()
 	now, err := e.Store.Now(ctx)
 	if err != nil {
 		e.offerCursor = ""
@@ -93,7 +100,10 @@ func (e *Engine) Step(ctx context.Context) error {
 	if err = e.Refresh(ctx, now); err != nil {
 		return err
 	}
-	leader, err := e.Store.MatchingLease(ctx, e.owner, int64(e.Config.Matching.ReconciliationSeconds)*1000)
+	leader, fresh, err := e.Store.MatchingLeaseState(ctx, e.owner, int64(e.Config.Matching.ReconciliationSeconds)*1000)
+	if fresh || !leader {
+		e.population = nil
+	}
 	if err != nil || !leader {
 		return err
 	}
@@ -124,11 +134,12 @@ func (e *Engine) Step(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if !dirty && len(due) == 0 && now-e.lastSweep < int64(e.Config.Matching.ReconciliationSeconds)*1000 {
+	deadlineDue := e.population != nil && e.population.nextDeadline > 0 && now >= e.population.nextDeadline
+	if e.population != nil && !deadlineDue && !dirty && len(due) == 0 && now-e.population.fullAt < int64(e.Config.Matching.ReconciliationSeconds)*1000 {
 		return nil
 	}
 	e.lastSweep = now
-	signals, err := e.Store.EligibleSnapshot(ctx, e.Planner.Index.Grid, now, e.Config.Limits.CleanupBatchSize, e.Config.Limits.MaxActiveSignals)
+	signals, err := e.populationSnapshot(ctx, now)
 	if err != nil {
 		return err
 	}

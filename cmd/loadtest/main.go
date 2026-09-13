@@ -334,7 +334,7 @@ func run() error {
 		phases = append(phases, h.phase("post-burst-recovery", 1000, 100, func(n int) int { code, _ := h.call(n%len(h.actors), "GET", "/api/signal", nil); return code }))
 	}
 	phases = append(phases, h.phase("cancellation", min(1000, len(h.actors)), 200, func(n int) int { code, _ := h.call(n, "DELETE", "/api/signal", nil); return code }))
-	report := map[string]any{"synthetic": true, "real_time": true, "distribution": *distribution, "seed": 42, "stages": stageResults, "phases": phases, "latency_upper_bounds_ms": bounds, "same_host_generator": true, "limitations": []string{"Accepted responses are counted; uncertain creations can exist until teardown.", "Production limits are unchanged; 512 loopback source addresses model independent network clients.", "Public reads hit the origin, not a CDN or cache proxy.", "No actual device location or external push provider is used.", "Owned lab teardown removes all synthetic state; this is not an expiry test."}}
+	report := map[string]any{"synthetic": true, "real_time": true, "mixed_requested": *mixed, "distribution": *distribution, "seed": 42, "stages": stageResults, "phases": phases, "latency_upper_bounds_ms": bounds, "same_host_generator": true, "limitations": []string{"Accepted responses are counted; uncertain creations can exist until teardown.", "Production limits are unchanged; 512 loopback source addresses model independent network clients.", "Public reads hit the origin, not a CDN or cache proxy.", "No actual device location or external push provider is used.", "Owned lab teardown removes all synthetic state; this is not an expiry test."}}
 	data, _ := json.MarshalIndent(report, "", "  ")
 	return os.WriteFile(*out, append(data, '\n'), 0600)
 }

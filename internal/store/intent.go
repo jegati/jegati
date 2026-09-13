@@ -38,7 +38,7 @@ else
  s._gathering=g.id;s._gathering_until=g.ends_at;s._pending=nil;s._pending_until=nil
 end
 redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL')
-redis.call('SET','gati:dirty','1','PX',10000)
+markCell(s.cell)
 return cjson.encode(s)
 `)
 
@@ -85,6 +85,7 @@ if s.expires_at<now+tonumber(ARGV[8]) then return 'GONE' end
 if s._gathering~=g.id and s._arrival_member then removeArrival(s);s._arrival_member=nil;s.arrival_until=nil end
 s._gathering=g.id;s._gathering_until=g.ends_at;s._pending=nil;s._pending_until=nil;s.state='going'
 redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL')
+markCell(s.cell)
 return cjson.encode(s)
 `)
 

@@ -7,6 +7,7 @@ def evaluate(report):
     if report.get('synthetic') is not True or report.get('real_time') is not True:failures.append('not a real-time synthetic report')
     phases=report.get('phases',[])
     if not phases:failures.append('no measured phases')
+    if report.get('mixed_requested') and not {'mixed-status','mixed-public-origin','mixed-going'} <= {p['name'] for p in phases}:failures.append('missing mixed workload phases')
     for phase in phases:
         name=phase['name'];codes=phase['statuses'];accepted=sum(n for c,n in codes.items() if c.startswith('2'))
         if phase['generator_dropped']:failures.append(name+': generator dropped scheduled requests')

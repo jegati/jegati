@@ -1,5 +1,7 @@
 # Initial threat model and evidence index
 
+Update 2026-09-14: matching now retains a private per-cell working set only in the active owner, discards it on error/ownership changes, and rechecks deadlines before use. Ten-second cell change markers contain no participant IDs. [Decision 0011](decisions/0011-incremental-matching-working-set.md) documents the additional live-memory exposure and retention/reconciliation controls; no public count or arrival guarantee changes.
+
 Status: willingness, private activation/arrival, limited network/write admission
 and service ACLs are implemented; public aggregate publication remains planned. See STORAGE.md and API.md. See the
 [scaffold report](reports/02-scaffold.md) for config validation, API headers and
