@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. Milestone 09 can resume under the disclosed inference limitation.
+Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. The 3,000-person response simulation suite is complete. Milestone 09 can resume under the disclosed inference limitation.
 
 ## Current task and authorization
 
@@ -33,7 +33,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 03 — Coarse geography and intersection fixtures | Complete | 6,491 imported road intersections, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
 | 05 — Albanian willingness UI | Complete | 13 Chromium checks pass after device-only correction; previous five-check milestone evidence below is historical |
-| 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
+| 06 — Seeded Tirana simulation | Complete; response suite added | Dedicated store/build, controllable clock, 18 checked city cases, 3,000-person behavior/arrival replay; reports/population-3000.md |
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
 | 09 — Aggregate map/statistics | Known failure accepted for local work | Production-threshold collusion probe reconstructs one synthetic target cell; see reports/09-inference-gate.md |
@@ -71,12 +71,14 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Complete the authorized 3,000-person population simulation suite and review its
-reports. Current code includes event scheduling, weighted synthetic users, actual
-API responses/journeys/arrival, preserved application budgets, map replay and report
-checks. Run the six scenarios with three seeds plus the explicit finer-cell
-comparison and a repeatability check; finish documentation/commits with exact
-findings. Milestone 09 remains pending behind this simulation work.
+The simulation task is complete; see reports/population-3000.md for results and
+reproduction commands. Resume milestone 09 aggregate-publication design and tests
+under the disclosed nearest-intersection inference limitation (decision 0004), then
+notifications/hardening/load/deployment verification. The operating config retains
+1,000 m cells; 100 m was an explicit comparison. Before a real pilot, review the
+short-radius exclusions and journey/deadline outcomes; do not silently change the
+privacy resolution or claim human usability from synthetic actors.
+No credential or toolchain blocker remains for local work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -247,7 +249,7 @@ population reports remain willingness-only; fixed integration tests are separate
 Corrected obsolete SIMULATION.md wording that implied activation/arrival app code
 had not landed. Validation: source/config cross-check and git diff --check.
 
-## 3,000-person simulation implementation — in progress
+## 3,000-person simulation implementation — historical starting point
 
 User increased the main population to 3,000 and authorized current settings:
 activation 30, arrivals 20, radius choices 0.1/0.5/1/3 km, plus support for 100 m
@@ -255,8 +257,8 @@ cells. Current grid remains the user's 1,000 m setting; short radii cannot reach
 any destination under the conservative whole-cell rule. Decision 0005 records
 this distinction, finer-grid exposure, and a possible explicit comparison.
 Schema 6 adds fractional radii/100 m grid support. Regression config fixtures are
-now separate from the user's editable operating config. Simulation actor/event
-work is ongoing; no completed 3,000-person result is claimed yet.
+now separate from the user's editable operating config. At that starting point, simulation actor/event work was ongoing and no completed
+3,000-person result existed; final evidence is recorded below.
 
 
 ## Population-response implementation and initial validation
@@ -302,3 +304,36 @@ failed runs on suite resume. Added a shared-network diagnostic and CI success/re
 checks. Updated the parameter reference and original plan to schema 6/current
 settings. `make verify-local`, the real-store rollover checks and the 80-person
 success control passed. Final resumed suite and post-fix browser validation follow.
+
+
+## Final population simulation evidence
+
+All 18 scenario checks now pass (six cases × seeds 42/43/44). Initial failures remain
+preserved: three empty-result checker failures, and the dense seed-42 rollover 503.
+The latter was rerun after the atomic limiter fix; completed cases were rechecked.
+Baseline seed 42: 3,000 accepted, 1,107 invited, 489 unique actors confirming arrival,
+746 confirmation events, 27 observed gatherings, 15 ever JEMI KËTU. All accepted
+sessions cancelled/expired, zero baseline rate rejections. Fine-grid comparison:
+1,891 invited, 1,067 unique arrival actors, 41 gatherings, 30 ever JEMI KËTU.
+The 1,000 m baseline excludes all 0.1/0.5 km-radius matching; it remains unchanged.
+
+The initial batch took 929.22 seconds on this 16-thread Ryzen host. Before/after-fix
+baseline repeats have identical complete functional reports. The 80-person control
+has all 80 arriving; a YAML seed-43 control confirms seed selection. One-network
+120-person control accepted 55 with expected rate rejection, all 55 arriving.
+
+Final validation: make verify-local (race/unit/simulation-tag/vet/TS/build/config/
+normal-route smoke), make test-store including rollover/ACL/expiry, legacy real-
+store simulation integration, rebuilt Compose and all 13 app browser tests passed.
+Standalone replay checks passed for the control and final 3,000-person artifact;
+make check-containers passed after the final Compose rebuild.
+The report checker rejects corrupted expiry evidence; duplicate suite seeds are
+rejected before touching output. CI includes the control/replay checks but remote
+CI has not run. No downloaded tools or real participant records were committed.
+
+Reviewed evidence: reports/population-3000.md and population-3000-summary.json;
+interactive artifacts remain in ignored reports/local. Remaining limitations:
+synthetic decisions/journeys, injected late discovery, no human usability or 100k
+capacity claim, finer-cell exposure, known collusion/location-spoofing risks, and
+unfinished public maps/notifications/deployment verification. Work is committed
+locally; unrelated commands.txt remains untouched. Next action is milestone 09.

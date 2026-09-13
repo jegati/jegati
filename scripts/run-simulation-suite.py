@@ -8,7 +8,7 @@ parser.add_argument('--seeds',type=int,nargs='+',default=[42,43,44])
 parser.add_argument('--jobs',type=int,choices=[1,2,3],default=3)
 parser.add_argument('--resume',action='store_true',help='recheck completed runs and archive/retry failed runs using the saved config')
 args=parser.parse_args()
-if len(args.seeds)>10 or any(s<0 for s in args.seeds): parser.error('use at most ten nonnegative seeds')
+if len(args.seeds)>10 or len(set(args.seeds))!=len(args.seeds) or any(s<0 or s>2**64-1 for s in args.seeds): parser.error('use at most ten distinct unsigned 64-bit seeds')
 root=pathlib.Path(args.output);root.mkdir(parents=True,exist_ok=True)
 previous={}
 attempt=str(time.time_ns())

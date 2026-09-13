@@ -1,5 +1,8 @@
 # Isolated Tirana simulations
 
+[Completed 3,000-person experiment findings](reports/population-3000.md) include
+the 18-case matrix, finer-grid comparison, failures found and repeatability evidence.
+
 The main population scenario now uses **3,000 synthetic people** and the current
 `config/gati.yaml` settings. Each run owns a fresh loopback API/Valkey, drives the
 actual willingness/admission/arrival endpoints, and removes its processes/store.

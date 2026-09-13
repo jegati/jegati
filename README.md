@@ -17,6 +17,8 @@ implemented. Collective maps and notification subscriptions are not implemented 
 include a 3,000-person response/journey driver, a standalone map replay,
 expiry/replay checks and smaller Sybil cases. Run `make simulate-population` using
 your current configuration, or `make simulate-suite` for a scenario comparison.
+See the [3,000-person findings and replay links](docs/reports/population-3000.md)
+and [matching configuration reference](docs/MATCHING_PARAMETERS.md).
 
 **Known privacy limitation:** a reproducible synthetic collusion test reconstructs
 one participant's coarse cell from the ordinary nearest-intersection invitation.

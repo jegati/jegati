@@ -1,0 +1,4505 @@
+{
+  "simulation": true,
+  "recorded_date": "2026-09-13",
+  "initial_suite_wall_seconds": 929.22,
+  "hardware": {
+    "cpu": "AMD Ryzen 7 7435HS",
+    "logical_cpus": 16,
+    "memory_kib": 24281032
+  },
+  "functional_repeat_sha256": "f9141abd66bc40039ba48131ddab20ac98404b28da460182312a69295c69c13a",
+  "functional_repeat_exclusions": [
+    "wall_seconds",
+    "max_sampled_driver_heap_bytes",
+    "source_revision",
+    "source_dirty"
+  ],
+  "runs": [
+    {
+      "label": "tirana-boundaries-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-boundaries-42/report.json",
+      "report_sha256": "a49b16dc7432e74d3abe3e09558f09213d61356f6c5ea6b55cd7f4161a9698e0",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            600,
+            1200
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 200,
+        "distribution": "uniform",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "95430da423da76320a7538b939a486e243c44ed7f9b6bb45669bb56f5b7debb1",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 200,
+        "cancelled": 21,
+        "credentials_accepted": 200,
+        "expired_verified": 179,
+        "generated_credentials": 200,
+        "http_requests": 18655,
+        "idempotent_retries_verified": 18,
+        "offline_intervals": 965,
+        "synthetic_people": 200,
+        "synthetic_people_accepted": 200,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 57,
+          "coarsening_excludes_all_start_destinations": 21,
+          "exact_start_has_destination": 21,
+          "generated": 57
+        },
+        "0.5": {
+          "accepted": 40,
+          "coarsening_excludes_all_start_destinations": 37,
+          "exact_start_has_destination": 37,
+          "generated": 40
+        },
+        "1": {
+          "accepted": 51,
+          "coarse_start_has_destination": 33,
+          "coarsening_excludes_all_start_destinations": 14,
+          "exact_start_has_destination": 47,
+          "generated": 51
+        },
+        "3": {
+          "accepted": 52,
+          "coarse_start_has_destination": 52,
+          "exact_start_has_destination": 52,
+          "generated": 52
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 11865456,
+      "wall_seconds": 17.813583843,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 165,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-boundaries-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-boundaries-43/report.json",
+      "report_sha256": "92d32122c9874ee53cd3486e023b3ae35c6685642d10d53784f51ec0c5ab8500",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            600,
+            1200
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 200,
+        "distribution": "uniform",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "73ca486a5838a5bb61747a1435b80671773e056b1aafcc386254614942a0d5cb",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 200,
+        "cancelled": 24,
+        "credentials_accepted": 200,
+        "expired_verified": 176,
+        "generated_credentials": 200,
+        "http_requests": 16264,
+        "idempotent_retries_verified": 16,
+        "offline_intervals": 818,
+        "synthetic_people": 200,
+        "synthetic_people_accepted": 200,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 60,
+          "coarsening_excludes_all_start_destinations": 26,
+          "exact_start_has_destination": 26,
+          "generated": 60
+        },
+        "0.5": {
+          "accepted": 43,
+          "coarsening_excludes_all_start_destinations": 39,
+          "exact_start_has_destination": 39,
+          "generated": 43
+        },
+        "1": {
+          "accepted": 53,
+          "coarse_start_has_destination": 39,
+          "coarsening_excludes_all_start_destinations": 11,
+          "exact_start_has_destination": 50,
+          "generated": 53
+        },
+        "3": {
+          "accepted": 44,
+          "coarse_start_has_destination": 44,
+          "exact_start_has_destination": 44,
+          "generated": 44
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 11708552,
+      "wall_seconds": 15.578982525,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 141,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-boundaries-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-boundaries-44/report.json",
+      "report_sha256": "27a3867d1772c1ce8d480edf86bd43963ab719a923b85f4dde887330075e04d3",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            600,
+            1200
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 200,
+        "distribution": "uniform",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "449bd7d84a29aa9b6380a4c6aebc69b18fa99ea00f38ca137af5702ba0ec7435",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 200,
+        "cancelled": 20,
+        "credentials_accepted": 200,
+        "expired_verified": 180,
+        "generated_credentials": 200,
+        "http_requests": 17304,
+        "idempotent_retries_verified": 15,
+        "offline_intervals": 898,
+        "synthetic_people": 200,
+        "synthetic_people_accepted": 200,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 63,
+          "coarsening_excludes_all_start_destinations": 31,
+          "exact_start_has_destination": 31,
+          "generated": 63
+        },
+        "0.5": {
+          "accepted": 53,
+          "coarsening_excludes_all_start_destinations": 47,
+          "exact_start_has_destination": 47,
+          "generated": 53
+        },
+        "1": {
+          "accepted": 34,
+          "coarse_start_has_destination": 23,
+          "coarsening_excludes_all_start_destinations": 9,
+          "exact_start_has_destination": 32,
+          "generated": 34
+        },
+        "3": {
+          "accepted": 50,
+          "coarse_start_has_destination": 50,
+          "exact_start_has_destination": 50,
+          "generated": 50
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 11966928,
+      "wall_seconds": 15.683483281,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 160,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-churn-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-churn-42/report.json",
+      "report_sha256": "e48a7c2cd769c76d061327f176153bf71acd3ae90275b1abbc2cec98fd76bfe6",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.5,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            60,
+            600
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.4,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "9847b7c0aafcdfd1385b618fcc1d6f01979f6457ce62c740d112dd1b2fa58875",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 2040,
+        "arrival_attempts": 265,
+        "arrival_replays_verified": 26,
+        "arrivals_accepted": 253,
+        "arrivals_rejected": 12,
+        "arrivals_retracted": 25,
+        "cancelled": 1202,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 196,
+        "credentials_invited": 960,
+        "credentials_went": 784,
+        "decline_responses_accepted": 603,
+        "decline_responses_rejected": 9,
+        "direct_join_attempts": 421,
+        "direct_joins_accepted": 324,
+        "direct_joins_rejected": 97,
+        "expired_verified": 1798,
+        "gatherings_confirmed_observed": 2,
+        "gatherings_observed": 14,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1299,
+        "going_responses_rejected": 416,
+        "http_requests": 221695,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 401,
+        "invitations_observed": 2692,
+        "joins_after_jemi_ketu": 4,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 352,
+        "journeys_obsolete": 425,
+        "late_going_accepted": 163,
+        "offline_intervals": 10986,
+        "planned_no_shows": 256,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 196,
+        "synthetic_people_invited": 960
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarsening_excludes_all_start_destinations": 572,
+          "exact_start_has_destination": 572,
+          "generated": 759
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarsening_excludes_all_start_destinations": 732,
+          "exact_start_has_destination": 732,
+          "generated": 738
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 727,
+          "coarsening_excludes_all_start_destinations": 27,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 259
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 701
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 675810,
+      "journey_median_ms": 1143000,
+      "max_sampled_driver_heap_bytes": 18435592,
+      "wall_seconds": 192.027175611,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 1974,
+      "observed_activation_to_presence_median_minutes": 17.318291666666667
+    },
+    {
+      "label": "tirana-churn-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-churn-43/report.json",
+      "report_sha256": "d88a0c8a0aca862a75c3f72b59f1be9a8ba74d52cbacf35160309942969e4111",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.5,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            60,
+            600
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.4,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "7e0c6816a20338a1f8c349776d027e4a2806dee465c440d04431c29d89ad1ecb",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1806,
+        "arrival_attempts": 424,
+        "arrival_replays_verified": 46,
+        "arrivals_accepted": 405,
+        "arrivals_rejected": 19,
+        "arrivals_retracted": 41,
+        "cancelled": 1216,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 314,
+        "credentials_invited": 1194,
+        "credentials_went": 948,
+        "decline_responses_accepted": 746,
+        "decline_responses_rejected": 12,
+        "direct_join_attempts": 448,
+        "direct_joins_accepted": 362,
+        "direct_joins_rejected": 86,
+        "expired_verified": 1784,
+        "gatherings_confirmed_observed": 3,
+        "gatherings_observed": 26,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1633,
+        "going_responses_rejected": 475,
+        "http_requests": 221628,
+        "idempotent_retries_verified": 332,
+        "ignored_invitations": 485,
+        "invitations_observed": 3297,
+        "journeys_beyond_horizon": 5,
+        "journeys_ended_after_session": 386,
+        "journeys_obsolete": 483,
+        "late_going_accepted": 164,
+        "offline_intervals": 10821,
+        "planned_no_shows": 335,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 314,
+        "synthetic_people_invited": 1194
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 731,
+          "coarsening_excludes_all_start_destinations": 543,
+          "exact_start_has_destination": 543,
+          "generated": 731
+        },
+        "0.5": {
+          "accepted": 724,
+          "coarsening_excludes_all_start_destinations": 721,
+          "exact_start_has_destination": 721,
+          "generated": 724
+        },
+        "1": {
+          "accepted": 790,
+          "coarse_start_has_destination": 772,
+          "coarsening_excludes_all_start_destinations": 17,
+          "exact_start_has_destination": 789,
+          "generated": 790,
+          "invited": 469
+        },
+        "3": {
+          "accepted": 755,
+          "coarse_start_has_destination": 755,
+          "exact_start_has_destination": 755,
+          "generated": 755,
+          "invited": 725
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1388190,
+      "journey_median_ms": 983000,
+      "max_sampled_driver_heap_bytes": 18771680,
+      "wall_seconds": 196.460312093,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 1984,
+      "observed_activation_to_presence_median_minutes": 16.203916666666668
+    },
+    {
+      "label": "tirana-churn-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-churn-44/report.json",
+      "report_sha256": "c621a3424d33c0fc65300a2bf86aea3a4955ec34e95605f455c4016279ca78c3",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.5,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            60,
+            600
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.4,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "d4c0d369756655dc701c9cfce1719f3dde6806568569cb6f44f74ed515f26cd9",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1927,
+        "arrival_attempts": 363,
+        "arrival_replays_verified": 46,
+        "arrivals_accepted": 345,
+        "arrivals_rejected": 18,
+        "arrivals_retracted": 20,
+        "cancelled": 1188,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 261,
+        "credentials_invited": 1073,
+        "credentials_went": 875,
+        "decline_responses_accepted": 710,
+        "decline_responses_rejected": 5,
+        "direct_join_attempts": 440,
+        "direct_joins_accepted": 362,
+        "direct_joins_rejected": 78,
+        "expired_verified": 1812,
+        "gatherings_confirmed_observed": 5,
+        "gatherings_observed": 22,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1543,
+        "going_responses_rejected": 561,
+        "http_requests": 225902,
+        "idempotent_retries_verified": 286,
+        "ignored_invitations": 503,
+        "invitations_observed": 3268,
+        "journeys_beyond_horizon": 2,
+        "journeys_ended_after_session": 359,
+        "journeys_obsolete": 512,
+        "late_going_accepted": 161,
+        "offline_intervals": 11208,
+        "planned_no_shows": 307,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 261,
+        "synthetic_people_invited": 1073
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 773,
+          "coarsening_excludes_all_start_destinations": 574,
+          "exact_start_has_destination": 574,
+          "generated": 773
+        },
+        "0.5": {
+          "accepted": 744,
+          "coarsening_excludes_all_start_destinations": 740,
+          "exact_start_has_destination": 740,
+          "generated": 744
+        },
+        "1": {
+          "accepted": 744,
+          "coarse_start_has_destination": 732,
+          "coarsening_excludes_all_start_destinations": 12,
+          "exact_start_has_destination": 744,
+          "generated": 744,
+          "invited": 371
+        },
+        "3": {
+          "accepted": 739,
+          "coarse_start_has_destination": 739,
+          "exact_start_has_destination": 739,
+          "generated": 739,
+          "invited": 702
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 937088,
+      "journey_median_ms": 1066000,
+      "max_sampled_driver_heap_bytes": 18770256,
+      "wall_seconds": 198.563308444,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2017,
+      "observed_activation_to_presence_median_minutes": 15.96895
+    },
+    {
+      "label": "tirana-dense-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-dense-42/report.json",
+      "report_sha256": "f8045ae766ecc5cd66b23d363fea0d18281362f294dbed3cbc272bd53216e3eb",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 10,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "dddb120b6aa2f30393e1091d5bb50317fda3c4854bbf958f0f4786df2aaa7825",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1493,
+        "arrival_attempts": 810,
+        "arrival_replays_verified": 84,
+        "arrivals_accepted": 810,
+        "arrivals_retracted": 82,
+        "cancelled": 461,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 810,
+        "credentials_invited": 1507,
+        "credentials_went": 1005,
+        "decline_responses_accepted": 313,
+        "direct_join_attempts": 293,
+        "direct_joins_accepted": 293,
+        "expired_verified": 2539,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1005,
+        "http_requests": 257741,
+        "idempotent_retries_verified": 290,
+        "ignored_invitations": 189,
+        "invitations_observed": 1214,
+        "joins_after_jemi_ketu": 85,
+        "journeys_ended_after_session": 10,
+        "late_going_accepted": 682,
+        "offline_intervals": 12774,
+        "planned_no_shows": 185,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 810,
+        "synthetic_people_invited": 1507
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 753,
+          "coarsening_excludes_all_start_destinations": 753,
+          "exact_start_has_destination": 753,
+          "generated": 753
+        },
+        "0.5": {
+          "accepted": 740,
+          "coarsening_excludes_all_start_destinations": 740,
+          "exact_start_has_destination": 740,
+          "generated": 740
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 755,
+          "exact_start_has_destination": 755,
+          "generated": 755,
+          "invited": 755
+        },
+        "3": {
+          "accepted": 752,
+          "coarse_start_has_destination": 752,
+          "exact_start_has_destination": 752,
+          "generated": 752,
+          "invited": 752
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 0,
+      "journey_median_ms": 418000,
+      "max_sampled_driver_heap_bytes": 17292216,
+      "wall_seconds": 193.016334457,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "f18ea11cea89b8f47a738cfbab02fe2d7eef864fbc616e97bf7c64050c54256f",
+          "bin/gati-simulate": "450a3edcea1034bb0f494080fe8d6b0868799d3d512a848eca455ee827bf2254",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2989,
+      "observed_activation_to_presence_median_minutes": 6.76725
+    },
+    {
+      "label": "tirana-dense-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-dense-43/report.json",
+      "report_sha256": "01d3ea5087dde57d19af4f7feb1284976145dc80b230d3b34ef4d285431e764d",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 10,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 3000,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "37fcfee08075a6a88f0c676b8add4d11e285983fba6c79902a690bfc7b614968",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1505,
+        "arrival_attempts": 808,
+        "arrival_replays_verified": 78,
+        "arrivals_accepted": 808,
+        "arrivals_retracted": 73,
+        "cancelled": 448,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 808,
+        "credentials_invited": 1495,
+        "credentials_went": 1002,
+        "decline_responses_accepted": 298,
+        "direct_join_attempts": 294,
+        "direct_joins_accepted": 294,
+        "expired_verified": 2552,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1002,
+        "http_requests": 254684,
+        "idempotent_retries_verified": 305,
+        "ignored_invitations": 195,
+        "invitations_observed": 1201,
+        "joins_after_jemi_ketu": 83,
+        "journeys_ended_after_session": 11,
+        "late_going_accepted": 678,
+        "offline_intervals": 12651,
+        "planned_no_shows": 183,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 808,
+        "synthetic_people_invited": 1495
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 801,
+          "coarsening_excludes_all_start_destinations": 801,
+          "exact_start_has_destination": 801,
+          "generated": 801
+        },
+        "0.5": {
+          "accepted": 704,
+          "coarsening_excludes_all_start_destinations": 704,
+          "exact_start_has_destination": 704,
+          "generated": 704
+        },
+        "1": {
+          "accepted": 735,
+          "coarse_start_has_destination": 735,
+          "exact_start_has_destination": 735,
+          "generated": 735,
+          "invited": 735
+        },
+        "3": {
+          "accepted": 760,
+          "coarse_start_has_destination": 760,
+          "exact_start_has_destination": 760,
+          "generated": 760,
+          "invited": 760
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 0,
+      "journey_median_ms": 430000,
+      "max_sampled_driver_heap_bytes": 17379240,
+      "wall_seconds": 220.647922643,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2986,
+      "observed_activation_to_presence_median_minutes": 6.786583333333334
+    },
+    {
+      "label": "tirana-dense-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-dense-44/report.json",
+      "report_sha256": "2077617477ea2f1efb16b144f743bc3fb917f317b214737cfdb3a71c05010dcb",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 10,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 3000,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "8504c76f996616d58906c8492fd3f5bd311e717721a9c5a5717f878061a539f8",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1549,
+        "arrival_attempts": 796,
+        "arrival_replays_verified": 66,
+        "arrivals_accepted": 796,
+        "arrivals_retracted": 70,
+        "cancelled": 453,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 796,
+        "credentials_invited": 1451,
+        "credentials_went": 979,
+        "decline_responses_accepted": 294,
+        "direct_join_attempts": 272,
+        "direct_joins_accepted": 272,
+        "expired_verified": 2547,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 979,
+        "http_requests": 256768,
+        "idempotent_retries_verified": 274,
+        "ignored_invitations": 178,
+        "invitations_observed": 1179,
+        "joins_after_jemi_ketu": 80,
+        "journeys_ended_after_session": 4,
+        "late_going_accepted": 673,
+        "offline_intervals": 12784,
+        "planned_no_shows": 179,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 796,
+        "synthetic_people_invited": 1451
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 788,
+          "coarsening_excludes_all_start_destinations": 788,
+          "exact_start_has_destination": 788,
+          "generated": 788
+        },
+        "0.5": {
+          "accepted": 761,
+          "coarsening_excludes_all_start_destinations": 761,
+          "exact_start_has_destination": 761,
+          "generated": 761
+        },
+        "1": {
+          "accepted": 681,
+          "coarse_start_has_destination": 681,
+          "exact_start_has_destination": 681,
+          "generated": 681,
+          "invited": 681
+        },
+        "3": {
+          "accepted": 770,
+          "coarse_start_has_destination": 770,
+          "exact_start_has_destination": 770,
+          "generated": 770,
+          "invited": 770
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 0,
+      "journey_median_ms": 418000,
+      "max_sampled_driver_heap_bytes": 17124328,
+      "wall_seconds": 220.869899054,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2990,
+      "observed_activation_to_presence_median_minutes": 6.733633333333334
+    },
+    {
+      "label": "tirana-low-followthrough-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-low-followthrough-42/report.json",
+      "report_sha256": "9b9a7527c4332006ccf5f343364297295222aee263d21c92c6e6f84c240481fa",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.25,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.4,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "9847b7c0aafcdfd1385b618fcc1d6f01979f6457ce62c740d112dd1b2fa58875",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 2014,
+        "arrival_attempts": 137,
+        "arrival_replays_verified": 20,
+        "arrivals_accepted": 133,
+        "arrivals_rejected": 4,
+        "arrivals_retracted": 13,
+        "cancelled": 456,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 123,
+        "credentials_invited": 986,
+        "credentials_went": 652,
+        "decline_responses_accepted": 775,
+        "direct_join_attempts": 162,
+        "direct_joins_accepted": 130,
+        "direct_joins_rejected": 32,
+        "expired_verified": 2544,
+        "gatherings_observed": 17,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 995,
+        "going_responses_rejected": 15,
+        "http_requests": 255195,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 1709,
+        "invitations_observed": 3369,
+        "journeys_ended_after_session": 116,
+        "journeys_obsolete": 176,
+        "late_going_accepted": 175,
+        "offline_intervals": 12748,
+        "planned_no_shows": 566,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 123,
+        "synthetic_people_invited": 986
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarsening_excludes_all_start_destinations": 572,
+          "exact_start_has_destination": 572,
+          "generated": 759
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarsening_excludes_all_start_destinations": 732,
+          "exact_start_has_destination": 732,
+          "generated": 738
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 727,
+          "coarsening_excludes_all_start_destinations": 27,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 285
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 701
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 483795,
+      "journey_median_ms": 1110000,
+      "max_sampled_driver_heap_bytes": 18361752,
+      "wall_seconds": 234.44444538,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2212,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-low-followthrough-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-low-followthrough-43/report.json",
+      "report_sha256": "d60bc481032ca368e86f6d00fc21de384f98ea7580e3efcae081d4f2244b7012",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.25,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.4,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "7e0c6816a20338a1f8c349776d027e4a2806dee465c440d04431c29d89ad1ecb",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1745,
+        "arrival_attempts": 169,
+        "arrival_replays_verified": 7,
+        "arrivals_accepted": 162,
+        "arrivals_rejected": 7,
+        "arrivals_retracted": 11,
+        "cancelled": 459,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 151,
+        "credentials_invited": 1255,
+        "credentials_went": 731,
+        "decline_responses_accepted": 1011,
+        "direct_join_attempts": 192,
+        "direct_joins_accepted": 149,
+        "direct_joins_rejected": 43,
+        "expired_verified": 2541,
+        "gatherings_observed": 27,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1141,
+        "going_responses_rejected": 42,
+        "http_requests": 254309,
+        "idempotent_retries_verified": 332,
+        "ignored_invitations": 1960,
+        "invitations_observed": 4008,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 111,
+        "journeys_obsolete": 176,
+        "late_going_accepted": 189,
+        "offline_intervals": 12601,
+        "planned_no_shows": 684,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 151,
+        "synthetic_people_invited": 1255
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 731,
+          "coarsening_excludes_all_start_destinations": 543,
+          "exact_start_has_destination": 543,
+          "generated": 731
+        },
+        "0.5": {
+          "accepted": 724,
+          "coarsening_excludes_all_start_destinations": 721,
+          "exact_start_has_destination": 721,
+          "generated": 724
+        },
+        "1": {
+          "accepted": 790,
+          "coarse_start_has_destination": 772,
+          "coarsening_excludes_all_start_destinations": 17,
+          "exact_start_has_destination": 789,
+          "generated": 790,
+          "invited": 529
+        },
+        "3": {
+          "accepted": 755,
+          "coarse_start_has_destination": 755,
+          "exact_start_has_destination": 755,
+          "generated": 755,
+          "invited": 726
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1472123,
+      "journey_median_ms": 1004000,
+      "max_sampled_driver_heap_bytes": 18552912,
+      "wall_seconds": 235.345738618,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2228,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-low-followthrough-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-low-followthrough-44/report.json",
+      "report_sha256": "7a779e5e33f796883ef79a3d3f07cad1fef6d9ce026ecc3a536470e3470b84d6",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.25,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.4,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "d4c0d369756655dc701c9cfce1719f3dde6806568569cb6f44f74ed515f26cd9",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1881,
+        "arrival_attempts": 153,
+        "arrival_replays_verified": 15,
+        "arrivals_accepted": 146,
+        "arrivals_rejected": 7,
+        "arrivals_retracted": 16,
+        "cancelled": 463,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 133,
+        "credentials_invited": 1119,
+        "credentials_went": 705,
+        "decline_responses_accepted": 928,
+        "direct_join_attempts": 201,
+        "direct_joins_accepted": 165,
+        "direct_joins_rejected": 36,
+        "expired_verified": 2537,
+        "gatherings_observed": 25,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1103,
+        "going_responses_rejected": 28,
+        "http_requests": 258098,
+        "idempotent_retries_verified": 286,
+        "ignored_invitations": 1901,
+        "invitations_observed": 3801,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 123,
+        "journeys_obsolete": 176,
+        "late_going_accepted": 172,
+        "offline_intervals": 12820,
+        "planned_no_shows": 650,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 133,
+        "synthetic_people_invited": 1119
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 773,
+          "coarsening_excludes_all_start_destinations": 574,
+          "exact_start_has_destination": 574,
+          "generated": 773
+        },
+        "0.5": {
+          "accepted": 744,
+          "coarsening_excludes_all_start_destinations": 740,
+          "exact_start_has_destination": 740,
+          "generated": 744
+        },
+        "1": {
+          "accepted": 744,
+          "coarse_start_has_destination": 732,
+          "coarsening_excludes_all_start_destinations": 12,
+          "exact_start_has_destination": 744,
+          "generated": 744,
+          "invited": 414
+        },
+        "3": {
+          "accepted": 739,
+          "coarse_start_has_destination": 739,
+          "exact_start_has_destination": 739,
+          "generated": 739,
+          "invited": 705
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 916049,
+      "journey_median_ms": 1112000,
+      "max_sampled_driver_heap_bytes": 18083136,
+      "wall_seconds": 235.989917144,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2263,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-population-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-population-42/report.json",
+      "report_sha256": "20fb3f2deacd3af604dd7e8963c343f92e7bfb7fd8db0248354a90aa8d9cc7f6",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "9847b7c0aafcdfd1385b618fcc1d6f01979f6457ce62c740d112dd1b2fa58875",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1893,
+        "arrival_attempts": 764,
+        "arrival_replays_verified": 102,
+        "arrivals_accepted": 746,
+        "arrivals_rejected": 18,
+        "arrivals_retracted": 73,
+        "cancelled": 456,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 489,
+        "credentials_invited": 1107,
+        "credentials_went": 1003,
+        "decline_responses_accepted": 1038,
+        "direct_join_attempts": 175,
+        "direct_joins_accepted": 132,
+        "direct_joins_rejected": 43,
+        "expired_verified": 2544,
+        "gatherings_confirmed_observed": 15,
+        "gatherings_observed": 27,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 2481,
+        "going_responses_rejected": 91,
+        "http_requests": 258545,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 606,
+        "invitations_observed": 4091,
+        "joins_after_jemi_ketu": 11,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 521,
+        "journeys_obsolete": 736,
+        "late_going_accepted": 449,
+        "offline_intervals": 12721,
+        "planned_no_shows": 459,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 489,
+        "synthetic_people_invited": 1107
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarsening_excludes_all_start_destinations": 572,
+          "exact_start_has_destination": 572,
+          "generated": 759
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarsening_excludes_all_start_destinations": 732,
+          "exact_start_has_destination": 732,
+          "generated": 738
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 727,
+          "coarsening_excludes_all_start_destinations": 27,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 399
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 708
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1215866,
+      "journey_median_ms": 1034000,
+      "max_sampled_driver_heap_bytes": 18697320,
+      "wall_seconds": 246.015945043,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2212,
+      "observed_activation_to_presence_median_minutes": 13.2385
+    },
+    {
+      "label": "tirana-population-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-population-43/report.json",
+      "report_sha256": "04ebb344e5eaa8bba827d51923cf27e11adfa39be4cc8aa74466c51878ebd554",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "7e0c6816a20338a1f8c349776d027e4a2806dee465c440d04431c29d89ad1ecb",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1909,
+        "arrival_attempts": 480,
+        "arrival_replays_verified": 41,
+        "arrivals_accepted": 461,
+        "arrivals_rejected": 19,
+        "arrivals_retracted": 32,
+        "cancelled": 459,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 368,
+        "credentials_invited": 1091,
+        "credentials_went": 915,
+        "decline_responses_accepted": 684,
+        "direct_join_attempts": 169,
+        "direct_joins_accepted": 119,
+        "direct_joins_rejected": 50,
+        "expired_verified": 2541,
+        "gatherings_confirmed_observed": 8,
+        "gatherings_observed": 19,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 1717,
+        "going_responses_rejected": 68,
+        "http_requests": 255386,
+        "idempotent_retries_verified": 332,
+        "ignored_invitations": 413,
+        "invitations_observed": 2767,
+        "joins_after_jemi_ketu": 13,
+        "journeys_beyond_horizon": 9,
+        "journeys_ended_after_session": 392,
+        "journeys_obsolete": 527,
+        "late_going_accepted": 378,
+        "offline_intervals": 12542,
+        "planned_no_shows": 309,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 368,
+        "synthetic_people_invited": 1091
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 731,
+          "coarsening_excludes_all_start_destinations": 543,
+          "exact_start_has_destination": 543,
+          "generated": 731
+        },
+        "0.5": {
+          "accepted": 724,
+          "coarsening_excludes_all_start_destinations": 721,
+          "exact_start_has_destination": 721,
+          "generated": 724
+        },
+        "1": {
+          "accepted": 790,
+          "coarse_start_has_destination": 772,
+          "coarsening_excludes_all_start_destinations": 17,
+          "exact_start_has_destination": 789,
+          "generated": 790,
+          "invited": 385
+        },
+        "3": {
+          "accepted": 755,
+          "coarse_start_has_destination": 755,
+          "exact_start_has_destination": 755,
+          "generated": 755,
+          "invited": 706
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1716119,
+      "journey_median_ms": 1191000,
+      "max_sampled_driver_heap_bytes": 18169224,
+      "wall_seconds": 234.4365042,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2228,
+      "observed_activation_to_presence_median_minutes": 11.700966666666666
+    },
+    {
+      "label": "tirana-population-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-population-44/report.json",
+      "report_sha256": "8670ca8d7d3eceb1263d86ed8653aea70ba0c844e5b6a99c63e2f6a7aaeab950",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "d4c0d369756655dc701c9cfce1719f3dde6806568569cb6f44f74ed515f26cd9",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1924,
+        "arrival_attempts": 618,
+        "arrival_replays_verified": 63,
+        "arrivals_accepted": 593,
+        "arrivals_rejected": 25,
+        "arrivals_retracted": 58,
+        "cancelled": 463,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 444,
+        "credentials_invited": 1076,
+        "credentials_went": 962,
+        "decline_responses_accepted": 767,
+        "direct_join_attempts": 199,
+        "direct_joins_accepted": 163,
+        "direct_joins_rejected": 36,
+        "expired_verified": 2537,
+        "gatherings_confirmed_observed": 14,
+        "gatherings_observed": 21,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 2037,
+        "going_responses_rejected": 90,
+        "http_requests": 259937,
+        "idempotent_retries_verified": 286,
+        "ignored_invitations": 496,
+        "invitations_observed": 3231,
+        "joins_after_jemi_ketu": 4,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 369,
+        "journeys_obsolete": 638,
+        "late_going_accepted": 460,
+        "offline_intervals": 12822,
+        "planned_no_shows": 411,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 444,
+        "synthetic_people_invited": 1076
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 773,
+          "coarsening_excludes_all_start_destinations": 574,
+          "exact_start_has_destination": 574,
+          "generated": 773
+        },
+        "0.5": {
+          "accepted": 744,
+          "coarsening_excludes_all_start_destinations": 740,
+          "exact_start_has_destination": 740,
+          "generated": 744
+        },
+        "1": {
+          "accepted": 744,
+          "coarse_start_has_destination": 732,
+          "coarsening_excludes_all_start_destinations": 12,
+          "exact_start_has_destination": 744,
+          "generated": 744,
+          "invited": 376
+        },
+        "3": {
+          "accepted": 739,
+          "coarse_start_has_destination": 739,
+          "exact_start_has_destination": 739,
+          "generated": 739,
+          "invited": 700
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 806580,
+      "journey_median_ms": 1022000,
+      "max_sampled_driver_heap_bytes": 18761352,
+      "wall_seconds": 241.568324404,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2263,
+      "observed_activation_to_presence_median_minutes": 14.305908333333333
+    },
+    {
+      "label": "tirana-sparse-42",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-sparse-42/report.json",
+      "report_sha256": "e7e99ec74669a6b2a682f3c6254f3011e966f38d720e7260808de2705ba339a6",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 100,
+        "distribution": "sparse",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "de7b7bfd1b4e2ba785852851ee86b204a20e0ca59864a7a64be59f24b0d310df",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 100,
+        "cancelled": 10,
+        "credentials_accepted": 100,
+        "expired_verified": 90,
+        "generated_credentials": 100,
+        "http_requests": 9275,
+        "idempotent_retries_verified": 8,
+        "offline_intervals": 461,
+        "synthetic_people": 100,
+        "synthetic_people_accepted": 100,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 23,
+          "coarsening_excludes_all_start_destinations": 1,
+          "exact_start_has_destination": 1,
+          "generated": 23
+        },
+        "0.5": {
+          "accepted": 18,
+          "coarsening_excludes_all_start_destinations": 11,
+          "exact_start_has_destination": 11,
+          "generated": 18
+        },
+        "1": {
+          "accepted": 28,
+          "coarse_start_has_destination": 12,
+          "coarsening_excludes_all_start_destinations": 9,
+          "exact_start_has_destination": 21,
+          "generated": 28
+        },
+        "3": {
+          "accepted": 31,
+          "coarse_start_has_destination": 31,
+          "exact_start_has_destination": 31,
+          "generated": 31
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 8281624,
+      "wall_seconds": 11.778629426,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 77,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-sparse-43",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-sparse-43/report.json",
+      "report_sha256": "6e83d43abd987f5db15c76040101db7b7ce63f85c1bc88d7afd5be94e2c01ead",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 100,
+        "distribution": "sparse",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "0f0900961dbca2d1ef207adee3ec67fcbbb1df7b30c22e0218dc58a1b572e479",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 100,
+        "cancelled": 11,
+        "credentials_accepted": 100,
+        "expired_verified": 89,
+        "generated_credentials": 100,
+        "http_requests": 8054,
+        "idempotent_retries_verified": 11,
+        "offline_intervals": 384,
+        "synthetic_people": 100,
+        "synthetic_people_accepted": 100,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 24,
+          "coarsening_excludes_all_start_destinations": 2,
+          "exact_start_has_destination": 2,
+          "generated": 24
+        },
+        "0.5": {
+          "accepted": 25,
+          "coarsening_excludes_all_start_destinations": 16,
+          "exact_start_has_destination": 16,
+          "generated": 25
+        },
+        "1": {
+          "accepted": 26,
+          "coarse_start_has_destination": 15,
+          "coarsening_excludes_all_start_destinations": 6,
+          "exact_start_has_destination": 21,
+          "generated": 26
+        },
+        "3": {
+          "accepted": 25,
+          "coarse_start_has_destination": 25,
+          "exact_start_has_destination": 25,
+          "generated": 25
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 8249336,
+      "wall_seconds": 10.583301389,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 73,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "tirana-sparse-44",
+      "local_artifact": "reports/local/tirana-suite-3000-current/tirana-sparse-44/report.json",
+      "report_sha256": "49373d18789e6f52758a4a2179518e3314cb7b8b9c55fdf7e75622c421ec300a",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 44,
+        "population": 100,
+        "distribution": "sparse",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "1dd6becc203a81a51898a265c251511da3175dcc63491c136aa1941195d46752",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 100,
+        "cancelled": 8,
+        "credentials_accepted": 100,
+        "expired_verified": 92,
+        "generated_credentials": 100,
+        "http_requests": 8537,
+        "idempotent_retries_verified": 6,
+        "offline_intervals": 441,
+        "synthetic_people": 100,
+        "synthetic_people_accepted": 100,
+        "synthetic_people_arrived": 0,
+        "synthetic_people_invited": 0
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 32,
+          "coarsening_excludes_all_start_destinations": 4,
+          "exact_start_has_destination": 4,
+          "generated": 32
+        },
+        "0.5": {
+          "accepted": 26,
+          "coarsening_excludes_all_start_destinations": 14,
+          "exact_start_has_destination": 14,
+          "generated": 26
+        },
+        "1": {
+          "accepted": 16,
+          "coarse_start_has_destination": 11,
+          "coarsening_excludes_all_start_destinations": 4,
+          "exact_start_has_destination": 15,
+          "generated": 16
+        },
+        "3": {
+          "accepted": 26,
+          "coarse_start_has_destination": 26,
+          "exact_start_has_destination": 26,
+          "generated": 26
+        }
+      },
+      "invitation_wait_median_ms": null,
+      "invitation_wait_p95_ms": null,
+      "journey_median_ms": null,
+      "max_sampled_driver_heap_bytes": 8268496,
+      "wall_seconds": 10.64970487,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 74,
+      "observed_activation_to_presence_median_minutes": null
+    },
+    {
+      "label": "100m-seed-42",
+      "local_artifact": "reports/local/tirana-population-100m-42/report.json",
+      "report_sha256": "dbcca625d419eb524eb1bee48727baacb1f0dad8e9e8cb14a7ad843c0969ce9a",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "8ec7ec11fead062be0566d5d3243acfc32977d2c716982f4e15b5f3083b57335",
+      "input_sha256": "a5f3b5749ad2e4ae94c9011fa224c24c818e79861403a23e6ddfb1c10599b26b",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1109,
+        "arrival_attempts": 1542,
+        "arrival_replays_verified": 184,
+        "arrivals_accepted": 1498,
+        "arrivals_rejected": 44,
+        "arrivals_retracted": 161,
+        "cancelled": 456,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 1067,
+        "credentials_invited": 1891,
+        "credentials_went": 1676,
+        "decline_responses_accepted": 1594,
+        "direct_join_attempts": 286,
+        "direct_joins_accepted": 219,
+        "direct_joins_rejected": 67,
+        "expired_verified": 2544,
+        "gatherings_confirmed_observed": 30,
+        "gatherings_observed": 41,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 3976,
+        "going_responses_rejected": 154,
+        "http_requests": 262018,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 1008,
+        "invitations_observed": 6521,
+        "joins_after_jemi_ketu": 25,
+        "journeys_beyond_horizon": 17,
+        "journeys_ended_after_session": 602,
+        "journeys_obsolete": 1050,
+        "late_going_accepted": 744,
+        "offline_intervals": 12811,
+        "planned_no_shows": 765,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 1067,
+        "synthetic_people_invited": 1891
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarse_start_has_destination": 163,
+          "coarsening_excludes_all_start_destinations": 409,
+          "exact_start_has_destination": 572,
+          "generated": 759,
+          "invited": 11
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarse_start_has_destination": 730,
+          "coarsening_excludes_all_start_destinations": 2,
+          "exact_start_has_destination": 732,
+          "generated": 738,
+          "invited": 503
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 754,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 655
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 722
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1166839,
+      "journey_median_ms": 790000,
+      "max_sampled_driver_heap_bytes": 27749232,
+      "wall_seconds": 270.878414718,
+      "grid_meters": 100,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2212,
+      "observed_activation_to_presence_median_minutes": 11.289116666666667
+    },
+    {
+      "label": "repeat-42",
+      "local_artifact": "reports/local/tirana-repeat-42/report.json",
+      "report_sha256": "a3004d3fe14da6fe2dd9f9d3cefbb08b8b7cf99637cbfa6a94ad41a7f7bd4c4c",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "9847b7c0aafcdfd1385b618fcc1d6f01979f6457ce62c740d112dd1b2fa58875",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1893,
+        "arrival_attempts": 764,
+        "arrival_replays_verified": 102,
+        "arrivals_accepted": 746,
+        "arrivals_rejected": 18,
+        "arrivals_retracted": 73,
+        "cancelled": 456,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 489,
+        "credentials_invited": 1107,
+        "credentials_went": 1003,
+        "decline_responses_accepted": 1038,
+        "direct_join_attempts": 175,
+        "direct_joins_accepted": 132,
+        "direct_joins_rejected": 43,
+        "expired_verified": 2544,
+        "gatherings_confirmed_observed": 15,
+        "gatherings_observed": 27,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 2481,
+        "going_responses_rejected": 91,
+        "http_requests": 258545,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 606,
+        "invitations_observed": 4091,
+        "joins_after_jemi_ketu": 11,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 521,
+        "journeys_obsolete": 736,
+        "late_going_accepted": 449,
+        "offline_intervals": 12721,
+        "planned_no_shows": 459,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 489,
+        "synthetic_people_invited": 1107
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarsening_excludes_all_start_destinations": 572,
+          "exact_start_has_destination": 572,
+          "generated": 759
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarsening_excludes_all_start_destinations": 732,
+          "exact_start_has_destination": 732,
+          "generated": 738
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 727,
+          "coarsening_excludes_all_start_destinations": 27,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 399
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 708
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1215866,
+      "journey_median_ms": 1034000,
+      "max_sampled_driver_heap_bytes": 18843544,
+      "wall_seconds": 251.414614769,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2212,
+      "observed_activation_to_presence_median_minutes": 13.2385
+    },
+    {
+      "label": "post-fix-repeat-42",
+      "local_artifact": "reports/local/tirana-post-fix-repeat-42/report.json",
+      "report_sha256": "263618419dae1a0ed07ace95ee6c5a4f37b5d0108b4db56dcaf9bc3f0e81e675",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 60,
+          "duration_minutes": 180,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 0.6,
+          "decline_probability": 0.25,
+          "arrival_probability_given_going": 0.8,
+          "late_join_probability": 0.2,
+          "retract_probability": 0.1,
+          "offline_probability": 0.05,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            0.4,
+            0.35,
+            0.15,
+            0.1
+          ],
+          "radius_weights": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 3000,
+        "distribution": "clustered",
+        "availability_minutes": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "radius_km": [
+          0.1,
+          0.5,
+          1,
+          3
+        ],
+        "cancellation_probability": 0.15,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "9847b7c0aafcdfd1385b618fcc1d6f01979f6457ce62c740d112dd1b2fa58875",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+      "source_dirty": true,
+      "counts": {
+        "accepted_never_invited": 1893,
+        "arrival_attempts": 764,
+        "arrival_replays_verified": 102,
+        "arrivals_accepted": 746,
+        "arrivals_rejected": 18,
+        "arrivals_retracted": 73,
+        "cancelled": 456,
+        "credentials_accepted": 3000,
+        "credentials_arrived": 489,
+        "credentials_invited": 1107,
+        "credentials_went": 1003,
+        "decline_responses_accepted": 1038,
+        "direct_join_attempts": 175,
+        "direct_joins_accepted": 132,
+        "direct_joins_rejected": 43,
+        "expired_verified": 2544,
+        "gatherings_confirmed_observed": 15,
+        "gatherings_observed": 27,
+        "generated_credentials": 3000,
+        "going_responses_accepted": 2481,
+        "going_responses_rejected": 91,
+        "http_requests": 258545,
+        "idempotent_retries_verified": 300,
+        "ignored_invitations": 606,
+        "invitations_observed": 4091,
+        "joins_after_jemi_ketu": 11,
+        "journeys_beyond_horizon": 1,
+        "journeys_ended_after_session": 521,
+        "journeys_obsolete": 736,
+        "late_going_accepted": 449,
+        "offline_intervals": 12721,
+        "planned_no_shows": 459,
+        "synthetic_people": 3000,
+        "synthetic_people_accepted": 3000,
+        "synthetic_people_arrived": 489,
+        "synthetic_people_invited": 1107
+      },
+      "by_radius": {
+        "0.1": {
+          "accepted": 759,
+          "coarsening_excludes_all_start_destinations": 572,
+          "exact_start_has_destination": 572,
+          "generated": 759
+        },
+        "0.5": {
+          "accepted": 738,
+          "coarsening_excludes_all_start_destinations": 732,
+          "exact_start_has_destination": 732,
+          "generated": 738
+        },
+        "1": {
+          "accepted": 755,
+          "coarse_start_has_destination": 727,
+          "coarsening_excludes_all_start_destinations": 27,
+          "exact_start_has_destination": 754,
+          "generated": 755,
+          "invited": 399
+        },
+        "3": {
+          "accepted": 748,
+          "coarse_start_has_destination": 748,
+          "exact_start_has_destination": 748,
+          "generated": 748,
+          "invited": 708
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 1215866,
+      "journey_median_ms": 1034000,
+      "max_sampled_driver_heap_bytes": 18555912,
+      "wall_seconds": 202.776811541,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "f18ea11cea89b8f47a738cfbab02fe2d7eef864fbc616e97bf7c64050c54256f",
+          "bin/gati-simulate": "450a3edcea1034bb0f494080fe8d6b0868799d3d512a848eca455ee827bf2254",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 2212,
+      "observed_activation_to_presence_median_minutes": 13.2385
+    },
+    {
+      "label": "success-control",
+      "local_artifact": "reports/local/tirana-success/report.json",
+      "report_sha256": "6ee19372c5af77344583d57f038a9779f37660c3983b84ee999b8eb773552dc1",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 1,
+          "duration_minutes": 31,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 1,
+          "decline_probability": 0,
+          "arrival_probability_given_going": 1,
+          "late_join_probability": 0.2,
+          "retract_probability": 0,
+          "offline_probability": 0,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            1
+          ],
+          "radius_weights": [
+            1
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 80,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30
+        ],
+        "radius_km": [
+          3
+        ],
+        "cancellation_probability": 0,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "c66bb4b191da0b29cd986ff6eb0eaf03dbfda1c55cb1d7762b91bce3bd3fcf2d",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "6f463842279fe37babc168c2ac0e0f8cb47033cc",
+      "source_dirty": true,
+      "counts": {
+        "arrival_attempts": 80,
+        "arrival_replays_verified": 5,
+        "arrivals_accepted": 80,
+        "credentials_accepted": 80,
+        "credentials_arrived": 80,
+        "credentials_invited": 80,
+        "credentials_went": 80,
+        "direct_join_attempts": 2,
+        "direct_joins_accepted": 2,
+        "expired_verified": 80,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 80,
+        "going_responses_accepted": 80,
+        "http_requests": 4733,
+        "idempotent_retries_verified": 5,
+        "invitations_observed": 78,
+        "late_going_accepted": 39,
+        "synthetic_people": 80,
+        "synthetic_people_accepted": 80,
+        "synthetic_people_arrived": 80,
+        "synthetic_people_invited": 80
+      },
+      "by_radius": {
+        "3": {
+          "accepted": 80,
+          "coarse_start_has_destination": 80,
+          "exact_start_has_destination": 80,
+          "generated": 80,
+          "invited": 80
+        }
+      },
+      "invitation_wait_median_ms": 0,
+      "invitation_wait_p95_ms": 35321,
+      "journey_median_ms": 415000,
+      "max_sampled_driver_heap_bytes": 7300632,
+      "wall_seconds": 5.284716002,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "6f463842279fe37babc168c2ac0e0f8cb47033cc",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "418f023ffb76d96f1b233030e206504cc9b257d3cd5fb1d07817c2e4dc89162f",
+          "bin/gati-simulate": "50521709d7cb5e609aa8e1e4a2987b8d1fa30fdcbff010f4b80bfabf3f747589",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 80,
+      "observed_activation_to_presence_median_minutes": 6.9276333333333335
+    },
+    {
+      "label": "shared-network",
+      "local_artifact": "reports/local/tirana-shared-network-42/report.json",
+      "report_sha256": "7c1d417e3384985811f88f36c27cafd702e51c115348d7fc404525ae5542ce82",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 1,
+          "duration_minutes": 31,
+          "network_groups": 1,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 1,
+          "decline_probability": 0,
+          "arrival_probability_given_going": 1,
+          "late_join_probability": 0.2,
+          "retract_probability": 0,
+          "offline_probability": 0.5,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            1
+          ],
+          "radius_weights": [
+            1
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 42,
+        "population": 120,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30
+        ],
+        "radius_km": [
+          3
+        ],
+        "cancellation_probability": 0,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "019996324c185f864ae2deb6ce48df9a3fe892b44259662d3da934419886a53a",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+      "source_dirty": true,
+      "counts": {
+        "arrival_attempts": 55,
+        "arrival_replays_verified": 5,
+        "arrivals_accepted": 55,
+        "credentials_accepted": 55,
+        "credentials_arrived": 55,
+        "credentials_invited": 55,
+        "credentials_rejected": 65,
+        "credentials_went": 55,
+        "direct_join_attempts": 14,
+        "direct_joins_rejected": 14,
+        "expired_verified": 55,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 120,
+        "going_responses_accepted": 55,
+        "http_requests": 1382,
+        "idempotent_retries_verified": 5,
+        "invitations_observed": 55,
+        "late_going_accepted": 9,
+        "offline_intervals": 556,
+        "rate_limited_requests": 79,
+        "synthetic_people": 120,
+        "synthetic_people_accepted": 55,
+        "synthetic_people_arrived": 55,
+        "synthetic_people_invited": 55
+      },
+      "by_radius": {
+        "3": {
+          "accepted": 55,
+          "coarse_start_has_destination": 120,
+          "exact_start_has_destination": 120,
+          "generated": 120,
+          "invited": 55
+        }
+      },
+      "invitation_wait_median_ms": 34066,
+      "invitation_wait_p95_ms": 192486,
+      "journey_median_ms": 422000,
+      "max_sampled_driver_heap_bytes": 4800280,
+      "wall_seconds": 3.67112564,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "29dd40673e44214f6297e2e52b21df27abf86bdb",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "1400d118590d29fcc7dd04e6d79b72aa6ea61f59a7c0bcabcd95db64c9fa3d56",
+          "bin/gati-simulate": "e5fb06c32c14c71a4cfa7b8beaf5a0a942d0cb64a737dbc821073dc02cd81e2d",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 55,
+      "observed_activation_to_presence_median_minutes": 8.354816666666666
+    },
+    {
+      "label": "yaml-seed-control",
+      "local_artifact": "reports/local/tirana-seed-control/report.json",
+      "report_sha256": "9ad8994f5d1519876a5e3d87807f0ff34b9bd24334bcad9af393fdd5652f7739",
+      "status": "completed",
+      "scenario": {
+        "behavior": {
+          "enrollment_minutes": 1,
+          "duration_minutes": 31,
+          "network_groups": 256,
+          "writes_per_second": 200,
+          "snapshot_seconds": 60,
+          "accept_probability": 1,
+          "decline_probability": 0,
+          "arrival_probability_given_going": 1,
+          "late_join_probability": 0.2,
+          "retract_probability": 0,
+          "offline_probability": 0,
+          "offline_seconds": [
+            60,
+            180
+          ],
+          "response_seconds": [
+            5,
+            90
+          ],
+          "speed_meters_per_second": [
+            0.8,
+            1.6
+          ],
+          "detour_multiplier": [
+            1.2,
+            1.8
+          ],
+          "availability_weights": [
+            1
+          ],
+          "radius_weights": [
+            1
+          ],
+          "clusters": [
+            {
+              "center": [
+                19.818,
+                41.327
+              ],
+              "spread_km": 1,
+              "weight": 0.4
+            },
+            {
+              "center": [
+                19.822,
+                41.307
+              ],
+              "spread_km": 1,
+              "weight": 0.25
+            },
+            {
+              "center": [
+                19.799,
+                41.335
+              ],
+              "spread_km": 1,
+              "weight": 0.2
+            },
+            {
+              "center": [
+                19.825,
+                41.33
+              ],
+              "spread_km": 4,
+              "weight": 0.15
+            }
+          ]
+        },
+        "seed": 43,
+        "population": 80,
+        "distribution": "single_hotspot",
+        "availability_minutes": [
+          30
+        ],
+        "radius_km": [
+          3
+        ],
+        "cancellation_probability": 0,
+        "duplicate_request_fraction": 0.1,
+        "sybil_fraction": 0,
+        "sybil_credentials": 1
+      },
+      "config_sha256": "3a4b403ac6f487fc3b1f06fe6b019e8cbdbe1aa079a2fe3bdb4b0c83ea0ce3e9",
+      "input_sha256": "8e79963b32650bc8652ab920b2f07de582a623a7936a145ca269bdebfdb82df4",
+      "dataset_sha256": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37",
+      "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+      "source_dirty": true,
+      "counts": {
+        "arrival_attempts": 80,
+        "arrival_replays_verified": 9,
+        "arrivals_accepted": 80,
+        "credentials_accepted": 80,
+        "credentials_arrived": 80,
+        "credentials_invited": 80,
+        "credentials_went": 80,
+        "direct_join_attempts": 2,
+        "direct_joins_accepted": 2,
+        "expired_verified": 80,
+        "gatherings_confirmed_observed": 1,
+        "gatherings_observed": 1,
+        "generated_credentials": 80,
+        "going_responses_accepted": 80,
+        "http_requests": 4741,
+        "idempotent_retries_verified": 9,
+        "invitations_observed": 78,
+        "late_going_accepted": 36,
+        "synthetic_people": 80,
+        "synthetic_people_accepted": 80,
+        "synthetic_people_arrived": 80,
+        "synthetic_people_invited": 80
+      },
+      "by_radius": {
+        "3": {
+          "accepted": 80,
+          "coarse_start_has_destination": 80,
+          "exact_start_has_destination": 80,
+          "generated": 80,
+          "invited": 80
+        }
+      },
+      "invitation_wait_median_ms": 30229,
+      "invitation_wait_p95_ms": 35999,
+      "journey_median_ms": 426000,
+      "max_sampled_driver_heap_bytes": 7661008,
+      "wall_seconds": 6.097460894,
+      "grid_meters": 1000,
+      "manifest": {
+        "source_revision": "efb3f8c9ed6b87a6fac54673b1a029a2bc139bb8",
+        "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+        "machine": "x86_64",
+        "logical_cpus": 16,
+        "hashes": {
+          "bin/gati-simulation": "f18ea11cea89b8f47a738cfbab02fe2d7eef864fbc616e97bf7c64050c54256f",
+          "bin/gati-simulate": "450a3edcea1034bb0f494080fe8d6b0868799d3d512a848eca455ee827bf2254",
+          "data/tirana/intersections.json": "ef9845290f7cbef97965b219f1f58d198dd20e21ae4a47c37c669c22cb5c0c37"
+        }
+      },
+      "peak_sampled_active_credentials": 80,
+      "observed_activation_to_presence_median_minutes": 6.914333333333333
+    }
+  ],
+  "baseline_source_config": {
+    "limits": {
+      "arrival_requests_per_signal_window": 20,
+      "max_declines_per_signal": 32,
+      "max_body_bytes": 1024,
+      "network_window_seconds": 60,
+      "requests_per_network_window": 3000,
+      "new_signals_per_network_window": 60,
+      "global_writes_per_second": 500,
+      "max_active_signals": 150000,
+      "cleanup_batch_size": 1000
+    },
+    "schema_version": 6,
+    "profile": "production",
+    "availability": {
+      "minimum_minutes": 30,
+      "choices_minutes": [
+        30,
+        60,
+        90,
+        120
+      ],
+      "maximum_minutes": 120
+    },
+    "geography": {
+      "location_max_accuracy_meters": 100,
+      "location_fix_max_age_seconds": 60,
+      "cell_size_meters": 1000,
+      "travel_radius_choices_km": [
+        0.1,
+        0.5,
+        1,
+        3
+      ],
+      "intersection_dataset": "tirana-intersections-v1"
+    },
+    "matching": {
+      "invitation_cooldown_seconds": 60,
+      "activation_count": 30,
+      "activation_stability_seconds": 10,
+      "maximum_debounce_seconds": 2,
+      "reconciliation_seconds": 10,
+      "minimum_remaining_minutes": 15,
+      "intersection_index_batch_size": 500,
+      "candidate_batch_size": 100,
+      "destination_rule": "nearest_eligible_crossroad_to_coarse_group_center",
+      "prefer_open_gatherings": true,
+      "maximum_gathering_minutes": 60,
+      "late_join_min_remaining_minutes": 5
+    },
+    "arrivals": {
+      "confirmation_count": 20,
+      "confirmation_stability_seconds": 10,
+      "freshness_minutes": 15,
+      "nonce_seconds": 120,
+      "allowed_cell_neighbor_rings": 0
+    },
+    "public_activity": {
+      "minimum_count": 20,
+      "count_buckets": [
+        20,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "release_seconds": 300,
+      "delay_epochs": 1,
+      "snapshot_retention_minutes": 15,
+      "daily_summary_retention_days": 30
+    },
+    "notifications": {
+      "nearby_gati_count": 50,
+      "nearby_arrival_count": 50,
+      "nearby_radius_km": 5,
+      "foreground_poll_seconds": 30,
+      "push_min_interval_seconds": 300,
+      "push_max_per_hour": 6,
+      "queue_ttl_seconds": 300,
+      "area_follow_max_hours": 24
+    }
+  },
+  "fine_source_config": {
+    "limits": {
+      "arrival_requests_per_signal_window": 20,
+      "max_declines_per_signal": 32,
+      "max_body_bytes": 1024,
+      "network_window_seconds": 60,
+      "requests_per_network_window": 3000,
+      "new_signals_per_network_window": 60,
+      "global_writes_per_second": 500,
+      "max_active_signals": 150000,
+      "cleanup_batch_size": 1000
+    },
+    "schema_version": 6,
+    "profile": "simulation",
+    "availability": {
+      "minimum_minutes": 30,
+      "choices_minutes": [
+        30,
+        60,
+        90,
+        120
+      ],
+      "maximum_minutes": 120
+    },
+    "geography": {
+      "location_max_accuracy_meters": 50,
+      "location_fix_max_age_seconds": 60,
+      "cell_size_meters": 100,
+      "travel_radius_choices_km": [
+        0.1,
+        0.5,
+        1,
+        3
+      ],
+      "intersection_dataset": "tirana-intersections-v1"
+    },
+    "matching": {
+      "invitation_cooldown_seconds": 60,
+      "activation_count": 30,
+      "activation_stability_seconds": 10,
+      "maximum_debounce_seconds": 2,
+      "reconciliation_seconds": 10,
+      "minimum_remaining_minutes": 15,
+      "intersection_index_batch_size": 500,
+      "candidate_batch_size": 100,
+      "destination_rule": "nearest_eligible_crossroad_to_coarse_group_center",
+      "prefer_open_gatherings": true,
+      "maximum_gathering_minutes": 60,
+      "late_join_min_remaining_minutes": 5
+    },
+    "arrivals": {
+      "confirmation_count": 20,
+      "confirmation_stability_seconds": 10,
+      "freshness_minutes": 15,
+      "nonce_seconds": 120,
+      "allowed_cell_neighbor_rings": 0
+    },
+    "public_activity": {
+      "minimum_count": 20,
+      "count_buckets": [
+        20,
+        50,
+        100,
+        250,
+        500,
+        1000
+      ],
+      "release_seconds": 300,
+      "delay_epochs": 1,
+      "snapshot_retention_minutes": 15,
+      "daily_summary_retention_days": 30
+    },
+    "notifications": {
+      "nearby_gati_count": 50,
+      "nearby_arrival_count": 50,
+      "nearby_radius_km": 5,
+      "foreground_poll_seconds": 30,
+      "push_min_interval_seconds": 300,
+      "push_max_per_hour": 6,
+      "queue_ttl_seconds": 300,
+      "area_follow_max_hours": 24
+    }
+  }
+}
