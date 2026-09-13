@@ -88,4 +88,4 @@ complete observation (default 30 s; fast isolated simulation 5 s; must be below
 release interval). `max_snapshot_bytes` caps a complete uncompressed snapshot
 (default 1,000,000; at least 1024, at most 1,000,000). Invalid or oversized captures
 are discarded, never partially published. Existing minimum/buckets/delay/retention
-remain. The policy is implemented; publication wiring is tracked in PROGRESS.
+remain. The policy, publisher, API and browser views are implemented; remaining work is tracked in PROGRESS.

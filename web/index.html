@@ -20,16 +20,20 @@
         </div>
         <fieldset><legend>Ku je afërsisht?</legend>
           <p class="hint">Lejo vendndodhjen nga pajisja. Dërgohet vetëm zona e përafërt.</p>
-          <div id="map" role="region" aria-label="Harta e Tiranës"></div>
           <div class="area-actions"><button id="location" type="button">Përdor vendndodhjen një herë</button></div>
           <p id="area-status" role="status">Vendndodhja ende nuk është marrë.</p>
         <p class="hint">Vendndodhja e pajisjes mund të ketë pasaktësi.</p>
         </fieldset>
+        <p id="join-choice" role="status" hidden></p><button id="join-back" type="button" hidden>Jo tani, vetëm gatishmëri</button>
         <button id="ready" class="primary" type="submit" disabled>JAM GATI</button>
       </form>
       <section id="active" hidden aria-label="Gatishmëria jote">
         <h2 id="active-title">JAM GATI.</h2>
         <p id="remaining"></p>
+        <section id="nearby-statistics" hidden aria-label="GATI afër teje">
+          <h3>GATI afër teje</h3><p id="nearby-count"></p>
+          <p class="hint" id="nearby-area-description"></p>
+        </section>
         <section id="invitation" hidden aria-label="Takimi pranë teje">
           <h3 id="collective-title">JEMI GATI.</h3>
           <p id="destination"></p>
@@ -37,6 +41,8 @@
           <div id="destination-map" role="region" aria-label="Harta e pikës së takimit"></div>
           <p id="gathering-time"></p>
           <p id="going-status" role="status"></p>
+          <div id="gathering-statistics"><p id="going-count"></p><p id="here-count"></p>
+          <p class="hint">Mbërritjet përfshihen te ata që kanë zgjedhur të shkojnë.</p></div>
           <button id="going" type="button" class="primary">PO, PO SHKOJ</button>
           <button id="decline" type="button">JO TANI</button>
           <button id="arrive" type="button" class="primary" hidden>JAM KËTU</button>
@@ -47,6 +53,22 @@
         <button id="retry" type="button" hidden>Provo përsëri</button>
         <button id="cancel" type="button">Mbyll gatishmërinë</button>
       </section>
+      <section id="city-activity" aria-label="Aktiviteti në Tiranë">
+        <h2>GATI në Tiranë</h2>
+        <p class="hint">Zona të përbashkëta, pa pika individuale apo vende të sakta takimi. Shifrat tregojnë sinjale të përkohshme, jo persona të verifikuar.</p>
+        <label>Pamja e hartës<select id="activity-layer"><option value="willingness">Gatishmëria</option><option value="gatherings">Takimet</option></select></label>
+        <div id="map" role="region" aria-label="Harta e Tiranës"></div>
+        <p id="activity-time" role="status">Po merren të dhënat e publikuara…</p>
+        <p id="activity-selected-count"></p>
+        <h3 id="activity-selection">Takimet në zonat e publikuara</h3>
+        <button id="activity-all" type="button">Të gjitha zonat</button>
+        <div id="activity-gatherings"></div>
+      </section>
+      <dialog id="public-join-dialog">
+        <h2>A do të shkosh?</h2><p>Pika e takimit shfaqet pasi të pranohesh. Kontrollo nëse dëshiron të shkosh.</p>
+        <button id="public-join-confirm" class="primary" type="button">PO, PO SHKOJ</button>
+        <button id="public-join-cancel" type="button">JO TANI</button>
+      </dialog>
       <p id="status" role="status">Po hapet GATI…</p>
       <footer>Pa llogari. Pa profil. Vetëm përkohësisht.</footer>
       <noscript>Kjo faqe ka nevojë për JavaScript.</noscript>

@@ -1,4 +1,5 @@
 import './style.css';
+import { ActivityView } from './activity';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as maplibregl from 'maplibre-gl';
 import workerURL from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -21,6 +22,9 @@ function begin() { operations++; busy = true; render(); }
 function finish() { operations--; busy = operations > 0; render(); }
 let map: maplibregl.Map | undefined;
 let initialized = false;
+let activityView: ActivityView | undefined;
+let publicJoinTarget: { id: string; ends_at: number } | null = null;
+let joinTarget: { id: string; ends_at: number } | null = null;
 interface Invitation { id: string; intersection: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
 let invitation: Invitation | null = null, going = false, destinationMap: maplibregl.Map | undefined;
 let renderedDestination: string | null = null;
@@ -65,10 +69,14 @@ function render() {
   retry.hidden = !session || session.confirmed;
   el('active-title').textContent = session?.confirmed ? (here ? 'JAM KËTU.' : 'JAM GATI.') : 'Po kontrollojmë gatishmërinë…';
   invitationView();
+  activityView?.render();
+  ready.textContent = joinTarget ? 'PO, PO SHKOJ' : 'JAM GATI';
+  el('join-choice').hidden = !joinTarget; el('join-back').hidden = !joinTarget;
+  if (joinTarget) el('join-choice').textContent = 'Për t’u bashkuar, merr vendndodhjen nga pajisja dhe konfirmo. Pika e takimit shfaqet pas pranimit.';
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
-  session = null; sessions.clear(); selected = null; selectedUntil = 0; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
+  joinTarget = null; session = null; sessions.clear(); selected = null; selectedUntil = 0; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
   el('area-status').textContent = 'Vendndodhja ende nuk është marrë.';
   render(); map?.resize(); message(text);
@@ -83,7 +91,8 @@ async function sync(create = false) {
   if (!session || busy) return;
   begin();
   try {
-    const response = await request(create ? 'POST' : 'GET', create ? '/api/signals' : '/api/signal', create ? session.request : undefined);
+    const response = await request(create ? 'POST' : 'GET', create ? (session.joinGathering ? '/api/join' : '/api/signals') : '/api/signal', create ? { ...session.request, ...(session.joinGathering ? { gathering_id: session.joinGathering } : {}) } : undefined);
+    if (session.joinGathering && [409, 410].includes(response.status)) { end('Nuk mund të bashkohesh në këtë takim. Mund të shprehësh sërish gatishmërinë.'); return; }
     if (response.status === 410) { end('Gatishmëria përfundoi.'); return; }
     if (!response.ok) throw new Error('unavailable');
     const signal = await response.json();
@@ -92,7 +101,7 @@ async function sync(create = false) {
       // Never extend the local maximum on retries or reload. Server enforces its
       // own clock/deadline even if this browser's wall clock has been changed.
       session.expires = Math.min(session.expires, signal.expires_at);
-      session.confirmed = true; sessions.save(session);
+      session.confirmed = true; delete session.joinGathering; joinTarget = null; sessions.save(session);
       applySignal(signal);
       failures = 0; message('Gatishmëria jote është aktive.');
     }
@@ -103,8 +112,12 @@ form.addEventListener('submit', event => {
   event.preventDefault();
   if (busy || !selected || selectedUntil <= Date.now() || session) return;
   session = sessions.create({ cell: selected, radius_km: Number(radius.value), availability_minutes: Number(duration.value) });
+  if (joinTarget) session.joinGathering = joinTarget.id;
   sessions.save(session); void sync(true);
 });
+el<HTMLButtonElement>('public-join-cancel').onclick = () => { publicJoinTarget = null; el<HTMLDialogElement>('public-join-dialog').close(); };
+el<HTMLButtonElement>('public-join-confirm').onclick = () => { const target = publicJoinTarget; publicJoinTarget = null; el<HTMLDialogElement>('public-join-dialog').close(); if (target && target.ends_at > Date.now()) void intent('going', target.id); };
+el<HTMLButtonElement>('join-back').onclick = () => { joinTarget = null; render(); };
 retry.onclick = () => { void sync(true); };
 cancel.onclick = async () => {
   if (cancelling || !session) return;
@@ -117,11 +130,11 @@ cancel.onclick = async () => {
   finally { cancelling = false; finish(); }
 };
 
-async function intent(action: 'going' | 'decline') {
-  if (!session || !invitation || busy) return;
+async function intent(action: 'going' | 'decline', target = invitation?.id) {
+  if (!session || !target || busy) return;
   begin();
   try {
-    const response = await request('POST', `/api/${action}`, { gathering_id: invitation.id });
+    const response = await request('POST', `/api/${action}`, { gathering_id: target });
     if (response.status === 410) { invitation = null; going = false; message('Ky takim nuk është më i hapur për t’u bashkuar. Gatishmëria jote mund të vazhdojë.'); return; }
     if (!response.ok) throw new Error('unavailable');
     const signal = await response.json();
@@ -186,6 +199,7 @@ async function start() {
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));
   for (const km of config.geography.travel_radius_choices_km) radius.add(new Option(`${km} km`, String(km)));
   radius.value = String(config.geography.travel_radius_choices_km.includes(3) ? 3 : config.geography.travel_radius_choices_km[0]);
+  el('nearby-area-description').textContent = `Në zonën publike ${config.public_activity.area_size_meters / 1000} km që përmban vendndodhjen e dhënë. Nuk është rrezja jote e udhëtimit.`;
   initialized = true; render();
   try {
     map = new maplibregl.Map({ container: 'map', center: [19.818, 41.327], zoom: 12,
@@ -203,8 +217,20 @@ async function start() {
   } catch {
     el('map').textContent = 'Harta nuk mund të hapet në këtë pajisje.';
   }
+  activityView = new ActivityView(map, configuration.sha256,
+    () => ({ cell: session?.confirmed ? session.request.cell : undefined, gathering: invitation?.id }),
+    event => {
+      if (busy) return;
+      if (session) { publicJoinTarget = event; el<HTMLDialogElement>('public-join-dialog').showModal(); return; }
+      joinTarget = event; selected = null; selectedUntil = 0; render();
+      form.scrollIntoView({ block: 'start' }); el<HTMLButtonElement>('location').focus();
+    }, config.matching.late_join_min_remaining_minutes);
   function drawArea(cell: string) {
-    const coordinates = polygon(grid, cell);
+    const ratio = config.public_activity.area_size_meters / grid.size_meters;
+    const parts = cell.split(':');
+    const publicCell = `${grid.version}:${config.public_activity.area_size_meters}:${Math.floor(Number(parts[2]) / ratio)}:${Math.floor(Number(parts[3]) / ratio)}`;
+    const publicGrid: Grid = { ...grid, size_meters: config.public_activity.area_size_meters, lon_step: grid.lon_step * ratio, lat_step: grid.lat_step * ratio };
+    const coordinates = polygon(publicGrid, publicCell);
     const draw = () => map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [coordinates] } });
     if (map?.isStyleLoaded()) draw(); else map?.once('load', draw);
     // Camera uses the coarse center too; exact device coordinates are discarded.
@@ -224,13 +250,14 @@ async function start() {
     } finally { finish(); }
   };
   message('');
-  if (session) await sync();
+  if (session) { drawArea(session.request.cell); await sync(); }
   setInterval(() => {
     if (selected && !session && selectedUntil <= Date.now()) {
       selected = null; selectedUntil = 0;
       map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
       el('area-status').textContent = 'Merr sërish vendndodhjen nga pajisja për të vazhduar.'; render();
     }
+    if (joinTarget && joinTarget.ends_at <= Date.now()) { joinTarget = null; render(); }
     if (pendingNonce && pendingNonce.expires <= Date.now()) pendingNonce = null;
     if (here && arrivalUntil <= Date.now()) { here = false; arrivalUntil = 0; }
     if (invitation && invitation.ends_at <= Date.now()) { invitation = null; going = false; }

@@ -172,3 +172,18 @@ credential whose server expiry invalidates access; closed clients cannot guarant
 physical deletion on schedule. No opt-in means no added background resume storage.
 Publication correctness, suppression, coordinate omission, expiry, replay protection,
 SSRF and queue bounds remain required implementation tests.
+
+### Implemented activity surface evidence
+
+The pure builder rejects duplicate contributions, bounds capture/output, and emits
+only cell IDs plus published buckets/event metadata. The real publisher uses a
+separate expiring lease and immutable epoch keys with delayed visibility and logical/
+native expiry; public reads never scan participant records. HTTP tests cover cache
+expiry, auth no-store, query rejection and concurrent identical reads. Browser
+fixtures cover cell layers, neutral suppressed data, identical own/gathering counts,
+expiry, explicit joining and capability-preserving retry. Real fixed-clock API tests
+cover private JEMI KËTU with a still-suppressed public arrival value. Neither these
+checks nor the accepted nested/threshold-inference fixtures establish anonymity.
+Capture is a bounded interval, so cancellation after observation may remain in that
+release; no per-participant capture history is persisted. Push-related controls in
+the plan remain unimplemented, and no subscriptions/provider calls are active.

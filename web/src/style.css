@@ -26,3 +26,14 @@ fieldset { padding: 0; border: 0; min-width: 0; }.hint { font-size: .9rem; margi
 #invitation h3 { font-size: 1.8rem; margin-top: 0; }
 #destination-map { height: 220px; border-radius: .8rem; overflow: hidden; }
 .destination-marker { display: grid; place-items: center; width: 48px; height: 48px; font-size: 2rem; background: #fff8f3; border: 2px solid #963754; border-radius: 50%; padding: .25rem; }
+
+#city-activity { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #d9cbc5; }
+#city-activity select { margin-bottom: 1rem; }
+#activity-time, #nearby-count { font-size: .95rem; }
+.public-gathering { padding: 1rem; margin-block: 1rem; border: 1px solid #d9cbc5; border-radius: .8rem; }
+.public-gathering h3 { margin-top: 0; }
+.public-gathering button { margin: .25rem; }
+#nearby-statistics { border-bottom: 1px solid #d9cbc5; padding-bottom: .5rem; }
+dialog { max-width: min(90vw, 28rem); border: 1px solid #d9cbc5; border-radius: 1rem; padding: 1.5rem; background: #fff8f3; color: inherit; }
+dialog::backdrop { background: #352c3166; }
+dialog button { margin-top: .5rem; }

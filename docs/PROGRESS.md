@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. The 3,000-person response simulation suite is complete. Milestone 09 can resume under the disclosed inference limitation.
+Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. The 3,000-person response simulation suite is complete. Milestone 09 now has the current activity publisher/API/cards/cell map; daily history remains. Decision 0007 accepts documented inference for implementation.
 
 ## Current task and authorization
 
@@ -22,7 +22,8 @@ is authorized, and GitHub authentication/write access remains unverified.
 - Expiring willingness APIs, replay tombstones, bounded indexes, rate limits and restricted ephemeral Valkey roles.
 - Albanian willingness UI with first-party roads, required one-shot device location, expiring client capability and cancellation.
 - Continuous activation, late admission, going/decline and temporary arrivals are implemented.
-  Collective public maps/statistics and notification subscriptions remain future work.
+  Delayed public cell maps and willingness/going/here statistics are implemented.
+  Background notification subscriptions and daily history remain future work.
 
 ## Milestone tracker
 
@@ -36,7 +37,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 06 — Seeded Tirana simulation | Complete; response suite added | Dedicated store/build, controllable clock, 18 checked city cases, 3,000-person behavior/arrival replay; reports/population-3000.md |
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
-| 09 — Aggregate map/statistics | Known failure accepted for local work | Production-threshold collusion probe reconstructs one synthetic target cell; see reports/09-inference-gate.md |
+| 09 — Aggregate map/statistics | Current activity implemented; daily history remains | Cell-only delayed releases/API/cards/map, real-store and browser evidence below; inference accepted in decision 0007 |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
 | 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
@@ -71,13 +72,14 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement commits 3/4 of ACTIVITY_IMPLEMENTATION_PLAN.md: connect statistics cards
-and the cell-only city map to the implemented delayed public activity endpoint. Decision 0007 accepts documented inference limitations;
-no new inference-approval gate is required. Push remains explicitly opt-in/off by
-default. Preserve private 100 m cells / 50 m device-error / 30/20 thresholds.
-The schema-7 public policy, bounded capture/publisher and aggregate API are
-implemented and tested; aggregate UI and notifications remain incomplete.
-No credential or toolchain blocker remains for local work.
+Continue with commit 5 of ACTIVITY_IMPLEMENTATION_PLAN.md: bounded server-side
+invitation discovery and notification outbox, then opt-in PWA/push lifecycle/follows.
+Statistics/map commits 1–4 are implemented locally; acceptance scope is in
+FUNCTIONALITY_STATUS.md. Decision 0007 accepts documented inference limitations;
+no further inference-approval gate is needed. Push must remain off by default and
+chosen by the user. No service worker, push subscription or IndexedDB resume exists
+yet. Preserve private 100 m cells / 50 m device-error / 30/20 thresholds and the fixed
+1 km public grid. No credential or toolchain blocker remains for local work.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -435,3 +437,35 @@ fencing, immutable release, delayed visibility, native/logical expiry, cached HT
 100 concurrent identical public reads, auth no-store and query rejection. These are
 functional checks, not a 100k benchmark. Logs: /tmp/gati-activity-verify.log and
 /tmp/gati-activity-store.log. Next: statistics/map browser implementation and checks.
+
+## Activity implementation — browser cards, cell map and joining
+
+The same public snapshot now supplies nearby willingness and per-gathering going/
+here cards before and after arrival, with neutral suppression and observation time.
+The city map stays visible through all states. Its two layers use only public cell
+polygons; cell selection displays the published bucket and gathering list without
+changing participant location or querying individual state. Multiple events share
+a cell; private actionable destination maps remain separate.
+
+Public-map joining requires an explicit choice. New participants supply a fresh
+device fix and confirm PO, PO SHKOJ through atomic /api/join. A lost response retains
+the same temporary admission capability and request; no second enrollment is made.
+An existing participant confirms through a dialog and the existing /api/going path.
+Map browsing/area selection never enrolls. Expired snapshots disable map joining;
+server checks remain authoritative. Added a temporary pending-join ID to existing
+tab session storage, removed on acknowledgment/cancellation/expiry; no push provider
+or durable browser resume storage was added.
+
+Validation: full `make test-browser` passed 17 checks; four public presentation/join
+fixtures are distinguished from real API participation tests. After final selected-
+cell text and Albanian 24-hour formatting, the four focused activity browser tests
+passed again. Inspected reports/local/activity-here.png after both maps were ready.
+`make verify-local` passed; focused activity race tests passed after the nested-count
+inference fixture. `make simulate SCENARIO=tirana-evening` passed with a real
+publisher/API extension: private confirmed presence can remain publicly suppressed.
+`make check-containers` passed after the rebuilt web server became ready (an initial
+immediate post-restart socket-close check was retried only after HTTP readiness).
+The running Compose app uses schema 7, private 100 m/public 1000 m grids. The
+publisher-enabled 3,000-person seed-42 run is underway, not yet counted as passed.
+Logs: /tmp/gati-activity-browser.log, /tmp/gati-activity-browser-focused.log,
+/tmp/gati-activity-simulation.log, /tmp/gati-activity-container-check.log.

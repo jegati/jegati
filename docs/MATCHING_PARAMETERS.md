@@ -1,6 +1,6 @@
 # Matching parameters: current implementation reference
 
-Checked against schema 6 and the implementation on 2026-09-13. Values below are
+Checked against schema 7 and the implementation on 2026-09-13. Values below are
 the current operating settings, not recommendations inferred from the experiments. Bounds
 are validation choices, not privacy guarantees. Cross-field checks can reject
 combinations even when each value is individually within its range.
@@ -112,16 +112,19 @@ mocked-browser tests separately exercise the actual client quality checks.
 often the visible client checks own status, with jitter/backoff. It affects when a
 person sees JEMI GATI/JEMI KËTU, not when the backend forms them.
 
-The other notification and public-activity fields are currently validated plans,
-not implemented public-map/subscription protections:
+Public snapshot settings below are active. Notification delivery/follow settings
+and the daily-summary retention remain validated plans, not implemented behavior:
 
 | Setting | Normal default | Intended meaning / current validation |
 | --- | --- | --- |
+| `public_activity.area_size_meters` | 1000 | Shared public willingness/gathering grid, 1000–5000 m, integer multiple of private cells. |
+| `public_activity.capture_max_seconds` | 30 | Maximum capture interval, ≤30 s and below release interval; incomplete captures discarded. |
+| `public_activity.max_snapshot_bytes` | 1000000 | Complete uncompressed release cap, 1024–1,000,000 bytes. |
 | `public_activity.minimum_count` | 20 | Minimum to publish area activity; normal ≥20. |
 | `public_activity.count_buckets` | `[20,50,100,250,500,1000]` | Ascending published lower bounds; first equals public minimum; 1–32 entries. |
 | `public_activity.release_seconds` / `delay_epochs` | 300 / 1 | Fixed release interval and delayed epochs; normal interval ≥300, delay positive. |
 | `public_activity.snapshot_retention_minutes` | 15 | Origin snapshot lifetime, ≤15; must exceed `release_seconds*(delay_epochs+1)` in seconds. |
-| `public_activity.daily_summary_retention_days` | 30 | Protected summary lifetime, ≤30 days. |
+| `public_activity.daily_summary_retention_days` | 30 | Planned protected summary lifetime, ≤30 days; summaries not implemented. |
 | `notifications.nearby_gati_count` / `nearby_arrival_count` | 50 / 50 | Large-nearby alert thresholds, both must be public bucket boundaries. |
 | `notifications.nearby_radius_km` | 5 | Proposed alert distance, 1–20 km; not participants' travel-radius setting. |
 | `notifications.push_min_interval_seconds` | 300 | Proposed minimum push gap, at least queue TTL. |
@@ -131,6 +134,6 @@ not implemented public-map/subscription protections:
 
 All integer fields are positive and ≤1,000,000 unless tighter bounds or the explicit
 zero-neighbor exception above apply. Simulation lowers some publication/activation
-floors but does not enable these unfinished features. Avoid interpreting the nearby
+floors; isolated clock steps also drive public snapshots. It does not enable unfinished notifications. Avoid interpreting the nearby
 50 threshold as today's activation threshold: the implemented JEMI GATI threshold
 is `matching.activation_count` (30 normal/population, 3 small regression profile).

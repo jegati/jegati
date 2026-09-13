@@ -129,3 +129,26 @@ func TestPrivateCellsMapIntoPublicCells(t *testing.T) {
 		}
 	}
 }
+
+func TestNestedCountsRetainDocumentedInferenceWithoutExactRemainder(t *testing.T) {
+	c, v, g := fixture(t)
+	v = v[:50]
+	for i := range v {
+		v[i].State = "here"
+		v[i].ArrivalUntil = 2000000
+	}
+	v[49].State = "going"
+	v[49].ArrivalUntil = 0
+	r, data, e := Build(c, 600000, 600000, v, g)
+	if e != nil {
+		t.Fatal(e)
+	}
+	// An observer with knowledge of its own 49 arrived credentials may infer the
+	// additional going contribution. User acceptance permits these bucketed views.
+	if r.Gatherings[0].Going != 50 || r.Gatherings[0].Here != 20 {
+		t.Fatal("nested bucket fixture changed")
+	}
+	if strings.Contains(string(data), `"remainder"`) || strings.Contains(string(data), `"here":49`) {
+		t.Fatal("exact complementary count exposed")
+	}
+}

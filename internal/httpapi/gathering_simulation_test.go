@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/jegati/jegati/internal/activity"
 	"github.com/jegati/jegati/internal/config"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/store"
@@ -189,6 +190,40 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 	if g.State != "jemi_ketu" {
 		t.Fatal("stable arrivals did not establish JEMI KETU")
 	}
+	// Publish through the real store/API after the private threshold. Public minimum
+	// is 3, so the two fresh arrivals remain suppressed despite private JEMI KËTU.
+	backend.Client.Del(ctx, "gati-sim:activity:lease")
+	publisher := worker.NewActivityPublisher(backend, c)
+	if e = publisher.Step(ctx); e != nil {
+		t.Fatal(e)
+	}
+	observed, _, e := backend.CaptureActivity(ctx, c)
+	if e != nil {
+		t.Fatal(e)
+	}
+	publicNow, _ := backend.Now(ctx)
+	backend.AdvanceClock(ctx, observed.ReleaseAt-publicNow)
+	public := call("GET", "/api/activity/latest", "", "")
+	var released activity.Release
+	if public.Code != 200 || json.Unmarshal(public.Body.Bytes(), &released) != nil {
+		t.Fatal("public release absent", public.Code)
+	}
+	found := false
+	for _, event := range released.Gatherings {
+		if event.ID == original.ID {
+			found = true
+			if event.Going != 3 || event.Here != 0 || event.State != "jemi_gati" {
+				t.Fatalf("public buckets ignored independent threshold: %+v", event)
+			}
+			if _, e = grid.Parse(event.Cell); e != nil {
+				t.Fatal("public gathering not in shared cell")
+			}
+		}
+	}
+	if !found || strings.Contains(public.Body.String(), original.Intersection.ID) || strings.Contains(public.Body.String(), `"intersection":`) {
+		t.Fatal("missing cell event or exact destination disclosure")
+	}
+	// Cached release stays identical after a new live participant; no live count query.
 	afterPresence := create()
 	w = call("POST", "/api/going", afterPresence, body)
 	var afterView sessionView

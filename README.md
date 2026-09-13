@@ -16,7 +16,10 @@ willingness APIs and the Albanian browser participation flow. The UI supports
 required one-shot device location, availability/radius choices,
 reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
-implemented. Collective maps and notification subscriptions are not implemented yet. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
+implemented. Delayed aggregate statistics and a cell-only public activity map now
+work locally, including explicit joining from map entries. Public cells default to
+1 km; private matching remains 100 m. Background push/follows are not implemented
+yet and will remain optional, chosen by the user. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
 include a 3,000-person response/journey driver, a standalone map replay,
 expiry/replay checks and smaller Sybil cases. Run `make simulate-population` using
 your current configuration, or `make simulate-suite` for a scenario comparison.
@@ -28,7 +31,8 @@ one participant's coarse cell from the ordinary nearest-intersection invitation.
 See the [evidence and product decision](docs/reports/09-inference-gate.md).
 The prototype does not yet meet the full inference-protection requirement and is
 not ready for public deployment. The user retained nearest-crossroad matching with
-this limitation; local development can continue (see [decision 0004](docs/decisions/0004-crossroads-and-device-location.md)).
+this limitation and explicitly accepted documented public inference for local
+implementation (see [decision 0007](docs/decisions/0007-cell-only-public-activity.md)).
 
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 
@@ -61,6 +65,8 @@ make dev
 ```
 
 Open http://127.0.0.1:5173. Docker is required for the temporary store.
+Public snapshots appear after the configured delay (normally 5–10 minutes) and
+small groups remain suppressed. Matching and personal state continue immediately.
 `make dev-native` remains a read-only UI/API preview without a store.
 Run `make browser-install` once, then `make test-browser` with the Compose API up.
 
