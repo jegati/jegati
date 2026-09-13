@@ -1,0 +1,21 @@
+goos: linux
+goarch: amd64
+pkg: github.com/jegati/jegati/internal/geography
+cpu: AMD Ryzen 7 7435HS
+BenchmarkCanReach/100-16         	 3515904	       346.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/100-16         	 3520317	       339.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/100-16         	 3540126	       340.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/100-16         	 3523447	       340.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/100-16         	 3520478	       343.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/1000-16        	  399260	      3045 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/1000-16        	  367546	      3040 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/1000-16        	  388556	      3060 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/1000-16        	  395779	      3023 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/1000-16        	  383923	      3027 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/10000-16       	   35421	     34049 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/10000-16       	   35794	     33697 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/10000-16       	   35413	     33724 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/10000-16       	   35842	     33546 ns/op	       0 B/op	       0 allocs/op
+BenchmarkCanReach/10000-16       	   34766	     33750 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/jegati/jegati/internal/geography	21.554s

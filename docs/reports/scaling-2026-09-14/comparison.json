@@ -1,0 +1,149 @@
+{
+  "scope": "Isolated synthetic component benchmarks on one host; not HTTP, whole-app throughput or 1M-user capacity. Repeated-sample ranges are not confidence intervals. B/op measures allocation traffic, not peak/live RAM.",
+  "rows": [
+    {
+      "benchmark": "BenchmarkChangedCell/uniform-100000",
+      "before_median_ms": 296.377469,
+      "after_median_ms": 0.394016,
+      "speedup": 752.1965326281166,
+      "before_range_ms": [
+        290.68913,
+        298.637332
+      ],
+      "after_range_ms": [
+        0.339544,
+        0.438393
+      ],
+      "before_bytes_per_op": 145636549,
+      "after_bytes_per_op": 9589,
+      "before_samples": 3,
+      "after_samples": 3
+    },
+    {
+      "benchmark": "BenchmarkChangedCell/hotspot-100000",
+      "before_median_ms": 303.883811,
+      "after_median_ms": 223.78106,
+      "speedup": 1.357951432529634,
+      "before_range_ms": [
+        301.244979,
+        312.632741
+      ],
+      "after_range_ms": [
+        223.43592,
+        225.765543
+      ],
+      "before_bytes_per_op": 186383568,
+      "after_bytes_per_op": 75595533,
+      "before_samples": 3,
+      "after_samples": 3
+    },
+    {
+      "benchmark": "BenchmarkEligibleSnapshot/10000",
+      "before_median_ms": 30.443879,
+      "after_median_ms": 32.955893,
+      "speedup": 0.9237764851342368,
+      "before_range_ms": [
+        29.023516,
+        31.504116
+      ],
+      "after_range_ms": [
+        32.53274,
+        33.691697
+      ],
+      "before_bytes_per_op": 13875930,
+      "after_bytes_per_op": 10438082,
+      "before_samples": 3,
+      "after_samples": 3
+    },
+    {
+      "benchmark": "BenchmarkEligibleSnapshot/100000",
+      "before_median_ms": 292.055645,
+      "after_median_ms": 269.199491,
+      "speedup": 1.0849041501345187,
+      "before_range_ms": [
+        287.824819,
+        296.320785
+      ],
+      "after_range_ms": [
+        267.47047,
+        273.106394
+      ],
+      "before_bytes_per_op": 145663085,
+      "after_bytes_per_op": 82731138,
+      "before_samples": 3,
+      "after_samples": 3
+    },
+    {
+      "benchmark": "BenchmarkEligibleSnapshot/1000000",
+      "before_median_ms": 2803.169694,
+      "after_median_ms": 2646.120479,
+      "speedup": 1.0593507424345814,
+      "before_range_ms": [
+        2788.082152,
+        2807.377441
+      ],
+      "after_range_ms": [
+        2638.035684,
+        2647.526527
+      ],
+      "before_bytes_per_op": 1441277016,
+      "after_bytes_per_op": 819693538,
+      "before_samples": 3,
+      "after_samples": 3
+    },
+    {
+      "benchmark": "BenchmarkCanReach/100",
+      "before_median_ms": 0.0003409,
+      "after_median_ms": 8.586e-05,
+      "speedup": 3.9704169578383413,
+      "before_range_ms": [
+        0.0003393,
+        0.00034669999999999997
+      ],
+      "after_range_ms": [
+        8.561e-05,
+        8.626e-05
+      ],
+      "before_bytes_per_op": 0,
+      "after_bytes_per_op": 0,
+      "before_samples": 5,
+      "after_samples": 5
+    },
+    {
+      "benchmark": "BenchmarkCanReach/1000",
+      "before_median_ms": 0.00304,
+      "after_median_ms": 0.0001044,
+      "speedup": 29.11877394636015,
+      "before_range_ms": [
+        0.003023,
+        0.00306
+      ],
+      "after_range_ms": [
+        0.0001042,
+        0.0001047
+      ],
+      "before_bytes_per_op": 0,
+      "after_bytes_per_op": 0,
+      "before_samples": 5,
+      "after_samples": 5
+    },
+    {
+      "benchmark": "BenchmarkCanReach/10000",
+      "before_median_ms": 0.033724,
+      "after_median_ms": 0.0001261,
+      "speedup": 267.4385408406027,
+      "before_range_ms": [
+        0.033546,
+        0.034049
+      ],
+      "after_range_ms": [
+        0.000126,
+        0.0001265
+      ],
+      "before_bytes_per_op": 0,
+      "after_bytes_per_op": 0,
+      "before_samples": 5,
+      "after_samples": 5
+    }
+  ]
+}

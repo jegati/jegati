@@ -1,0 +1,802 @@
+{
+  "before": {
+    "manifest": {
+      "binary_source_revision": "f9a412e87b6dfd50dba7f49e8ad90817e3f6c43f",
+      "source_revision": "f9a412e87b6dfd50dba7f49e8ad90817e3f6c43f",
+      "source_dirty": true,
+      "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+      "cpu_model": "AMD Ryzen 7 7435HS",
+      "logical_cpus": 16,
+      "store_maxmemory_mb": 512,
+      "same_host_generator": true,
+      "config_sha256": "13aedb29ea15f34e845cd4234e124d1047397fc1cfc631d4fb162cbdf51503aa",
+      "binary_sha256": "1ad293d9dd4fbe46253824b23d18d7b507bf0214c85d5eca0fe82d355a7d4637"
+    },
+    "phases": [
+      {
+        "name": "create-100000",
+        "started_ms": 1789336315194,
+        "seconds": 333.33538407,
+        "attempted": 100000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 100000
+        },
+        "latency_bins": [
+          99458,
+          540,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          99458,
+          540,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "status-100000",
+        "started_ms": 1789336648529,
+        "seconds": 20.001729561,
+        "attempted": 66680,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 66680
+        },
+        "latency_bins": [
+          66373,
+          300,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          66373,
+          300,
+          7,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "public-origin-100000",
+        "started_ms": 1789336668531,
+        "seconds": 20.00106973,
+        "attempted": 20000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 20000
+        },
+        "latency_bins": [
+          19995,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          19995,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "invitation-sample",
+        "started_ms": 1789336688532,
+        "seconds": 10.002100613,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 1000
+        },
+        "latency_bins": [
+          999,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          999,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-status",
+        "started_ms": 1789336698535,
+        "seconds": 20.002022505,
+        "attempted": 66680,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 66680
+        },
+        "latency_bins": [
+          66505,
+          175,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          66505,
+          175,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-public-origin",
+        "started_ms": 1789336698535,
+        "seconds": 20.001369801,
+        "attempted": 20000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 20000
+        },
+        "latency_bins": [
+          19948,
+          52,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          19948,
+          52,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-going",
+        "started_ms": 1789336698535,
+        "seconds": 20.002257248,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 1000
+        },
+        "latency_bins": [
+          997,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          997,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "cancellation",
+        "started_ms": 1789336718537,
+        "seconds": 5.001131842,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 1000
+        },
+        "latency_bins": [
+          998,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          998,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      }
+    ],
+    "sample_count": 83,
+    "scope": "one fixed-rate local run per revision; 5s resource samples, CPU deltas exclude index construction before collector start; RSS sampled peak, not heap allocation traffic",
+    "resources": {
+      "cpu_seconds_delta": 176.42,
+      "peak_rss_bytes": 529715200
+    },
+    "store_resources": {
+      "cpu_seconds_delta": 75.57,
+      "peak_rss_bytes": 93818880
+    },
+    "alerts": {},
+    "maximum_observed_lag_seconds": {
+      "matcher": 0,
+      "publisher": 0,
+      "cleanup": 0
+    }
+  },
+  "after": {
+    "manifest": {
+      "binary_source_revision": "96db982cc485affb3670ae170598624b8a725fa0",
+      "source_revision": "96db982cc485affb3670ae170598624b8a725fa0",
+      "source_dirty": true,
+      "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+      "cpu_model": "AMD Ryzen 7 7435HS",
+      "logical_cpus": 16,
+      "store_maxmemory_mb": 512,
+      "same_host_generator": true,
+      "config_sha256": "13aedb29ea15f34e845cd4234e124d1047397fc1cfc631d4fb162cbdf51503aa",
+      "binary_sha256": "ed10b44ba0d25aba68c0c740d8d96f8337af9c6706e4b86905e7e765325d26b6"
+    },
+    "phases": [
+      {
+        "name": "create-100000",
+        "started_ms": 1789338316988,
+        "seconds": 333.335602444,
+        "attempted": 100000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 100000
+        },
+        "latency_bins": [
+          99338,
+          652,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          99338,
+          652,
+          10,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "status-100000",
+        "started_ms": 1789338650324,
+        "seconds": 20.000686057,
+        "attempted": 66680,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 66680
+        },
+        "latency_bins": [
+          66528,
+          147,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          66528,
+          147,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "public-origin-100000",
+        "started_ms": 1789338670325,
+        "seconds": 20.001297422,
+        "attempted": 20000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 20000
+        },
+        "latency_bins": [
+          20000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          20000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "invitation-sample",
+        "started_ms": 1789338690326,
+        "seconds": 10.001947009,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 1000
+        },
+        "latency_bins": [
+          999,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          999,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-status",
+        "started_ms": 1789338700328,
+        "seconds": 20.001659612,
+        "attempted": 66680,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 66680
+        },
+        "latency_bins": [
+          66565,
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          66565,
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-public-origin",
+        "started_ms": 1789338700328,
+        "seconds": 20.001108041,
+        "attempted": 20000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 20000
+        },
+        "latency_bins": [
+          19967,
+          33,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          19967,
+          33,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "mixed-going",
+        "started_ms": 1789338700328,
+        "seconds": 20.001956021,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "200": 1000
+        },
+        "latency_bins": [
+          1000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          1000,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      },
+      {
+        "name": "cancellation",
+        "started_ms": 1789338720330,
+        "seconds": 5.001903191,
+        "attempted": 1000,
+        "generator_dropped": 0,
+        "statuses": {
+          "204": 1000
+        },
+        "latency_bins": [
+          997,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_latency_bins": [
+          997,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rejected_latency_bins": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "accepted_p95_upper_ms": 10,
+        "rejected_p95_upper_ms": 0,
+        "p95_upper_ms": 10
+      }
+    ],
+    "sample_count": 83,
+    "scope": "one fixed-rate local run per revision; 5s resource samples, CPU deltas exclude index construction before collector start; RSS sampled peak, not heap allocation traffic",
+    "resources": {
+      "cpu_seconds_delta": 142.55,
+      "peak_rss_bytes": 586575872
+    },
+    "store_resources": {
+      "cpu_seconds_delta": 75.02,
+      "peak_rss_bytes": 94633984
+    },
+    "alerts": {},
+    "maximum_observed_lag_seconds": {
+      "matcher": 0,
+      "publisher": 0,
+      "cleanup": 0
+    }
+  }
+}

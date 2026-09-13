@@ -1,0 +1,21 @@
+goos: linux
+goarch: amd64
+pkg: github.com/jegati/jegati/internal/store
+cpu: AMD Ryzen 7 7435HS
+BenchmarkChangedCell/uniform-100000-16         	       3	    394016 ns/op	    9589 B/op	      95 allocs/op
+BenchmarkChangedCell/uniform-100000-16         	       3	    438393 ns/op	    9589 B/op	      95 allocs/op
+BenchmarkChangedCell/uniform-100000-16         	       3	    339544 ns/op	    9589 B/op	      95 allocs/op
+BenchmarkChangedCell/hotspot-100000-16         	       3	 225765543 ns/op	75594664 B/op	  704729 allocs/op
+BenchmarkChangedCell/hotspot-100000-16         	       3	 223435920 ns/op	75600880 B/op	  704736 allocs/op
+BenchmarkChangedCell/hotspot-100000-16         	       3	 223781060 ns/op	75595533 B/op	  704729 allocs/op
+BenchmarkEligibleSnapshot/10000-16             	       3	  33691697 ns/op	10434394 B/op	  110677 allocs/op
+BenchmarkEligibleSnapshot/10000-16             	       3	  32955893 ns/op	10441877 B/op	  110691 allocs/op
+BenchmarkEligibleSnapshot/10000-16             	       3	  32532740 ns/op	10438082 B/op	  110682 allocs/op
+BenchmarkEligibleSnapshot/100000-16            	       3	 273106394 ns/op	82738506 B/op	  847748 allocs/op
+BenchmarkEligibleSnapshot/100000-16            	       3	 267470470 ns/op	82731138 B/op	  847721 allocs/op
+BenchmarkEligibleSnapshot/100000-16            	       3	 269199491 ns/op	82702709 B/op	  847741 allocs/op
+BenchmarkEligibleSnapshot/1000000-16           	       3	2647526527 ns/op	819665026 B/op	 8096414 allocs/op
+BenchmarkEligibleSnapshot/1000000-16           	       3	2638035684 ns/op	819806274 B/op	 8096442 allocs/op
+BenchmarkEligibleSnapshot/1000000-16           	       3	2646120479 ns/op	819693538 B/op	 8096434 allocs/op
+PASS
+ok  	github.com/jegati/jegati/internal/store	106.448s

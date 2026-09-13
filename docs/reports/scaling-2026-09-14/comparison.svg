@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="796" viewBox="0 0 1000 796" role="img" aria-label="GATI component benchmark comparison">
+<rect width="1000" height="796" fill="#fff"/>
+<g font-family="sans-serif" fill="#183b36">
+<text x="30" y="38" font-size="22">GATI: measured component speedups</text>
+<text x="30" y="65" font-size="13">Gray = before; green = after. Each pair is scaled independently. Median time per operation.</text>
+<text x="30" y="110" font-size="15">ChangedCell/uniform-100000</text>
+<rect x="360" y="94" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="116" width="0.51" height="16" fill="#27806d"/>
+<text x="755" y="110" font-size="13">296.4 → 0.394 ms</text>
+<text x="755" y="132" font-size="13">752.20×</text>
+<text x="30" y="188" font-size="15">ChangedCell/hotspot-100000</text>
+<rect x="360" y="172" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="194" width="279.83" height="16" fill="#27806d"/>
+<text x="755" y="188" font-size="13">303.9 → 223.8 ms</text>
+<text x="755" y="210" font-size="13">1.36×</text>
+<text x="30" y="266" font-size="15">EligibleSnapshot/10000</text>
+<rect x="360" y="250" width="351.04" height="16" fill="#a8b5b2"/>
+<rect x="360" y="272" width="380.00" height="16" fill="#27806d"/>
+<text x="755" y="266" font-size="13">30.44 → 32.96 ms</text>
+<text x="755" y="288" font-size="13">0.92×</text>
+<text x="30" y="344" font-size="15">EligibleSnapshot/100000</text>
+<rect x="360" y="328" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="350" width="350.26" height="16" fill="#27806d"/>
+<text x="755" y="344" font-size="13">292.1 → 269.2 ms</text>
+<text x="755" y="366" font-size="13">1.08×</text>
+<text x="30" y="422" font-size="15">EligibleSnapshot/1000000</text>
+<rect x="360" y="406" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="428" width="358.71" height="16" fill="#27806d"/>
+<text x="755" y="422" font-size="13">2803 → 2646 ms</text>
+<text x="755" y="444" font-size="13">1.06×</text>
+<text x="30" y="500" font-size="15">CanReach/100</text>
+<rect x="360" y="484" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="506" width="95.71" height="16" fill="#27806d"/>
+<text x="755" y="500" font-size="13">0.0003409 → 8.586e-05 ms</text>
+<text x="755" y="522" font-size="13">3.97×</text>
+<text x="30" y="578" font-size="15">CanReach/1000</text>
+<rect x="360" y="562" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="584" width="13.05" height="16" fill="#27806d"/>
+<text x="755" y="578" font-size="13">0.00304 → 0.0001044 ms</text>
+<text x="755" y="600" font-size="13">29.12×</text>
+<text x="30" y="656" font-size="15">CanReach/10000</text>
+<rect x="360" y="640" width="380.00" height="16" fill="#a8b5b2"/>
+<rect x="360" y="662" width="1.42" height="16" fill="#27806d"/>
+<text x="755" y="656" font-size="13">0.03372 → 0.0001261 ms</text>
+<text x="755" y="678" font-size="13">267.44×</text>
+<text x="30" y="766" font-size="13">Synthetic component results; these ratios are not whole-application or million-user capacity claims.</text>
+</g></svg>

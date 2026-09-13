@@ -934,3 +934,26 @@ completed in 214.2 wall seconds with 3,000 accepted credentials, 1,922 invited
 actors, 1,562 arrived actors and 44 observed gatherings; its paced synthetic time
 is not a speedup benchmark. Remaining checks/results are recorded in the next
 entry. Local deployment scaffolding is being prepared separately; preserve commands.txt.
+
+## Measured optimization results — 2026-09-14
+
+Final same-harness clean-export comparison f9a412e → 96db982 is retained in
+[the performance report](reports/scaling-2026-09-14.md), including raw repeated
+component samples and a standalone SVG. Distributed single-cell reads improved
+296.38 ms → 0.394 ms (752× component-only); a 100k single-cell hotspot improved
+303.88 → 223.78 ms (1.36×). Full snapshots: 10k became 8.3% slower, 100k became
+1.085× faster, 1M became 1.059× faster. At 100k/1M allocation traffic dropped about
+43%; this is not a live-memory measurement. Reachability last-hit/miss improved
+3.97×/29.1×/267× at 100/1k/10k candidates. Materialization/planning and periodic
+reconciliation/publication still include population-sized work.
+
+Corrected before/after mixed-load runs both accepted 100k creations and all requested
+simultaneous status/public/going traffic, with no 429/errors/generator drops and
+p95 <=10ms. Sampled API CPU during the workload fell 176.42 → 142.55 CPU seconds
+(19.2%), while peak sampled API RSS rose 505.18 → 559.40 MiB (10.7%). Valkey CPU/RSS
+were essentially unchanged. No monitoring alerts; observed worker lag buckets were
+<5 seconds at samples, not proof of zero delay. These are one fixed-rate run per
+revision on this laptop, not maximum throughput, VPS sizing or 1M-user evidence.
+
+Next local work: finish and verify the already prepared production roles/proxy,
+immutable release/rollback tooling and host/edge runbook. No publication authorized.
