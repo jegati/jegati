@@ -34,7 +34,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
 | 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
 | 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
-| 07 — Continuous activation and late admission | Not started | Matching/timers/crosswalk selection, races and joining |
+| 07 — Continuous activation and late admission | In progress | Pure planner and bounded founding-cohort decision tested; Valkey reservations, scheduling, atomic activation/admission and UI remain |
 | 08 — Arrival claims | Not started | Founding/late participants, nonces/freshness/retraction |
 | 09 — Aggregate map/statistics | Not started | Canonical releases and inference review |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
@@ -121,3 +121,13 @@ restricted simulation namespace were checked against real disposable Valkey.
 Production store integration and native checks passed after fixing cross-package
 test interference. No simulation-control credential or synthetic participant token
 is written to a report or committed. Normal Compose remains separate.
+
+## Milestone 07, planner slice
+
+`internal/matching` selects oldest compatible founders, ranks mapped crossings,
+computes the nearest common crossing, enforces unaligned remaining availability,
+prefers compatible open gatherings, respects declines/cutoffs and freezes the
+proposed deadline. Focused race tests passed. Decision 0003 explains the bounded
+cohort and conservative reservation stability. This planner is not wired into the
+API yet and does not establish end-to-end activation. Next: atomic Valkey
+reservation/activation/admission and worker recovery/timer integration.
