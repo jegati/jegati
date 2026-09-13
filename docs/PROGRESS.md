@@ -71,10 +71,13 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Resume milestone 09 public aggregate releases, keeping the known
-collusion limitation visible and reviewing additional public inference surfaces.
-The user retained nearest destinations after disclosure; this resolves the local
-implementation decision, not the absolute inference requirement or release gates.
+The latest user request prioritizes planning Tirana population-response simulations
+before implementing/running the new suite. Present docs/SIMULATION_PLAN.md and the
+16–28-hour effort estimate; docs/MATCHING_PARAMETERS.md explains every current
+matching field, related settings, validation choices and inactive controls.
+The next implementation step is the scenario schema/event scheduler, followed by
+responses/journeys and replay/reporting. Milestone 09 remains pending behind this
+requested simulation work. No new response-population run has been claimed.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -227,3 +230,20 @@ missing location service, stale/poor/out-of-area fixes, selection expiry, no man
 map input, keyboard/mobile, retry/cancellation and the complete arrival flow.
 Inspected the synthetic mobile screenshot. No real device location was requested.
 The disposable local store was recreated for the incompatible destination schema.
+
+## Population-response simulation planning
+
+Inspected the current generator, API driver, worker/planner, validation, configs and
+existing reports. Added a six-scenario/three-seed proposal with synthetic behavior,
+production-equivalent thresholds in an isolated profile, real-window rate-limit
+handling, mocked-device browser journeys and measurements. Estimate: 16–28 focused
+developer hours; first response-enabled run after roughly 8–13 hours of that work.
+No new simulation or app tests were run for this documentation-only change.
+
+Documented all matching fields and related choices. Notable implementation limits:
+intersection_index_batch_size is unused; the current runner hardcodes the small
+simulation profile (3 willing/2 arrivals), generates all traffic from one peer and
+has narrower availability/radius choices than the application schema. Previous
+population reports remain willingness-only; fixed integration tests are separate.
+Corrected obsolete SIMULATION.md wording that implied activation/arrival app code
+had not landed. Validation: source/config cross-check and git diff --check.

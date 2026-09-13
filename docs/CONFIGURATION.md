@@ -65,3 +65,7 @@ submission if the user waits too long. Denial, missing service, timeout, out-of-
 or poor/stale fixes leave participation disabled, with no manual fallback.
 Neither coordinates nor reported accuracy are sent to GATI. These settings cannot
 attest hardware, prevent spoofing or make the coarse server claim trustworthy.
+
+For field-by-field defaults, accepted choices and current runtime effects, see
+[MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md). In particular,
+`matching.intersection_index_batch_size` currently has no matcher consumer.

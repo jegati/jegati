@@ -17,8 +17,9 @@ Edit `simulation/scenarios/*.yaml`: seed, population (1–1000), clustered/unifo
 sparse/single_hotspot distribution, offered availability/radii, cancellation,
 duplicate-request fraction and Sybil fraction/credentials (up to 10 per person).
 The simulation consumes thresholds and geography from `config/simulation.yaml`.
-Unsupported scenario options are rejected; going/arrival/notification options will
-be added with their functionality rather than silently ignored now.
+Unsupported scenario options are rejected. The population driver still needs
+going/arrival behavior options; separate API integration tests already exercise
+those implemented app features. Notification subscriptions have not landed.
 
 ## Isolation and time
 
@@ -43,5 +44,12 @@ be added with their functionality rather than silently ignored now.
 
 Current controls demonstrate bounded bursts, not privacy-preserving human identity
 or robust Sybil resistance. A distributed attacker can exceed one network's budget.
-Activation, admission, arrival and notifications are not simulated yet because
-those application features have not landed.
+The population driver does not model invitation responses or journeys yet. The
+script also runs separate fixed-clock integration tests for activation, admission
+and arrival; those checks are not a population-response report. Notification
+subscriptions remain unimplemented.
+
+See [the proposed population/interaction simulation plan](SIMULATION_PLAN.md) for
+scenarios, measurements, implementation steps and effort estimates, and
+[the matching parameter reference](MATCHING_PARAMETERS.md) for defaults, choices
+and settings that are not active yet.

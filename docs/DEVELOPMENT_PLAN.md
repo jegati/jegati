@@ -248,7 +248,12 @@ make down
 
 Use one deterministic Go simulation CLI that drives the real API and matching code. A controllable clock supports fast functional scenarios; performance tests use real wall-clock time. Explicitly separate simulation ground truth from production API responses. The simulator dashboard may show synthetic individuals only on a separate development origin with an unmistakable Albanian simulation banner. Compile simulation routes/clock overrides out of production, bind them to loopback, and test their absence in production artifacts. Never allow a deployment environment flag alone to turn them on in a public binary.
 
-Version-controlled scenario parameters:
+The next requested simulation work is detailed in [SIMULATION_PLAN.md](SIMULATION_PLAN.md),
+including effort, scenarios and report gates. See [MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md)
+for actual configurable behavior and inactive fields. The YAML below remains a
+proposed sketch, not a currently accepted scenario file.
+
+Version-controlled scenario parameters (proposed):
 
 ```yaml
 city: tirana

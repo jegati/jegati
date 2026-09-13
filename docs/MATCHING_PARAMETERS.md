@@ -1,0 +1,125 @@
+# Matching parameters: current implementation reference
+
+Checked against schema 5 and the implementation on 2026-09-13. Values below are
+current defaults, not recommended outcomes from the proposed experiments. Bounds
+are validation choices, not privacy guarantees. Cross-field checks can reject
+combinations even when each value is individually within its range.
+
+## Where to configure
+
+- `config/gati.yaml`: normal local Compose/application functional settings.
+- `config/simulation.yaml`: current isolated simulator settings (activation 3,
+  arrival 2; most timing/geography defaults match the normal app).
+- `simulation/scenarios/tirana-evening.yaml` and `tirana-sybil.yaml`: existing
+  synthetic population/behavior inputs, not application matching policy.
+- `internal/config/types.go` and `config.go`: authoritative field names/validation.
+- `GET /api/config`: running service's effective nonsecret config and SHA-256.
+
+Validate/inspect the normal file with `make config-check` and `make config-show`.
+Use `make config-check CONFIG=path/to/production-profile.yaml` for another normal
+file. `make config-check-simulation` checks the current simulation file. Settings
+are loaded at startup: edit the normal file, validate it, then recreate/rebuild the
+local API (e.g. `make dev` starts/rebuilds Compose). Confirm the running config/hash
+at `/api/config`; editing a file is not evidence a running process reloaded it.
+Gathering destinations/deadlines are frozen; use fresh isolated stores for each
+comparison. Grid/map/schema incompatibilities require the documented restart/drain
+policy, not reinterpretation of active records.
+
+`make simulate SCENARIO=tirana-evening SEED=42` is implemented. Currently it always
+loads config/simulation.yaml; Make's CONFIG variable does not change that runner.
+New behavior fields/profiles described in SIMULATION_PLAN.md are proposed, not
+accepted inputs yet. Unknown fields are rejected.
+
+## All fields under `matching`
+
+| Parameter | Normal / simulation default | Actual effect | Accepted choices / constraints |
+| --- | --- | --- | --- |
+| `activation_count` | 20 / 3 | Size of stable founding cohort needed for JEMI GATI. Counts willing credentials, not promises or verified humans. Late joiners do not require another full cohort. | Normal 10–500; simulation 1–500; no greater than `limits.max_active_signals`. |
+| `activation_stability_seconds` | 10 / 10 | Same eligible founding cohort must remain valid this long before activation. Cancellation/missing founder breaks it. | Positive integer; must fit remaining-availability constraint below. |
+| `maximum_debounce_seconds` | 2 / 2 | Current worker timer interval for checking matching/deadlines. A scheduling target, not a guaranteed maximum latency under load. | 1–5 seconds, no greater than reconciliation interval. |
+| `reconciliation_seconds` | 10 / 10 | Full eligibility reconciliation interval without a dirty event; also used for worker lease/recovery timing. Changes trigger earlier work. | 1–10 seconds, at least debounce interval. |
+| `minimum_remaining_minutes` | 15 / 15 | Minimum availability left to count in a new founding cohort, rechecked at activation. This is not the user's minimum offered availability. | Positive; no greater than maximum gathering duration; must leave room for stability/reconciliation within minimum offered availability. |
+| `maximum_gathering_minutes` | 60 / 60 | Caps duration starting at activation. Actual end is earlier if a founder's willingness expires earlier; fixed after activation. | 1–60 minutes, at least minimum remaining time. |
+| `late_join_min_remaining_minutes` | 5 / 5 | Admission requires both gathering and participant to have at least this much time left. Applies even after JEMI KËTU. | Positive; no greater than founding minimum; arrival stability must fit inside it. |
+| `invitation_cooldown_seconds` | 60 / 60 | Wait after declining before another automatic invitation can be offered. The declined gathering stays declined for the session. | Normal 30–300; simulation 1–300 seconds. |
+| `prefer_open_gatherings` | true / true | Prefer compatible existing/open gatherings rather than founding competing ones; planner also reserves prospective destinations during stability. | Only `true` is supported. `false` is rejected. |
+| `destination_rule` | `nearest_eligible_crossroad_to_coarse_group_center` / same | Choose nearest eligible imported road intersection to mean coarse founder-cell centers, reachable by all counted founders. Geographic distance; no routing. Stable map-ID tie-break. | Only this literal rule is supported; no alternate/random/manual setting. |
+| `candidate_batch_size` | 100 / 100 | Maximum due reservations processed and maximum new reservation attempts per worker step (separate loops). | Currently 1–1,000,000 under generic schema bound; very large values are not performance validated. It does not change activation count. |
+| `intersection_index_batch_size` | 500 / 500 | Intended future budget for incremental intersection-index processing. **Currently stored/validated but not consumed by the matcher. Changing it has no processing effect.** | Currently generic positive-integer bound 1–1,000,000. Treat as inactive until implemented. |
+
+The exact timing constraint currently validated is:
+`minimum_remaining_minutes * 60 + activation_stability_seconds + reconciliation_seconds < availability.minimum_minutes * 60`.
+Matching is continuous; none of these settings creates appointment slots.
+The bounded planner chooses oldest compatible founders and ranks candidate junctions
+by compatible count, oldest signal, then stable map ID. There is no configurable
+fairness algorithm. One credential is not one person.
+
+## Availability and geography
+
+| Parameter | Current default | Effect and choices |
+| --- | --- | --- |
+| `availability.minimum_minutes` | 30 | Lowest user choice; cannot be below 30. Must equal first choices entry. |
+| `availability.choices_minutes` | `[30,60,90,120]` | Strictly increasing positive integer minute choices, 1–32 entries, within min/max. Actual app permits alternatives such as `[30,45,60]` when min/max agree. Existing simulator only accepts 30/60/90/120 until generalized. |
+| `availability.maximum_minutes` | 120 | Highest user choice/session lifetime, at most 120; must equal last choice. |
+| `geography.travel_radius_choices_km` | `[1,3,5]` | User travel-distance choices: ascending positive integer km, up to 20, at most 32 entries. Existing simulator accepts only 1/3/5 until generalized. Uses conservative distance from the whole coarse cell, not walking distance or time. |
+| `geography.cell_size_meters` | 1000 | Nominal private geographic grid size, integer 500–5000. Larger cells conceal more precision but can exclude more radius matches. This changes IDs and the reachability index. |
+| `geography.intersection_dataset` | `tirana-intersections-v1` | Installed road-junction dataset version; startup requires matching file version. Other versions require importing/installing reviewed data, not just changing a label. |
+| `geography.location_max_accuracy_meters` | 100 | Client rejects larger reported device errors; positive integer, at most half the configured nominal cell size. Accuracy estimate stays on-device. |
+| `geography.location_fix_max_age_seconds` | 60 | Client rejects stale fixes and expires an unused willingness fix before submission; allowed 5–120 seconds. No manual fallback. |
+
+Changing age/accuracy limits does not prevent spoofed device/API claims. Production
+UI always obtains location from the device. Synthetic API actors bypass that UI;
+mocked-browser tests separately exercise the actual client quality checks.
+
+## Arrival confirmation (`arrivals`)
+
+| Parameter | Normal / simulation default | Effect and choices |
+| --- | --- | --- |
+| `confirmation_count` | 10 / 2 | Accepted fresh arrival credentials required for JEMI KËTU; normal 10–500, simulation 1–500. Independent of willingness activation count. |
+| `confirmation_stability_seconds` | 10 / 10 | Same valid arrival cohort must survive this interval; positive and strictly shorter than freshness and late-join remaining time. |
+| `freshness_minutes` | 15 / 15 | Maximum life of an arrival claim, further capped by session/gathering end; 1–15 minutes. No automatic claim renewal. |
+| `nonce_seconds` | 120 / 120 | Maximum arrival challenge lifetime; 1–120 seconds and strictly less than freshness. Replays cannot increase/refresh attendance. |
+| `allowed_cell_neighbor_rings` | 0 / 0 | `0`: claimed cell must equal destination cell. `1`: also allow the eight surrounding cells (within the service grid). Expands accepted approximate area, not a GPS accuracy proof. |
+
+## Limits that affect observed matching
+
+| Parameter under `limits` | Default | Effect / bounds |
+| --- | --- | --- |
+| `new_signals_per_network_window` | 60 | Creation request budget per network window, including retries; positive, no greater than request budget. One localhost simulator currently shares this budget. |
+| `requests_per_network_window` | 3000 | Total authenticated request budget per network window; positive integer ≤1,000,000. |
+| `network_window_seconds` | 60 | Abuse-counter window, 1–600 real seconds. Fake clock advancement does not advance it. |
+| `global_writes_per_second` | 500 | Global write request budget; positive ≤1,000,000. Not a measured sustainable throughput. |
+| `max_active_signals` | 150000 | Store admission cap and worker snapshot bound; positive ≤1,000,000 and ≥ activation count. Expired-index cleanup can affect admission. Not proof of capacity. |
+| `max_declines_per_signal` | 32 | Maximum retained per-session declined invitations; 1–128. Once exhausted, further automatic offers stop. |
+| `arrival_requests_per_signal_window` | 20 | Additional per-credential arrival request budget; 1–60 per configured real-time window. |
+| `max_body_bytes` | 1024 | Maximum request body size, 1–4096 bytes. |
+| `cleanup_batch_size` | 1000 | Maximum entries in an expiry cleanup batch and page size used by worker reads; 1–1000. |
+
+## Other event counts and visibility
+
+`notifications.foreground_poll_seconds` (30, allowed 1–60) is active: controls how
+often the visible client checks own status, with jitter/backoff. It affects when a
+person sees JEMI GATI/JEMI KËTU, not when the backend forms them.
+
+The other notification and public-activity fields are currently validated plans,
+not implemented public-map/subscription protections:
+
+| Setting | Normal default | Intended meaning / current validation |
+| --- | --- | --- |
+| `public_activity.minimum_count` | 20 | Minimum to publish area activity; normal ≥20. |
+| `public_activity.count_buckets` | `[20,50,100,250,500,1000]` | Ascending published lower bounds; first equals public minimum; 1–32 entries. |
+| `public_activity.release_seconds` / `delay_epochs` | 300 / 1 | Fixed release interval and delayed epochs; normal interval ≥300, delay positive. |
+| `public_activity.snapshot_retention_minutes` | 15 | Origin snapshot lifetime, ≤15; must exceed `release_seconds*(delay_epochs+1)` in seconds. |
+| `public_activity.daily_summary_retention_days` | 30 | Protected summary lifetime, ≤30 days. |
+| `notifications.nearby_gati_count` / `nearby_arrival_count` | 50 / 50 | Large-nearby alert thresholds, both must be public bucket boundaries. |
+| `notifications.nearby_radius_km` | 5 | Proposed alert distance, 1–20 km; not participants' travel-radius setting. |
+| `notifications.push_min_interval_seconds` | 300 | Proposed minimum push gap, at least queue TTL. |
+| `notifications.push_max_per_hour` | 6 | Proposed maximum pushes per handle/hour, 1–60. |
+| `notifications.queue_ttl_seconds` | 300 | Proposed queued update lifetime, 1–300 seconds. |
+| `notifications.area_follow_max_hours` | 24 | Proposed temporary follow lifetime, 1–24 hours. |
+
+All integer fields are positive and ≤1,000,000 unless tighter bounds or the explicit
+zero-neighbor exception above apply. Simulation lowers some publication/activation
+floors but does not enable these unfinished features. Avoid interpreting the nearby
+50 threshold as today's activation threshold: the implemented JEMI GATI threshold
+is `matching.activation_count` (20 normal, 3 current simulator).
