@@ -678,3 +678,17 @@ personal participant information. Default functionality works without push. No r
 Git push or public deployment occurred. Broader follows/daily summaries, hardening,
 100k benchmark, production deployment and independently verified release/audit remain
 incomplete. Preserve unrelated untracked commands.txt.
+
+## Predeployment testing review — 2026-09-13
+
+Reviewed current test sources, configuration, recorded usability evidence and the
+remaining hardening/performance/release gates in response to the user's question.
+Proposed additional work is in PREDEPLOYMENT_TEST_PLAN.md: isolated real end-to-end
+journeys, crash/replica recovery, overnight expiry/churn, real-time load, fuzz/privacy
+probes, browser/device/human checks and independent build/audit rehearsal. Pilot
+monitoring should use bounded service-health metrics and existing protected releases,
+with no participant tracking or synthetic contributions to real gathering counts.
+No new test executions, implementation changes or deployment occurred in this review.
+The next recommended local batch is test isolation, failure recovery and retention
+soak/fuzzing. Live push contact/device verification remains unresolved separately;
+it does not block these local checks. Preserve commands.txt.
