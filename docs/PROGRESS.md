@@ -825,3 +825,27 @@ imported packages. The previously documented advisory in an unused required modu
 remains; it is not silently omitted. All owned lab processes exited and tracked
 changes pass `git diff --check`. Next local testing priority: realistic-lifetime
 full-API churn and direct matching/expiry-lag evidence before reference-host sizing.
+
+## Architecture explanation and 1M estimate — 2026-09-13
+
+User requested a scaling/memory assessment and visual architecture explanation.
+Reviewed current code/configuration and existing monitored 100k samples; added
+ARCHITECTURE.md and editable Graphviz DOT with rendered SVG/PDF. The diagram
+separates current Compose components from optional monitoring/push and planned
+Caddy/edge deployment. README links the explanation.
+
+As configured, admission caps at 150k. The 500/s write budget, increasing-offset
+population scans, one matching writer, background offer budget, publication capture
+and cleanup backlog require further scale work. Offset traversal cost was checked
+against official Valkey documentation. No 1M run or behavior/configuration change
+occurred. The approximately 3–6 GiB combined Go/Valkey allowance at 1M is explicitly
+an uncertain extrapolation for willingness-heavy, push-disabled traffic on the same
+Tirana map, not measured capacity or a memory upper bound. Actual 100k baseline,
+peak values and projection arithmetic are documented.
+
+Validation: rendered SVG/PDF with existing Graphviz 2.43.0, visually inspected the
+layout, checked SVG XML/PDF header, local document links and git diff whitespace.
+No runtime test rerun was needed for these documentation/vector-only changes.
+Next scaling action remains a bounded larger lab benchmark with representative
+lifetimes/mixed traffic and direct matching/publication/expiry-lag measurement,
+preceded by review of the identified scan/backlog bottlenecks. Preserve commands.txt.

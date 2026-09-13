@@ -1,0 +1,39 @@
+digraph GATI {
+  graph [rankdir=TB, bgcolor="#fff8f3", pad="0.35", nodesep="0.45", ranksep="0.65", fontname="DejaVu Sans", fontsize=22, fontcolor="#352c31", label="GATI  |  current architecture", labelloc=t, compound=true];
+  node [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#baa5ae", fontname="DejaVu Sans", fontsize=12, fontcolor="#352c31", margin="0.22,0.16", penwidth=1.3];
+  edge [color="#963754", fontname="DejaVu Sans", fontsize=10, fontcolor="#66515b", arrowsize=0.75, penwidth=1.3];
+
+  subgraph cluster_device {
+    label="PARTICIPANT'S DEVICE"; fontsize=13; color="#baa5ae"; style=rounded;
+    device [label="One-shot device location\nExact coordinates stay on the device", fillcolor="#f4e8e6"];
+    client [label="Albanian web app / PWA\nTypeScript + MapLibre\n100 m coarsening; temporary capability\nWillingness, commitment, arrival and aggregate map", fillcolor="#f4e8e6"];
+    device -> client [label="coarsen locally"];
+  }
+
+  subgraph cluster_local {
+    label="CURRENT LOCAL SERVICE  |  Docker Compose"; fontsize=14; color="#baa5ae"; style=rounded;
+    web [label="Web frontend server\nVite in local development\nServes app assets; proxies /api"];
+    api [label="ONE GO EXECUTABLE\nHTTP API: capabilities, deadlines, rate limits\nPrivate actions, invitations and previews\nPublic config + maps; delayed 1 km aggregate cells\n\nBACKGROUND TASKS IN THE SAME PROCESS\nMatching + arrival reconciliation\nDelayed publishing + expiry/index cleanup\nOptional push; leases coordinate replicas", fillcolor="#fcf0eb"];
+    valkey [shape=cylinder, label="PRIVATE VALKEY  |  RAM only\nTemporary signals, capability hashes, indexes\nGatherings, arrivals, nonces and leases\nOptional encrypted push bindings / retry state\nPrecomputed, delayed public releases\nTTL + cleanup; persistence and participant backups OFF", fillcolor="#eaf0eb", color="#69816e"];
+    web -> api [label="same-origin /api proxy"];
+    api -> valkey [label="private reads + atomic Lua transitions", color="#69816e"];
+
+  }
+
+  assets [shape=note, label="AUDITABLE INPUT FILES\nconfig/gati.yaml\nPinned Tirana crossroads + road geometry\nFirst-party maps; no live geocoder", fillcolor="#f1eee9"];
+  monitor [label="OPTIONAL PRIVATE MONITORING\nOwner-only Unix socket, no TCP metrics port\nPython collector: bounded health + CPU/RSS\nSuppressed request buckets; no participant labels", fillcolor="#f1eee9"];
+  provider [label="OPTIONAL EXTERNAL WEB PUSH\nBrowser/OS provider delivers minimal update\nUser opt-in; expiring subscription\nDisabled in the default configuration", style="rounded,filled,dashed", fillcolor="#f1eee9"];
+  future [label="PLANNED DEPLOYMENT FRONT DOOR\nCaddy / HTTPS and optional public edge cache\nOnly public assets/releases may be shared-cached\nDeployment wiring and edge tests remain", style="rounded,filled,dashed", fillcolor="#f1eee9"];
+  lab [shape=note, label="SEPARATE LOCAL TEST LAB\nOwn disposable API + Valkey; synthetic people only\nTirana simulations, real-clock load, browser/fault tests\nMonitoring reports + reproducible-build checks", fillcolor="#f1eee9"];
+
+  client -> web [label="coarse cell + radius + availability\ncapability in Authorization header", dir=both];
+  assets -> api [label="rules + map / crossroad data", color="#baa5ae"];
+
+  api -> monitor [label="fixed operational summaries", style=dashed, constraint=false];
+  api -> provider [label="encrypted, bounded delivery", style=dashed, constraint=false];
+  provider -> client [label="optional update; app rechecks live state", style=dashed, constraint=false];
+  valkey -> future [style=invis];
+  valkey -> lab [style=invis];
+
+
+}

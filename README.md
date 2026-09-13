@@ -82,3 +82,5 @@ Private destination preview before a map join and clearer waiting/offline/arriva
 guidance are implemented. Previewing or cancelling a preview never enrolls you.
 
 Additional local validation: [automated testing and monitored load](docs/AUTOMATED_TESTING.md), [private operational monitoring](docs/MONITORING.md). These checks create disposable synthetic stores and do not deploy the app.
+
+[System architecture, diagram and 1M-signal estimate](docs/ARCHITECTURE.md) distinguishes measured 100k evidence from untested scaling assumptions.
