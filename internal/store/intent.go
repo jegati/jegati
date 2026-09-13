@@ -44,7 +44,7 @@ return cjson.encode(s)
 
 // SetIntent requires geographic reachability checked against the immutable claim
 // and the frozen gathering. Lua revalidates both claims, cutoffs and live state.
-func (s *Store) SetIntent(ctx context.Context, hash, gathering, action, cell string, radius, maxDeclines int, minimumMS, cooldownMS int64) (Signal, error) {
+func (s *Store) SetIntent(ctx context.Context, hash, gathering, action, cell string, radius float64, maxDeclines int, minimumMS, cooldownMS int64) (Signal, error) {
 	if action != "offer" && action != "going" && action != "decline" {
 		return Signal{}, errors.New("invalid intent")
 	}
@@ -88,7 +88,7 @@ redis.call('SET',KEYS[1],cjson.encode(s),'KEEPTTL')
 return cjson.encode(s)
 `)
 
-func (s *Store) CreateAndJoin(ctx context.Context, hash, cell string, radius, minutes, capacity int, g Gathering, minimumMS int64) (Signal, error) {
+func (s *Store) CreateAndJoin(ctx context.Context, hash, cell string, radius float64, minutes, capacity int, g Gathering, minimumMS int64) (Signal, error) {
 	raw, e := createAndJoin.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell, keyPrefix + "gathering:" + g.ID}, cell, radius, minutes, int64(minutes)*60000, capacity, hash+"|"+cell, hash, minimumMS, g.Intersection.ID).Text()
 	if e != nil {
 		return Signal{}, errors.New("joining unavailable")

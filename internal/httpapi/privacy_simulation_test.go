@@ -39,7 +39,7 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	defer backend.Client.Close()
 	backend.Client.Del(ctx, "gati-sim:worker:lease")
 	// Production thresholds/limits with the isolated store's controlled clock.
-	c, e := config.Load("../../config/gati.yaml", false)
+	c, e := config.Load("../config/testdata/default.yaml", false)
 	if e != nil {
 		t.Fatal(e)
 	}

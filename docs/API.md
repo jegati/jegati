@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 5, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 6, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |

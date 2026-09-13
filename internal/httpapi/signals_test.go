@@ -40,7 +40,7 @@ func TestRealWillingnessAPI(t *testing.T) {
 		t.Fatal(e)
 	}
 	defer backend.Client.Close()
-	c, e := config.Load("../../config/gati.yaml", false)
+	c, e := config.Load("../config/testdata/default.yaml", false)
 	if e != nil {
 		t.Fatal(e)
 	}

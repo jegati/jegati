@@ -14,7 +14,7 @@ func fixture(t *testing.T) (Planner, []Signal, int64) {
 	center := g.Center(c)
 	intersection := geography.Intersection{ID: "near", Point: center}
 	other := geography.Intersection{ID: "far", Point: geography.Point{center[0] + .01, center[1]}}
-	index, e := geography.NewIndex(g, []geography.Intersection{other, intersection}, []int{1, 3, 5})
+	index, e := geography.NewIndex(g, []geography.Intersection{other, intersection}, []float64{1, 3, 5})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -91,7 +91,7 @@ func TestMissingCommonIntersectionAndReservations(t *testing.T) {
 	if _, ok := p.Propose(now, signals, nil); ok {
 		t.Fatal("unavailable signals counted")
 	}
-	p.Index, _ = geography.NewIndex(p.Index.Grid, nil, []int{1, 3, 5})
+	p.Index, _ = geography.NewIndex(p.Index.Grid, nil, []float64{1, 3, 5})
 	for n := range signals {
 		signals[n].Assigned = false
 		signals[n].ReservedUntil = 0

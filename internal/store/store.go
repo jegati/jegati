@@ -35,7 +35,7 @@ type Signal struct {
 	GatheringUntil      int64           `json:"_gathering_until,omitempty"`
 	Declined            map[string]bool `json:"_declined,omitempty"`
 	Cell                string          `json:"cell"`
-	RadiusKM            int             `json:"radius_km"`
+	RadiusKM            float64         `json:"radius_km"`
 	AvailabilityMinutes int             `json:"availability_minutes"`
 	CreatedAt           int64           `json:"created_at"`
 	ExpiresAt           int64           `json:"expires_at"`
@@ -93,7 +93,7 @@ return s
 
 var create = newScript(createLua)
 
-func (s *Store) Create(ctx context.Context, hash, cell string, radius, minutes int, ttl time.Duration, capacity int) (Signal, error) {
+func (s *Store) Create(ctx context.Context, hash, cell string, radius float64, minutes int, ttl time.Duration, capacity int) (Signal, error) {
 	raw, err := create.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell}, cell, radius, minutes, ttl.Milliseconds(), capacity, hash+"|"+cell, hash).Text()
 	if err != nil {
 		return Signal{}, errors.New("temporary store write failed")

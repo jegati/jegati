@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jegati/jegati/internal/geography"
 	"io"
 	"os"
 	"reflect"
@@ -79,6 +80,12 @@ func shape(n *yaml.Node, t reflect.Type, path string) error {
 			}
 		} else {
 			want := "!!str"
+			if t.Kind() == reflect.Float64 {
+				if n.Kind != yaml.ScalarNode || (n.Tag != "!!int" && n.Tag != "!!float") {
+					return fmt.Errorf("%s: expected numeric radius", path)
+				}
+				return nil
+			}
 			if t.Kind() == reflect.Int {
 				want = "!!int"
 			}
@@ -179,8 +186,13 @@ func (c Config) Validate(allowSimulation bool) error {
 	if a.MinimumMinutes < 30 || a.MaximumMinutes > 120 || a.MinimumMinutes > a.MaximumMinutes || !ascending(a.ChoicesMinutes) || a.ChoicesMinutes[0] != a.MinimumMinutes || a.ChoicesMinutes[len(a.ChoicesMinutes)-1] != a.MaximumMinutes {
 		return errors.New("availability choices must span minimum/maximum within 30..120 minutes")
 	}
-	if !ascending(g.TravelRadiusChoicesKm) || g.TravelRadiusChoicesKm[len(g.TravelRadiusChoicesKm)-1] > 20 || g.CellSizeMeters < 500 || g.CellSizeMeters > 5000 {
+	if !slices.IsSorted(g.TravelRadiusChoicesKm) || g.TravelRadiusChoicesKm[len(g.TravelRadiusChoicesKm)-1] > 20 || g.CellSizeMeters < 100 || g.CellSizeMeters > 5000 {
 		return errors.New("geographic configuration outside supported bounds")
+	}
+	for i, radius := range g.TravelRadiusChoicesKm {
+		if !geography.ValidRadius(radius) || (i > 0 && radius <= g.TravelRadiusChoicesKm[i-1]) {
+			return errors.New("radii must increase in 0.1 km increments within 0.1..20 km")
+		}
 	}
 	if g.LocationMaxAccuracyMeters > g.CellSizeMeters/2 || g.LocationFixMaxAgeSeconds < 5 || g.LocationFixMaxAgeSeconds > 120 {
 		return errors.New("device location quality bounds violated")

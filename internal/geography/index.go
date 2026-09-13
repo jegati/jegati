@@ -20,7 +20,7 @@ type Dataset struct {
 }
 type ParticipantArea struct {
 	Cell     Cell
-	RadiusKM int
+	RadiusKM float64
 }
 type Index struct {
 	Grid          Grid
@@ -28,7 +28,7 @@ type Index struct {
 	reachable     map[ParticipantArea][]int
 }
 
-func NewIndex(g Grid, intersections []Intersection, radii []int) (*Index, error) {
+func NewIndex(g Grid, intersections []Intersection, radii []float64) (*Index, error) {
 	if len(intersections) > 100000 || len(radii) == 0 || len(radii) > 32 {
 		return nil, errors.New("geography index outside bounds")
 	}
@@ -45,7 +45,7 @@ func NewIndex(g Grid, intersections []Intersection, radii []int) (*Index, error)
 	for y := 0; y < g.Rows; y++ {
 		for x := 0; x < g.Columns; x++ {
 			for _, r := range radii {
-				if r <= 0 || r > 20 {
+				if !ValidRadius(r) {
 					return nil, errors.New("invalid radius")
 				}
 				key := ParticipantArea{Cell{x, y}, r}

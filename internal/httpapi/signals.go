@@ -29,9 +29,9 @@ type signalAPI struct {
 	store  *store.Store
 }
 type createRequest struct {
-	Cell                string `json:"cell"`
-	RadiusKM            int    `json:"radius_km"`
-	AvailabilityMinutes int    `json:"availability_minutes"`
+	Cell                string  `json:"cell"`
+	RadiusKM            float64 `json:"radius_km"`
+	AvailabilityMinutes int     `json:"availability_minutes"`
 }
 
 func capability(r *http.Request) (string, error) {

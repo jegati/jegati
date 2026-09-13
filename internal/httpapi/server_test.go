@@ -13,7 +13,7 @@ import (
 )
 
 func TestPublicConfigIsCanonicalAndNoTracking(t *testing.T) {
-	c, err := config.Load("../../config/gati.yaml", false)
+	c, err := config.Load("../config/testdata/default.yaml", false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestPublicConfigIsCanonicalAndNoTracking(t *testing.T) {
 	}
 }
 func TestNoParticipantOrSimulationEndpoints(t *testing.T) {
-	c, err := config.Load("../../config/gati.yaml", false)
+	c, err := config.Load("../config/testdata/default.yaml", false)
 	if err != nil {
 		t.Fatal(err)
 	}

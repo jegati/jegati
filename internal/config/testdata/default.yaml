@@ -1,6 +1,6 @@
-# Rejected by normal builds; only -tags simulation permits this profile.
+# Public functional settings. No secrets. See docs/CONFIGURATION.md.
 schema_version: 6
-profile: simulation
+profile: production
 availability:
   minimum_minutes: 30
   choices_minutes: [30, 60, 90, 120]
@@ -13,7 +13,7 @@ geography:
   intersection_dataset: tirana-intersections-v1
 matching:
   invitation_cooldown_seconds: 60
-  activation_count: 3
+  activation_count: 20
   activation_stability_seconds: 10
   maximum_debounce_seconds: 2
   reconciliation_seconds: 10
@@ -25,21 +25,21 @@ matching:
   maximum_gathering_minutes: 60
   late_join_min_remaining_minutes: 5
 arrivals:
-  confirmation_count: 2
+  confirmation_count: 10
   confirmation_stability_seconds: 10
   freshness_minutes: 15
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:
-  minimum_count: 3
-  count_buckets: [3, 5, 10, 20, 50]
-  release_seconds: 10
+  minimum_count: 20
+  count_buckets: [20, 50, 100, 250, 500, 1000]
+  release_seconds: 300
   delay_epochs: 1
   snapshot_retention_minutes: 15
   daily_summary_retention_days: 30
 notifications:
-  nearby_gati_count: 5
-  nearby_arrival_count: 5
+  nearby_gati_count: 50
+  nearby_arrival_count: 50
   nearby_radius_km: 5
   foreground_poll_seconds: 30
   push_min_interval_seconds: 300

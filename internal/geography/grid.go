@@ -39,7 +39,7 @@ type Grid struct {
 type Cell struct{ X, Y int }
 
 func NewGrid(size int) (Grid, error) {
-	if size < 500 || size > 5000 {
+	if size < 100 || size > 5000 {
 		return Grid{}, errors.New("unsupported grid size")
 	}
 	dy := float64(size) / (orb.EarthRadius * degrees)
@@ -90,4 +90,9 @@ func (g Grid) MaxDistance(c Cell, p Point) float64 {
 	minLat := g.South + float64(c.Y)*g.LatStep
 	radius := 6400000 * degrees * math.Hypot(g.LatStep/2, g.LonStep/2*math.Cos(minLat*degrees))
 	return Distance(g.Center(c), p)*(6400000/orb.EarthRadius) + radius
+}
+
+// ValidRadius keeps fractional kilometres canonical at 100-metre increments.
+func ValidRadius(r float64) bool {
+	return finite(r) && r >= .1 && r <= 20 && math.Abs(r*10-math.Round(r*10)) < 1e-9
 }

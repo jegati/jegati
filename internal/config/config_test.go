@@ -9,7 +9,7 @@ import (
 
 func source(t *testing.T) string {
 	t.Helper()
-	b, e := os.ReadFile("../../config/gati.yaml")
+	b, e := os.ReadFile("../config/testdata/default.yaml")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -43,7 +43,7 @@ func TestInvalidConfigurations(t *testing.T) {
 		{"missing section", "availability:", "missing_availability:"},
 		{"null", "activation_count: 20", "activation_count: null"},
 		{"quoted number", "activation_count: 20", "activation_count: \"20\""},
-		{"unsupported schema", "schema_version: 5", "schema_version: 99"},
+		{"unsupported schema", "schema_version: 6", "schema_version: 99"},
 		{"simulation build guard", "profile: production", "profile: simulation"},
 		{"unknown profile", "profile: production", "profile: public"},
 		{"minimum under 30", "minimum_minutes: 30", "minimum_minutes: 15"},
@@ -123,7 +123,7 @@ func TestSimulationAndIndependentThresholdConfiguration(t *testing.T) {
 	}
 }
 func FuzzDecode(f *testing.F) {
-	b, _ := os.ReadFile("../../config/gati.yaml")
+	b, _ := os.ReadFile("../config/testdata/default.yaml")
 	f.Add(string(b))
 	f.Add("")
 	f.Add("profile: null")
@@ -136,4 +136,18 @@ func FuzzDecode(f *testing.F) {
 			c.Canonical()
 		}
 	})
+}
+
+func TestFractionalRadiiAndFineGrid(t *testing.T) {
+	text := strings.ReplaceAll(source(t), "[1, 3, 5]", "[0.1, 0.5, 1, 3]")
+	text = strings.ReplaceAll(text, "cell_size_meters: 1000", "cell_size_meters: 100")
+	text = strings.ReplaceAll(text, "location_max_accuracy_meters: 100", "location_max_accuracy_meters: 50")
+	if _, err := Decode(strings.NewReader(text), false); err != nil {
+		t.Fatal(err)
+	}
+	for _, bad := range []string{"[0.1, 0.1]", "[0.15, 1]", "[.nan, 1]", "[0, 1]", "[\"0.1\", 1]"} {
+		if _, err := Decode(strings.NewReader(strings.ReplaceAll(text, "[0.1, 0.5, 1, 3]", bad)), false); err == nil {
+			t.Fatalf("accepted %s", bad)
+		}
+	}
 }

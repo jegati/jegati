@@ -247,3 +247,14 @@ has narrower availability/radius choices than the application schema. Previous
 population reports remain willingness-only; fixed integration tests are separate.
 Corrected obsolete SIMULATION.md wording that implied activation/arrival app code
 had not landed. Validation: source/config cross-check and git diff --check.
+
+## 3,000-person simulation implementation — in progress
+
+User increased the main population to 3,000 and authorized current settings:
+activation 30, arrivals 20, radius choices 0.1/0.5/1/3 km, plus support for 100 m
+cells. Current grid remains the user's 1,000 m setting; short radii cannot reach
+any destination under the conservative whole-cell rule. Decision 0005 records
+this distinction, finer-grid exposure, and a possible explicit comparison.
+Schema 6 adds fractional radii/100 m grid support. Regression config fixtures are
+now separate from the user's editable operating config. Simulation actor/event
+work is ongoing; no completed 3,000-person result is claimed yet.

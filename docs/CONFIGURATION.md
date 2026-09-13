@@ -1,7 +1,7 @@
 # Functional configuration
 
 `config/gati.yaml` is the complete production-default document. `internal/config`
-is its authoritative typed schema and validation policy (schema version 5).
+is its authoritative typed schema and validation policy (schema version 6).
 Every field is required, including explicit zero/false values. Unknown or duplicate
 keys, aliases, nulls, coercion from strings to numbers, extra documents and files
 above 64 KiB are rejected. No field accepts credentials or external URLs.
@@ -69,3 +69,12 @@ attest hardware, prevent spoofing or make the coarse server claim trustworthy.
 For field-by-field defaults, accepted choices and current runtime effects, see
 [MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md). In particular,
 `matching.intersection_index_batch_size` currently has no matcher consumer.
+
+Schema 6 accepts travel radii as finite numeric kilometres in 0.1 km increments
+from 0.1 to 20, and cells from 100 to 5,000 m. Existing whole-kilometre configurations
+remain valid after the schema version update. Store, API, matching and client
+restoration preserve fractional values. The current requested gati.yaml settings
+are 30 willing credentials, 20 arrivals and radii [0.1,0.5,1,3], with 1,000 m cells.
+A short radius does not override the whole-cell conservative distance test.
+Small cells increase location exposure; see decision 0005. Test fixtures no longer
+read the developer-editable gati.yaml as immutable regression defaults.

@@ -45,7 +45,7 @@ func TestConservativeRadiusAndNearestSharedIntersection(t *testing.T) {
 	cell := Cell{4, 4}
 	center := g.Center(cell)
 	candidates := []Intersection{{ID: "node/2", Point: Point{center[0] + 0.001, center[1]}}, {ID: "node/1", Point: center}, {ID: "node/3", Point: Point{center[0] + 0.01, center[1]}}}
-	idx, e := NewIndex(g, candidates, []int{1, 3})
+	idx, e := NewIndex(g, candidates, []float64{1, 3})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -73,12 +73,12 @@ func TestConservativeRadiusAndNearestSharedIntersection(t *testing.T) {
 	if _, ok := idx.Closest([]ParticipantArea{{cell, 1}, {Cell{g.Columns - 1, g.Rows - 1}, 1}}); ok {
 		t.Fatal("incompatible group matched")
 	}
-	empty, _ := NewIndex(g, nil, []int{1})
+	empty, _ := NewIndex(g, nil, []float64{1})
 	if _, ok := empty.Closest([]ParticipantArea{{cell, 1}}); ok {
 		t.Fatal("invented missing intersection")
 	}
 	// Exact same public map point: stable identifier resolves the tie.
-	idx, _ = NewIndex(g, []Intersection{{ID: "node/b", Point: center}, {ID: "node/a", Point: center}}, []int{1})
+	idx, _ = NewIndex(g, []Intersection{{ID: "node/b", Point: center}, {ID: "node/a", Point: center}}, []float64{1})
 	chosen, _ = idx.Closest([]ParticipantArea{{cell, 1}})
 	if chosen.ID != "node/a" {
 		t.Fatal("unstable tie")
@@ -97,12 +97,38 @@ func TestCheckedInDataset(t *testing.T) {
 		t.Fatal("invalid provenance")
 	}
 	g, _ := NewGrid(1000)
-	idx, e := NewIndex(g, data.Intersections, []int{1, 3, 5})
+	idx, e := NewIndex(g, data.Intersections, []float64{1, 3, 5})
 	if e != nil {
 		t.Fatal(e)
 	}
 	center, _ := g.CellAt(Point{19.818, 41.327})
 	if len(idx.Reachable(ParticipantArea{center, 3})) == 0 {
 		t.Fatal("central Tirana fixture has no reachable intersection")
+	}
+}
+
+func TestHundredMeterCellsAndFractionalRadii(t *testing.T) {
+	g, err := NewGrid(100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, _ := g.CellAt(Point{19.818, 41.327})
+	center := g.Center(c)
+	idx, err := NewIndex(g, []Intersection{{ID: "near", Point: center}, {ID: "far", Point: Point{center[0] + .003, center[1]}}}, []float64{.1, .5, 1, 3})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !idx.CanReach(ParticipantArea{c, .1}, "near") || idx.CanReach(ParticipantArea{c, .1}, "far") || !idx.CanReach(ParticipantArea{c, .5}, "far") {
+		t.Fatal("fractional radius boundary broken")
+	}
+	coarse, _ := NewGrid(1000)
+	cc, _ := coarse.CellAt(center)
+	if coarse.MaxDistance(cc, coarse.Center(cc)) <= 100 {
+		t.Fatal("a 100m radius must not be satisfied by a 1km cell center")
+	}
+	for _, r := range []float64{0, .01, .15, 20.1} {
+		if ValidRadius(r) {
+			t.Fatal("unsupported radius accepted")
+		}
 	}
 }
