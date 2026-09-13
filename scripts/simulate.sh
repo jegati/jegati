@@ -61,7 +61,9 @@ for _ in {1..2400};do
   sleep .05
 done
 if [[ "$ready" != 1 ]];then printf "Simulation API readiness timed out.\n";exit 1;fi
-bin/gati-simulate -target "http://127.0.0.1:$api_port" -scenario "simulation/scenarios/${SCENARIO:-tirana-evening}.yaml" -seed "${SEED:-42}" -output "$run_output"
+seed_args=()
+if [[ -n "${SEED:-}" ]]; then seed_args=(-seed "$SEED"); fi
+bin/gati-simulate -target "http://127.0.0.1:$api_port" -scenario "simulation/scenarios/${SCENARIO:-tirana-evening}.yaml" "${seed_args[@]}" -output "$run_output"
 
 kill "$api_pid";wait "$api_pid";api_pid=""
 if [[ "${INTEGRATION_CHECKS:-1}" == 1 ]]; then

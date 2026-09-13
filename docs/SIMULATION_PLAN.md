@@ -3,17 +3,18 @@
 Status: implementation authorized and underway, 2026-09-13. The user increased
 the main population from 300 to 3,000 and selected their current configuration.
 See SIMULATION.md and PROGRESS.md for implemented commands and validation.
-The design and effort estimates below preserve the original proposal.
+The design below incorporates that correction; original effort estimates remain
+planning estimates, not a measurement of coding-agent elapsed time.
 This takes priority over continuing milestone 09. Existing commands and evidence
 are in SIMULATION.md; product settings are explained in MATCHING_PARAMETERS.md.
 
-## What exists and what is missing
+## Implemented scope and remaining limits
 
-The repository already has the actual Tirana road extract, 6,491 eligible road
-junctions, coarse grid, real API/matcher, isolated memory-only Valkey, a simulation
-clock, seeded population generator and standalone synthetic map report. The current
-population runner submits willingness/retries/cancellations and advances straight
-to expiry. It does not follow population invitations, decisions or journeys.
+The response runner now drives willingness, decisions, journeys, arrival/retraction,
+late admission, cancellation and expiry through the actual Tirana API. It uses the
+archived 6,491-junction map, isolated memory-only Valkey, scheduled virtual worker,
+seeded weighted population, real network budgets and standalone timeline replay.
+See SIMULATION.md for runnable commands and PROGRESS.md for validation state.
 
 Separate API integration tests cover continuous activation, going/decline, late
 admission, arrival replay, JEMI KËTU and expiry. Thirteen existing browser checks
@@ -30,7 +31,7 @@ not demographic or attendance estimates for Tirana.
 
 ## First experiment and scenario matrix
 
-Start with 3,000 synthetic people over two simulated hours, joining at unaligned
+Start with 3,000 synthetic people over three simulated hours, joining at unaligned
 moments during the first hour. An illustrative distribution is 40% central Tirana,
 25% near the lake, 20% northwest and 15% elsewhere within the supported rectangle.
 Reuse existing cluster centers, make their centers/spread/weights explicit, and
@@ -38,7 +39,7 @@ validate all generated points against the service boundary. Match only with the
 imported crossroads and actual conservative coarse-cell radius calculation.
 
 Availability distribution: 30/60/90/120 minutes with weights 40/35/15/10%.
-Travel radii: 1/3/5 km with weights 25/50/25%. Initial invitation outcomes:
+Travel radii: 0.1/0.5/1/3 km with equal 25% weights, matching the user’s config. Initial invitation outcomes:
 60% accept, 25% decline, 15% ignore; 80% of accepters attempt arrival. Response delay
 is sampled between 5 and 90 seconds. Conditional no-shows and cancellations are
 separate from declining. Begin with scripted guaranteed-success cases before
@@ -46,11 +47,11 @@ interpreting stochastic results. Compare seeds 42, 43 and 44 for each city scena
 
 | Scenario | Population/timing | What to observe |
 | --- | --- | --- |
-| Typical mixed evening | 300, weighted clusters, arrivals spread over 60 minutes | Time to invitation, selected crossroads, unmatched areas, going-to-arrival conversion |
-| Sparse city | 100 across the rectangle/outskirts, mostly 1 km | Honest no-match outcomes, radius exclusions, expiry without pressure |
-| Dense hotspot | 600, strong central cluster with a 10-minute enrollment burst | Stable founding, late admission into existing gatherings, duplicate/competing destinations, admission rejection |
-| Low follow-through | Same 300-person input as evening, 25% accept and 40% of accepters arrive | JEMI GATI without JEMI KËTU; willingness never treated as attendance |
-| Churn and late responses | 300 with cancellations and delayed newcomers | Stability resets; late admission before/after JEMI KËTU; cutoff/expiry and JO TANI retention |
+| Typical mixed evening | 3,000, weighted clusters, arrivals spread over 60 minutes | Time to invitation, selected crossroads, unmatched areas, going-to-arrival conversion |
+| Sparse city | 100 on the outskirts, same radius distribution | Honest no-match outcomes, radius exclusions, expiry without pressure |
+| Dense hotspot | 3,000, strong central cluster with a 10-minute enrollment burst | Stable founding, late admission into existing gatherings, duplicate/competing destinations, admission rejection |
+| Low follow-through | Same 3,000-person input distribution as evening, 25% accept and 40% of accepters arrive | JEMI GATI without JEMI KËTU; willingness never treated as attendance |
+| Churn and late responses | 3,000 with cancellations and delayed newcomers | Stability resets; late admission before/after JEMI KËTU; cutoff/expiry and JO TANI retention |
 | Geographic/time boundaries | Small constructed cohorts, then mixed 200-person case | 30-minute minimum, cell edges, unreachable crossroads, near-cutoff arrival and location-quality failures |
 
 Add targeted hostile/network cases: one crowded NAT, distributed networks, replayed
@@ -83,11 +84,11 @@ response policy and journey parameters. Use the actual API for every state chang
    bounded links and no surviving logical participation. Remove the disposable store.
 
 The bulk simulation drives API actors; it does not validate device-service origin.
-A small Playwright sample (about 6–10 journeys) uses the real client with mocked
-browser geolocation, including denial/poor accuracy, taking no real GPS fixes and
-adding no manual-location option to the product. Align the test browser clock and
-mocked fix timestamps with server virtual time so age/deadline checks stay meaningful.
-Keep screenshots/replays synthetic.
+The existing 13 Playwright checks exercise the real client with mocked device
+geolocation, including denial/poor accuracy and the full gathering flow. They use
+the normal real-time API, separately from accelerated bulk actors. A standalone
+replay browser test verifies the exported map/slider without external requests.
+No real GPS fix or manual-location product option is used.
 
 Advance virtual time through scheduled actions AND worker/poll/expiry deadlines;
 do not jump over ten-second stability intervals. Give simultaneous enrollments a
@@ -100,27 +101,19 @@ Record source/map/config hashes, seed, clock mode and input/output hashes.
 
 ## Configuration and network controls
 
-Application decisions and human assumptions are separate inputs. Leave
-config/gati.yaml unchanged. Add a simulation-only profile mirroring production
-behavior (activation 20, arrivals 10, normal timing/radii). Compare it explicitly
-with production config, with any network-budget differences listed in the report.
-Retain the existing 3/2 threshold profile for small deterministic regressions.
+Application decisions and human assumptions are separate inputs. The population
+runner validates and snapshots current config/gati.yaml, changing only the profile
+to simulation. `SIM_CONFIG` selects an explicit alternative. Baseline thresholds:
+30 willing / 20 arrivals, radii 0.1/0.5/1/3 km, cells 1,000 m. Retain the existing
+3/2 profile for small deterministic regressions. The explicit 100 m comparison
+also lowers maximum reported device error to 50 m; it does not change the baseline.
 
-The current runner hardcodes config/simulation.yaml; add an explicit validated
-simulation-config argument before claiming alternative profiles are selectable.
-The implemented actor limit is now 10,000, with a 30,000-credential worst-case bound
-for response simulations. Current requested thresholds are 30 willing / 20 arrivals,
-with 0.1/0.5/1/3 km radii. The baseline retains 1,000 m cells.
-
-All current HTTP actors share one real network budget: 60 creation requests/minute
-(including retries). Their virtual clock does NOT advance real abuse windows. An
-instant 600-person run would mostly test that limit. The new harness must distinguish:
-
-- Behavior runs with declared multiple loopback source addresses/network groups and
-  bounded real request pacing. Use actual TCP peer addresses, not trusted fake
-  forwarding headers. Verify the baseline is not accidentally limiter-dominated.
-- Shared-NAT/abuse runs with original budgets and measured accepted/rejected traffic.
-  Keep these separate from claims about city matching or human independence.
+The actor limit is 10,000, with a 30,000-credential worst-case bound for response
+simulations. Main behavior runs use 256 actual loopback peers and pace writes at
+200/second, preserving application budgets. No forwarding headers bypass limits.
+Shared-network/abuse runs use one peer and report rejections separately. The
+virtual clock never advances real rate windows. A crowded-NAT control therefore
+measures the creation budget, not inability to form geographically compatible groups.
 
 Do not disable production controls or add production test-network overrides. If a
 fast functional run needs larger simulation-only budgets, expose the full diff and
@@ -142,19 +135,20 @@ Measure:
   observed, accept/decline/ignore, arrival attempted/accepted/rejected and expiries.
 - Backend activation time versus participant-observed wait (median/p95, plus counts
   still unmatched at the end; no percentile calculated from an empty sample).
-- Gathering count, time to JEMI KËTU, no-show ratio among accepters, late-join success,
+- Gathering count, observed time to JEMI KËTU, planned no-show events, late-join success,
   active/fresh arrival trajectories and cancellation effects.
 - Distance/travel-time estimates, selected intersection/source IDs, unreachable or
   late attempts, coarse-grid false negatives relative to synthetic exact geometry.
-- Matched fraction by scenario area/radius/availability; repeated invitations and
+- Matched fraction by scenario area/radius (availability-stratified reporting is a follow-up); repeated invitations and
   ignored people, reporting small synthetic groups only in the isolated report.
 - Missed compatible groups using a small independent exhaustive oracle on bounded
   fixtures. City-wide heuristics get a clearly labeled diagnostic, not a claim of
   globally optimal allocation based on the same planner that is being tested.
 - Wall runtime and broad memory/resource measurements, distinct from simulated
-  duration. This 100–600-person suite cannot establish 100k production capacity.
+  duration. This 100–3,000-person suite cannot establish 100k production capacity.
 
-Use paired inputs/seeds to compare activation thresholds 10/20/30 and arrival
+Follow-up experiments, after reviewing the requested current-config baseline:
+use paired inputs/seeds to compare activation thresholds 10/20/30 and arrival
 thresholds 10/15/20 in separate one-factor sweeps. Do not run every cross-product
 initially. Follow with targeted radius choices and 30/60-second polling comparisons.
 Do not quietly adopt whichever settings yield the most gatherings: report waiting,
@@ -179,7 +173,7 @@ including checks/report inspection).
 
 For the new suite, initially budget **30–90 minutes** of machine execution and
 inspection for 18 runs (six city scenarios × three seeds), after implementation.
-Calibrate this with the first 100/300-person runs; report actual times before
+Calibrate this with the success control and 3,000-person runs; report actual times before
 expanding sweeps. Real-time validation takes its actual scheduled duration; fast
 clock results are not load benchmarks. Broad performance regressions or structural
 matching fixes would be estimated separately if the experiments expose them.

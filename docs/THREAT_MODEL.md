@@ -1,7 +1,7 @@
 # Initial threat model and evidence index
 
-Status: initial threat design plus milestone 02 scaffold evidence. Willingness lifecycle, limited network/write admission and service ACLs are implemented;
-activation/arrival/publication controls remain planned. See STORAGE.md and API.md. See the
+Status: willingness, private activation/arrival, limited network/write admission
+and service ACLs are implemented; public aggregate publication remains planned. See STORAGE.md and API.md. See the
 [scaffold report](reports/02-scaffold.md) for config validation, API headers and
 simulation-profile rejection tests. Keep this document updated as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
 defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.
@@ -33,7 +33,7 @@ anonymous to network providers or its operator.
 | Provider correlates requests | First-party assets, no app access logs, optional generic push | Browser network capture and provider inventory; network/provider visibility remains |
 | Browser compromise steals capabilities | No third-party scripts, CSP, bounded client storage, header-only secrets | Browser security/network/storage tests; compromised device outside guarantee |
 | Build/deployment differs from source | Pinned build inputs, signatures/hashes, independent rebuild and host inspection | Artifact comparison and scoped audit; remote version claim is not proof |
-| Simulation reaches production | Separate origin/target allowlist, production excludes control routes | Config build guard and scaffold route tests passed (internal/config, internal/httpapi, scripts/smoke.sh); population-tool destination checks remain future work |
+| Simulation reaches production | Separate origin/target allowlist, production excludes control routes | Config build guard and scaffold route tests passed (internal/config, internal/httpapi, scripts/smoke.sh); population driver also refuses production profiles/nonloopback/redirect targets before writes |
 
 ## Evidence rules
 
@@ -53,7 +53,8 @@ anonymous to network providers or its operator.
 ### Implemented browser boundary (milestone 05)
 
 The client requests location only after an explicit one-shot action, quantizes it
-using the published grid, and sends only a cell ID. Manual map choice is supported.
+using the published grid, and sends only a cell ID. Manual map choice was removed
+in schema 5; the current client requires device location.
 No runtime map/font provider, analytics, cookies, localStorage or service worker
 is used. Same-origin sessionStorage contains one capability, coarse request,
 confirmation flag and deadline; retries reuse it without renewal, cancellation
@@ -132,3 +133,24 @@ reported quality. The server has no authenticated evidence of GPS, a person's
 location or unique humanity. Removing manual entry does not repair the collusion
 counterexample. W3C describes device position and accuracy estimates, not physical
 presence attestation: https://www.w3.org/TR/geolocation/.
+
+### Population simulation evidence and finer cells (schema 6)
+
+The response harness accepts only an isolated simulation profile and declared
+loopback peers, drives the real admission/arrival checks and preserves application
+rate budgets. Reports distinguish synthetic people, accepted credentials, unique
+actors and repeated response/claim events. Injected gathering discovery does not
+prove unfinished public-map or notification behavior. Functional clock advances
+cannot bypass real abuse windows. A crowded-network control makes their exclusion
+cost visible; distributed Sybil resistance remains unresolved.
+
+Fractional radii and optional 100 m cells are supported. Smaller cells reveal more
+precise participant areas, and thresholding still provides no formal anonymity.
+The current 1,000 m baseline cannot match 0.1/0.5 km radii under conservative whole-
+cell reachability. See decision 0005 and the population findings report.
+
+The dense experiment exposed a real ten-minute rate-secret rollover race. Secret
+creation/read is now atomic using Valkey time. Real-store tests cover epoch-boundary
+expiry and concurrent API replicas, without storing raw addresses or adding logs.
+Secrets retain the existing bounded ten-minute lifecycle. These local controls do
+not establish protection from an upstream DoS or privileged operator observation.

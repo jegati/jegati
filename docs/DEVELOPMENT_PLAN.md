@@ -68,7 +68,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 ### Willingness
 
-- Defaults to evaluate in simulation: duration choices 30/60/90/120 minutes, with a minimum of 30 minutes, travel radius 1/3/5 km, approximately 1 km cells. These are tunable hypotheses, not privacy-certified numbers.
+- Defaults to evaluate in simulation: duration choices 30/60/90/120 minutes, with a minimum of 30 minutes, travel radius 0.1/0.5/1/3 km, approximately 1 km cells; schema 6 also supports explicit 100 m-cell comparisons. These are tunable hypotheses, not privacy-certified numbers.
 - The client generates a cryptographically random capability of at least 256 bits. Only its hash is stored; send the capability in an authorization header, never a URL. Client credentials must be cleared on cancellation/expiry while the client runs and rechecked immediately on reopening; a closed browser cannot execute a cleanup timer. No automatic session renewal or permanent browser ID. Explain that browser backups and a compromised device are outside server deletion guarantees.
 - Store coarse cell, radius bucket, server timestamps, deadline, temporary state and optional current gathering reference. Derive everything else where possible. One active signal per capability; renewing creates a fresh session after the old session ends. Multiple devices or browser resets can still create multiple credentials.
 - Validate supported geography, enum choices, schema sizes, expiry and replay atomically. A server-generated deadline is authoritative.
@@ -87,7 +87,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 ### JEMI GATI and joining an ongoing gathering
 
-- Suggested activation threshold: 20 eligible live signals, continuously eligible for 10 seconds. A timer triggers validation at the stability deadline; falling below threshold or losing a common destination resets the timer. On activation, store the triggering decision and configuration/map versions, not a permanent membership history. Under healthy load the processing target is within 5 seconds after stability completes; notification transport adds its own delay.
+- Current activation threshold: 30 eligible live signals, continuously eligible for 10 seconds. A timer triggers validation at the stability deadline; falling below threshold or losing a common destination resets the timer. On activation, store the triggering decision and configuration/map versions, not a permanent membership history. Under healthy load the processing target is within 5 seconds after stability completes; notification transport adds its own delay.
 - Set `gathering.ends_at = min(activation_time + maximum_lifetime_minutes, earliest founding signal deadline)`, initially capped at 60 minutes. All founding signals have at least the configured 15 minutes remaining at activation. Late arrivals never extend this deadline. Show the destination, remaining time and **PO, PO SHKOJ** / **JO TANI**. Activation records a threshold reached, not a promise of continuing attendance.
 - Give an existing compatible open gathering priority over forming a competing one. Offer it to newly GATI users and eligible nearby/area followers. A late participant needs sufficient remaining availability and a reachable destination; they need not have been present at activation. Gatherings already in **JEMI KËTU** remain joinable until their admission cutoff.
 - A notification or public aggregate gathering card can open the join flow. Someone without an active willingness session chooses duration (minimum 30 minutes), radius and coarse area, then presses **PO, PO SHKOJ**; atomically create their expiring capability/session and admit it. Someone with an active session reuses it. Viewing a card or receiving a notification does not count as willingness, going or arrival.
@@ -100,13 +100,13 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 - A going user can request a one-use, short-lived arrival nonce for their currently admitted gathering, whether admission occurred before or after activation. Require a fresh one-shot location fix, convert it locally to the allowed coarse arrival cell, and send the cell and nonce. Never use background tracking.
 - Check gathering deadline, prior going state, nonce lifetime/replay, admitted membership and allowed arrival cells. Reject insufficient location accuracy locally; do not upload accuracy or exact coordinates. Manual area selection works for willingness but cannot substitute for the arrival location check.
-- Atomically accept at most one arrival per admitted capability. Issue **JEMI KËTU** after a proposed 10 fresh accepted arrival claims stable for a configurable 10 seconds, evaluated continuously with deadline timers. Public map publication still needs the stricter public threshold. Repeat arrivals, duplicate requests and worker retries must not inflate counts.
+- Atomically accept at most one arrival per admitted capability. Issue **JEMI KËTU** after the currently configured 20 fresh accepted arrival claims stable for a configurable 10 seconds, evaluated continuously with deadline timers. Public map publication still needs the stricter public threshold. Repeat arrivals, duplicate requests and worker retries must not inflate counts.
 - A location-spoofing client or Sybil attacker can pass these checks. Nonces prevent replay, not spoofing. Name this limitation in the acceptance report.
 - An arrival claim is fresh for 15 minutes or until the gathering ends, whichever comes first. Do not silently refresh it. Public labels describe a recent confirmation window, not continuous occupancy. Allow retraction; it affects future releases only.
 
 ### Central functional configuration
 
-Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching and notification behavior consuming these settings remains future work.
+Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching/arrival behavior is implemented; public notification subscriptions remain future work. See MATCHING_PARAMETERS.md for active versus reserved settings.
 
 ```yaml
 profile: production
@@ -256,24 +256,64 @@ proposed sketch, not a currently accepted scenario file.
 Version-controlled scenario parameters (proposed):
 
 ```yaml
-city: tirana
-seed: 42
-population: 1000
-duration_minutes: 180
-distribution: clustered # also uniform, sparse, single_hotspot
-availability_minutes: [30, 60, 90, 120]
-radius_km: [1, 3, 5]
-going_probability: 0.55
-arrival_probability_given_going: 0.65
-cancellation_probability: 0.15
-arrival_delay_minutes: [2, 15]
-location_error_meters: 300
-sybil_fraction: 0.0
-duplicate_request_fraction: 0.02
-offline_fraction: 0.10
-clock_speed: 20 # functional simulation only
-# Explicit weights, grid, intersection map version, thresholds, timing and
-# boundary policies are inherited from config/gati.yaml (planned).
+# Public functional settings. No secrets. See docs/CONFIGURATION.md.
+schema_version: 6
+profile: production
+availability:
+  minimum_minutes: 30
+  choices_minutes: [30, 60, 90, 120]
+  maximum_minutes: 120
+geography:
+  location_max_accuracy_meters: 100
+  location_fix_max_age_seconds: 60
+  cell_size_meters: 1000
+  travel_radius_choices_km: [0.1, 0.5, 1, 3]
+  intersection_dataset: tirana-intersections-v1
+matching:
+  invitation_cooldown_seconds: 60
+  activation_count: 30
+  activation_stability_seconds: 10
+  maximum_debounce_seconds: 2
+  reconciliation_seconds: 10
+  minimum_remaining_minutes: 15
+  intersection_index_batch_size: 500
+  candidate_batch_size: 100
+  destination_rule: nearest_eligible_crossroad_to_coarse_group_center
+  prefer_open_gatherings: true
+  maximum_gathering_minutes: 60
+  late_join_min_remaining_minutes: 5
+arrivals:
+  confirmation_count: 20
+  confirmation_stability_seconds: 10
+  freshness_minutes: 15
+  nonce_seconds: 120
+  allowed_cell_neighbor_rings: 0
+public_activity:
+  minimum_count: 20
+  count_buckets: [20, 50, 100, 250, 500, 1000]
+  release_seconds: 300
+  delay_epochs: 1
+  snapshot_retention_minutes: 15
+  daily_summary_retention_days: 30
+notifications:
+  nearby_gati_count: 50
+  nearby_arrival_count: 50
+  nearby_radius_km: 5
+  foreground_poll_seconds: 30
+  push_min_interval_seconds: 300
+  push_max_per_hour: 6
+  queue_ttl_seconds: 300
+  area_follow_max_hours: 24
+limits:
+  arrival_requests_per_signal_window: 20
+  max_declines_per_signal: 32
+  max_body_bytes: 1024
+  network_window_seconds: 60
+  requests_per_network_window: 3000
+  new_signals_per_network_window: 60
+  global_writes_per_second: 500
+  max_active_signals: 150000
+  cleanup_batch_size: 1000
 ```
 
 Include city center clusters, Lake Park, sparse outskirts, radius/grid boundaries, incompatible availability, willingness without going, going without arrival, late joins before/after JEMI KËTU, follower-to-participant admission, duplicate and expired join links, decline while remaining GATI, arbitrary-minute 30-minute availability, threshold stability/reset, nearest-intersection ties, unreachable nearest intersection, missing intersections, map updates, destination stability under late joins, expiry before threshold, replayed/spoofed arrivals, NAT-shared users, Sybil bursts, notification failure, worker restart, cache staleness and complete store loss. Synthetic traffic must never contact a production endpoint: enforce a loopback/explicit test-target allowlist and separate development credentials.

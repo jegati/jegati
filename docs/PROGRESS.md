@@ -295,3 +295,10 @@ The baseline seed-42 repeat has identical complete functional JSON/timelines aft
 excluding only wall runtime, sampled driver heap and source build metadata.
 Canonical functional SHA-256:
 `f9141abd66bc40039ba48131ddab20ac98404b28da460182312a69295c69c13a`.
+
+Report tooling now accepts empty gathering results, compares complete functional
+reports, respects a scenario's seed unless explicitly overridden, and archives
+failed runs on suite resume. Added a shared-network diagnostic and CI success/replay
+checks. Updated the parameter reference and original plan to schema 6/current
+settings. `make verify-local`, the real-store rollover checks and the 80-person
+success control passed. Final resumed suite and post-fix browser validation follow.

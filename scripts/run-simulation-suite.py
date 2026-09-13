@@ -6,23 +6,44 @@ parser.add_argument('--output',default='reports/local/tirana-suite')
 parser.add_argument('--config',default='config/gati.yaml')
 parser.add_argument('--seeds',type=int,nargs='+',default=[42,43,44])
 parser.add_argument('--jobs',type=int,choices=[1,2,3],default=3)
+parser.add_argument('--resume',action='store_true',help='recheck completed runs and archive/retry failed runs using the saved config')
 args=parser.parse_args()
 if len(args.seeds)>10 or any(s<0 for s in args.seeds): parser.error('use at most ten nonnegative seeds')
 root=pathlib.Path(args.output);root.mkdir(parents=True,exist_ok=True)
-if (root/'requested-config.yaml').exists(): parser.error('choose a new output directory to preserve the previous experiment')
-(root/'requested-config.yaml').write_bytes(pathlib.Path(args.config).read_bytes())
+previous={}
+attempt=str(time.time_ns())
+if args.resume:
+    if not (root/'requested-config.yaml').exists(): parser.error('resume requires an existing suite config snapshot')
+    if (root/'summary.json').exists():
+        previous={(r['scenario'],r['seed']):r for r in json.loads((root/'summary.json').read_text())}
+        (root/f'summary-before-resume-{attempt}.json').write_bytes((root/'summary.json').read_bytes())
+else:
+    if (root/'requested-config.yaml').exists(): parser.error('choose a new output directory, or use --resume to preserve and retry failures')
+    (root/'requested-config.yaml').write_bytes(pathlib.Path(args.config).read_bytes())
 cases=['tirana-population','tirana-sparse','tirana-dense','tirana-low-followthrough','tirana-churn','tirana-boundaries']
 def run(case,seed):
-    out=root/f'{case}-{seed}';out.mkdir()
+    out=root/f'{case}-{seed}'
+    reuse=args.resume and (out/'report.json').exists() and json.loads((out/'report.json').read_text()).get('status')=='completed'
+    if out.exists() and not reuse:
+        archive=root/'failed-attempts';archive.mkdir(exist_ok=True)
+        out.rename(archive/f'{case}-{seed}-{attempt}')
+    out.mkdir(exist_ok=True)
     start=time.monotonic()
-    with (out/'execution.log').open('w') as log:
-        result=subprocess.run(['make','simulate-population',f'SCENARIO={case}',f'SEED={seed}',f'OUTPUT={out}',f'SIM_CONFIG={root / "requested-config.yaml"}'],stdout=log,stderr=subprocess.STDOUT)
+    with (out/'execution.log').open('a' if reuse else 'w') as log:
+        if reuse:
+            log.write('\nRechecking completed evidence; simulation was not rerun.\n');log.flush()
+            result=subprocess.CompletedProcess([],0)
+        else:
+            result=subprocess.run(['make','simulate-population',f'SCENARIO={case}',f'SEED={seed}',f'OUTPUT={out}',f'SIM_CONFIG={root / "requested-config.yaml"}'],stdout=log,stderr=subprocess.STDOUT)
         if result.returncode==0:
             # Make supplies the pinned Node PATH for checks, too.
             result=subprocess.run(['make','check-population',f'REPORT={out / "report.json"}'],stdout=log,stderr=subprocess.STDOUT)
     row={'scenario':case,'seed':seed,'status':'passed' if result.returncode==0 else 'failed','elapsed_seconds':round(time.monotonic()-start,2),'report':str(out.relative_to(root) / 'index.html')}
+    if reuse:
+        row['rechecked_completed_run']=True
+        row['elapsed_seconds']=previous.get((case,seed),{}).get('elapsed_seconds',row['elapsed_seconds'])
     if (out/'report.json').exists():
-        report=json.loads((out/'report.json').read_text());row.update(counts=report['counts'],config_sha256=report['config_sha256'],input_sha256=report['input_sha256'],wall_seconds=report['wall_seconds'])
+        report=json.loads((out/'report.json').read_text());row.update(counts=report['counts'],config_sha256=report['config_sha256'],input_sha256=report['input_sha256'],wall_seconds=report['wall_seconds'],source_revision=report['source_revision'])
     print(f'{case} seed {seed}: {row["status"]} ({row["elapsed_seconds"]} s)',flush=True)
     return row
 rows=[]

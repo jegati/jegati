@@ -15,8 +15,12 @@ assert.equal((c.arrivals_accepted || 0) + (c.arrivals_rejected || 0), c.arrival_
 assert.equal((c.direct_joins_accepted || 0) + (c.direct_joins_rejected || 0), c.direct_join_attempts || 0);
 assert.ok((c.credentials_invited || 0) <= c.credentials_accepted);
 assert.ok((c.gatherings_confirmed_observed || 0) <= (c.gatherings_observed || 0));
-assert.equal(r.gatherings.length, c.gatherings_observed || 0);
-for (const g of r.gatherings) { assert.ok(g.ends_at > g.activated_at); assert.ok(g.first_seen >= g.activated_at); }
+// Go encodes an unpopulated result slice as null; zero gatherings is a valid
+// sparse-population outcome, and must still satisfy the reported count.
+const gatherings = r.gatherings ?? [];
+assert.ok(Array.isArray(gatherings));
+assert.equal(gatherings.length, c.gatherings_observed || 0);
+for (const g of gatherings) { assert.ok(g.ends_at > g.activated_at); assert.ok(g.first_seen >= g.activated_at); }
 for (const f of r.frames) { const active = Object.values(f.cells).reduce((a,b)=>a+b,0); assert.ok(f.here <= f.going && f.going <= active); }
 assert.equal(Object.keys(r.frames.at(-1).cells).length, 0);
 assert.equal(r.frames.at(-1).here, 0);

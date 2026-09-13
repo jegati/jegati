@@ -116,3 +116,32 @@ not current occupancy. See reports/06-simulation.md for historical evidence.
 `make privacy-probe` remains a deliberately failing known-inference diagnostic.
 See [SIMULATION_PLAN.md](SIMULATION_PLAN.md) for the original experiment plan and
 [MATCHING_PARAMETERS.md](MATCHING_PARAMETERS.md) for application controls.
+
+## Reviewing and repeating experiments
+
+`SEED=...` overrides the scenario's `seed`; omitting it now respects the YAML.
+A suite uses seeds 42/43/44 explicitly. After correcting a failed check or code path:
+
+```sh
+python3 scripts/run-simulation-suite.py --output reports/local/my-suite --resume
+```
+
+Resume uses the suite's saved config, rechecks completed reports, and archives
+incomplete/failed runs under `failed-attempts/` before rerunning them. It preserves
+the previous summary. Reports record each run's source revision and binary hashes;
+a resumed suite can contain evidence from more than one revision. Never run two
+writers against the same output directory.
+
+To check exact functional repeatability (after `source scripts/env.sh`):
+
+```sh
+node scripts/compare-population.mjs path/to/first/report.json path/to/repeat/report.json
+```
+
+This compares full frames and metrics, excluding only wall runtime, sampled driver
+heap and source build metadata. Scenario/config/map/input differences still fail.
+The 120-person `tirana-shared-network` scenario deliberately exercises the unchanged
+creation budget. Check it with `node scripts/check-population.mjs path/to/report.json
+--allow-rate-limits`; rejected credentials must remain visible in its results.
+The small success control and standalone replay check are included in the CI
+workflow; a local pass does not assert that remote CI has executed.

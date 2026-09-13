@@ -19,6 +19,8 @@ jobs:
       - run: make test-store
       - run: make simulate
       - run: make simulate SCENARIO=tirana-sybil
+      - run: make simulate-population SCENARIO=tirana-success OUTPUT=reports/local/tirana-success
+      - run: node scripts/check-population.mjs reports/local/tirana-success/report.json --success
       - run: make verify-local COMPOSE='docker compose'
       - run: docker compose build
       - run: make secrets
@@ -30,5 +32,6 @@ jobs:
           make check-containers COMPOSE='docker compose'
       - run: cd web && npx playwright install --with-deps chromium
       - run: make test-browser
+      - run: cd web && npx playwright test --config=playwright.replay.config.ts
       - if: always()
         run: docker compose down

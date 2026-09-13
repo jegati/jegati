@@ -9,6 +9,7 @@ node_modules/
 web/dist/
 bin/
 coverage/
+__pycache__/
 .tmp/
 reports/local/
 *.test

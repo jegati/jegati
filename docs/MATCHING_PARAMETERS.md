@@ -1,17 +1,19 @@
 # Matching parameters: current implementation reference
 
-Checked against schema 5 and the implementation on 2026-09-13. Values below are
-current defaults, not recommended outcomes from the proposed experiments. Bounds
+Checked against schema 6 and the implementation on 2026-09-13. Values below are
+the current operating settings, not recommendations inferred from the experiments. Bounds
 are validation choices, not privacy guarantees. Cross-field checks can reject
 combinations even when each value is individually within its range.
 
 ## Where to configure
 
 - `config/gati.yaml`: normal local Compose/application functional settings.
-- `config/simulation.yaml`: current isolated simulator settings (activation 3,
-  arrival 2; most timing/geography defaults match the normal app).
-- `simulation/scenarios/tirana-evening.yaml` and `tirana-sybil.yaml`: existing
-  synthetic population/behavior inputs, not application matching policy.
+- `config/simulation.yaml`: small isolated regression settings (activation 3,
+  arrival 2), retained for legacy checks.
+- `config/simulation-population-100m.yaml`: explicit 100 m-cell / 50 m accuracy
+  comparison; the normal app is unchanged.
+- `simulation/scenarios/tirana-population.yaml`: 3,000-person behavior inputs;
+  see SIMULATION.md for the other scenarios. These are not application policy.
 - `internal/config/types.go` and `config.go`: authoritative field names/validation.
 - `GET /api/config`: running service's effective nonsecret config and SHA-256.
 
@@ -25,16 +27,17 @@ Gathering destinations/deadlines are frozen; use fresh isolated stores for each
 comparison. Grid/map/schema incompatibilities require the documented restart/drain
 policy, not reinterpretation of active records.
 
-`make simulate SCENARIO=tirana-evening SEED=42` is implemented. Currently it always
-loads config/simulation.yaml; Make's CONFIG variable does not change that runner.
-New behavior fields/profiles described in SIMULATION_PLAN.md are proposed, not
-accepted inputs yet. Unknown fields are rejected.
+`make simulate-population` validates and snapshots **current config/gati.yaml**,
+changing only the profile to simulation. Use `SIM_CONFIG=path/to/config.yaml`
+for an explicit comparison. `make simulate-suite CONFIG=path/to/config.yaml`
+runs six scenarios across three seeds. `make simulate` retains the small legacy
+profile. See SIMULATION.md for implemented commands and behavior fields.
 
 ## All fields under `matching`
 
-| Parameter | Normal / simulation default | Actual effect | Accepted choices / constraints |
+| Parameter | Normal / small regression setting | Actual effect | Accepted choices / constraints |
 | --- | --- | --- | --- |
-| `activation_count` | 20 / 3 | Size of stable founding cohort needed for JEMI GATI. Counts willing credentials, not promises or verified humans. Late joiners do not require another full cohort. | Normal 10–500; simulation 1–500; no greater than `limits.max_active_signals`. |
+| `activation_count` | 30 / 3 | Size of stable founding cohort needed for JEMI GATI. Counts willing credentials, not promises or verified humans. Late joiners do not require another full cohort. | Normal 10–500; simulation 1–500; no greater than `limits.max_active_signals`. |
 | `activation_stability_seconds` | 10 / 10 | Same eligible founding cohort must remain valid this long before activation. Cancellation/missing founder breaks it. | Positive integer; must fit remaining-availability constraint below. |
 | `maximum_debounce_seconds` | 2 / 2 | Current worker timer interval for checking matching/deadlines. A scheduling target, not a guaranteed maximum latency under load. | 1–5 seconds, no greater than reconciliation interval. |
 | `reconciliation_seconds` | 10 / 10 | Full eligibility reconciliation interval without a dirty event; also used for worker lease/recovery timing. Changes trigger earlier work. | 1–10 seconds, at least debounce interval. |
@@ -59,13 +62,20 @@ fairness algorithm. One credential is not one person.
 | Parameter | Current default | Effect and choices |
 | --- | --- | --- |
 | `availability.minimum_minutes` | 30 | Lowest user choice; cannot be below 30. Must equal first choices entry. |
-| `availability.choices_minutes` | `[30,60,90,120]` | Strictly increasing positive integer minute choices, 1–32 entries, within min/max. Actual app permits alternatives such as `[30,45,60]` when min/max agree. Existing simulator only accepts 30/60/90/120 until generalized. |
+| `availability.choices_minutes` | `[30,60,90,120]` | Strictly increasing positive integer minute choices, 1–32 entries, within min/max. Actual app permits alternatives such as `[30,45,60]` when min/max agree. Simulation choices must be accepted by the selected application config. |
 | `availability.maximum_minutes` | 120 | Highest user choice/session lifetime, at most 120; must equal last choice. |
-| `geography.travel_radius_choices_km` | `[1,3,5]` | User travel-distance choices: ascending positive integer km, up to 20, at most 32 entries. Existing simulator accepts only 1/3/5 until generalized. Uses conservative distance from the whole coarse cell, not walking distance or time. |
-| `geography.cell_size_meters` | 1000 | Nominal private geographic grid size, integer 500–5000. Larger cells conceal more precision but can exclude more radius matches. This changes IDs and the reachability index. |
+| `geography.travel_radius_choices_km` | `[0.1,0.5,1,3]` | Ascending finite values from 0.1 to 20 km in 0.1 km increments, at most 32 entries. Simulation choices must be present in the application config. Uses conservative distance from the whole coarse cell, not walking distance or time. |
+| `geography.cell_size_meters` | 1000 | Nominal private geographic grid size, integer 100–5000. Larger cells conceal more precision but can exclude more radius matches. This changes IDs and the reachability index. |
 | `geography.intersection_dataset` | `tirana-intersections-v1` | Installed road-junction dataset version; startup requires matching file version. Other versions require importing/installing reviewed data, not just changing a label. |
 | `geography.location_max_accuracy_meters` | 100 | Client rejects larger reported device errors; positive integer, at most half the configured nominal cell size. Accuracy estimate stays on-device. |
 | `geography.location_fix_max_age_seconds` | 60 | Client rejects stale fixes and expires an unused willingness fix before submission; allowed 5–120 seconds. No manual fallback. |
+
+With 1,000 m cells the whole-cell reachability rule excludes every 0.1/0.5 km
+choice: the cell's uncertainty already exceeds that radius. Setting the cell size
+to 100 m also requires `location_max_accuracy_meters` to be at most 50. Finer cells
+reveal a more precise area, increase index cost, and still exclude some short-radius
+matches. Radius and cell size are separate controls. See decision 0005 and the
+population report; do not interpret device accuracy as proof of presence.
 
 Changing age/accuracy limits does not prevent spoofed device/API claims. Production
 UI always obtains location from the device. Synthetic API actors bypass that UI;
@@ -73,9 +83,9 @@ mocked-browser tests separately exercise the actual client quality checks.
 
 ## Arrival confirmation (`arrivals`)
 
-| Parameter | Normal / simulation default | Effect and choices |
+| Parameter | Normal / small regression setting | Effect and choices |
 | --- | --- | --- |
-| `confirmation_count` | 10 / 2 | Accepted fresh arrival credentials required for JEMI KËTU; normal 10–500, simulation 1–500. Independent of willingness activation count. |
+| `confirmation_count` | 20 / 2 | Accepted fresh arrival credentials required for JEMI KËTU; normal 10–500, simulation 1–500. Independent of willingness activation count. |
 | `confirmation_stability_seconds` | 10 / 10 | Same valid arrival cohort must survive this interval; positive and strictly shorter than freshness and late-join remaining time. |
 | `freshness_minutes` | 15 / 15 | Maximum life of an arrival claim, further capped by session/gathering end; 1–15 minutes. No automatic claim renewal. |
 | `nonce_seconds` | 120 / 120 | Maximum arrival challenge lifetime; 1–120 seconds and strictly less than freshness. Replays cannot increase/refresh attendance. |
@@ -85,7 +95,7 @@ mocked-browser tests separately exercise the actual client quality checks.
 
 | Parameter under `limits` | Default | Effect / bounds |
 | --- | --- | --- |
-| `new_signals_per_network_window` | 60 | Creation request budget per network window, including retries; positive, no greater than request budget. One localhost simulator currently shares this budget. |
+| `new_signals_per_network_window` | 60 | Creation request budget per network window, including retries; positive, no greater than request budget. Population runs declare multiple real loopback peers; a one-group run shares this budget. |
 | `requests_per_network_window` | 3000 | Total authenticated request budget per network window; positive integer ≤1,000,000. |
 | `network_window_seconds` | 60 | Abuse-counter window, 1–600 real seconds. Fake clock advancement does not advance it. |
 | `global_writes_per_second` | 500 | Global write request budget; positive ≤1,000,000. Not a measured sustainable throughput. |
@@ -122,4 +132,4 @@ All integer fields are positive and ≤1,000,000 unless tighter bounds or the ex
 zero-neighbor exception above apply. Simulation lowers some publication/activation
 floors but does not enable these unfinished features. Avoid interpreting the nearby
 50 threshold as today's activation threshold: the implemented JEMI GATI threshold
-is `matching.activation_count` (20 normal, 3 current simulator).
+is `matching.activation_count` (30 normal/population, 3 small regression profile).

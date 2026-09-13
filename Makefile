@@ -64,7 +64,7 @@ test-browser:
 
 .PHONY: simulate
 simulate:
-	SCENARIO="$(or $(SCENARIO),tirana-evening)" SEED="$(or $(SEED),42)" bash scripts/simulate.sh
+	SCENARIO="$(or $(SCENARIO),tirana-evening)" SEED="$(SEED)" bash scripts/simulate.sh
 
 .PHONY: privacy-probe
 # Reproducing the counterexample is deliberately a failing privacy gate.
@@ -73,7 +73,7 @@ privacy-probe:
 
 .PHONY: simulate-population
 simulate-population:
-	SCENARIO="$(or $(SCENARIO),tirana-population)" SEED="$(or $(SEED),42)" SIM_CONFIG="$(or $(SIM_CONFIG),config/gati.yaml)" OUTPUT="$(or $(OUTPUT),reports/local/tirana-population-$(shell date -u +%Y%m%dT%H%M%S)-seed-$(or $(SEED),42))" INTEGRATION_CHECKS=0 bash scripts/simulate.sh
+	SCENARIO="$(or $(SCENARIO),tirana-population)" SEED="$(SEED)" SIM_CONFIG="$(or $(SIM_CONFIG),config/gati.yaml)" OUTPUT="$(or $(OUTPUT),reports/local/tirana-population-$(shell date -u +%Y%m%dT%H%M%S)-seed-$(or $(SEED),scenario))" INTEGRATION_CHECKS=0 bash scripts/simulate.sh
 
 .PHONY: check-population simulate-suite
 check-population:
