@@ -2,13 +2,19 @@
 package httpapi
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
+	"github.com/jegati/jegati/internal/geography"
+	"github.com/jegati/jegati/internal/store"
 	"net/http"
+	"time"
 
 	"github.com/jegati/jegati/internal/config"
 )
 
-func Handler(c config.Config) http.Handler {
+func Handler(c config.Config, backend *store.Store, roads []byte) http.Handler {
 	data, hash := c.Canonical()
 	envelope, _ := json.Marshal(struct {
 		SchemaVersion int             `json:"schema_version"`
@@ -16,6 +22,25 @@ func Handler(c config.Config) http.Handler {
 		Config        json.RawMessage `json:"config"`
 	}{config.SchemaVersion, hash, data})
 	mux := http.NewServeMux()
+	grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
+	signal := signalAPI{c, grid, backend}
+	mux.HandleFunc("POST /api/signals", signal.create)
+	mux.HandleFunc("GET /api/signal", signal.status)
+	mux.HandleFunc("DELETE /api/signal", signal.cancel)
+	mux.HandleFunc("GET /api/geography", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		json.NewEncoder(w).Encode(grid)
+	})
+	if len(roads) > 0 {
+		sum := sha256.Sum256(roads)
+		etag := fmt.Sprintf("\"%x\"", sum)
+		mux.HandleFunc("GET /api/map/roads", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/geo+json")
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+			w.Header().Set("ETag", etag)
+			http.ServeContent(w, r, "roads.geojson", time.Time{}, bytes.NewReader(roads))
+		})
+	}
 	mux.HandleFunc("GET /api/config", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.RawQuery != "" {
 			writeError(w, http.StatusBadRequest)
@@ -26,7 +51,7 @@ func Handler(c config.Config) http.Handler {
 	})
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.Write([]byte(`{"status":"ok","stage":"scaffold"}`))
+		w.Write([]byte(`{"status":"ok","stage":"willingness"}`))
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { writeError(w, http.StatusNotFound) })
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +59,7 @@ func Handler(c config.Config) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "no-referrer")
 		w.Header().Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
-		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead && !(r.Method == "POST" && r.URL.Path == "/api/signals") && !(r.Method == "DELETE" && r.URL.Path == "/api/signal") {
 			w.Header().Set("Allow", "GET, HEAD")
 			writeError(w, http.StatusMethodNotAllowed)
 			return

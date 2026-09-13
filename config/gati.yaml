@@ -1,5 +1,5 @@
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 1
+schema_version: 2
 profile: production
 availability:
   minimum_minutes: 30
@@ -43,3 +43,11 @@ notifications:
   push_max_per_hour: 6
   queue_ttl_seconds: 300
   area_follow_max_hours: 24
+limits:
+  max_body_bytes: 1024
+  network_window_seconds: 60
+  requests_per_network_window: 3000
+  new_signals_per_network_window: 60
+  global_writes_per_second: 500
+  max_active_signals: 150000
+  cleanup_batch_size: 1000

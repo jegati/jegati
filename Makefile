@@ -29,7 +29,7 @@ config-show:
 	go run ./cmd/gati -mode config-show -config "$(CONFIG)"
 config-check-simulation:
 	go run -tags simulation ./cmd/gati -mode config-check -config config/simulation.yaml
-dev:
+dev: secrets
 	$(COMPOSE) -f compose.yaml up --build
 dev-native:
 	bash scripts/dev-native.sh
@@ -49,3 +49,9 @@ map-import:
 	go run ./cmd/map-import
 map-check:
 	bash scripts/check-map.sh
+
+.PHONY: secrets test-store
+secrets:
+	python3 scripts/init-secrets.py
+test-store: secrets
+	bash scripts/test-store.sh

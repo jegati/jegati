@@ -1,9 +1,10 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 1
+const SchemaVersion = 2
 
 type Config struct {
+	Limits         Limits         `yaml:"limits" json:"limits"`
 	SchemaVersion  int            `yaml:"schema_version" json:"schema_version"`
 	Profile        string         `yaml:"profile" json:"profile"`
 	Availability   Availability   `yaml:"availability" json:"availability"`
@@ -66,4 +67,14 @@ type Notifications struct {
 	PushMaxPerHour         int `yaml:"push_max_per_hour" json:"push_max_per_hour"`
 	QueueTtlSeconds        int `yaml:"queue_ttl_seconds" json:"queue_ttl_seconds"`
 	AreaFollowMaxHours     int `yaml:"area_follow_max_hours" json:"area_follow_max_hours"`
+}
+
+type Limits struct {
+	MaxBodyBytes               int `yaml:"max_body_bytes" json:"max_body_bytes"`
+	NetworkWindowSeconds       int `yaml:"network_window_seconds" json:"network_window_seconds"`
+	RequestsPerNetworkWindow   int `yaml:"requests_per_network_window" json:"requests_per_network_window"`
+	NewSignalsPerNetworkWindow int `yaml:"new_signals_per_network_window" json:"new_signals_per_network_window"`
+	GlobalWritesPerSecond      int `yaml:"global_writes_per_second" json:"global_writes_per_second"`
+	MaxActiveSignals           int `yaml:"max_active_signals" json:"max_active_signals"`
+	CleanupBatchSize           int `yaml:"cleanup_batch_size" json:"cleanup_batch_size"`
 }

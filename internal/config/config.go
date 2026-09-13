@@ -215,6 +215,9 @@ func (c Config) Validate(allowSimulation bool) error {
 	if c.Profile == "production" && (m.ActivationCount < 10 || r.ConfirmationCount < 10 || p.MinimumCount < 20 || p.ReleaseSeconds < 300) {
 		return errors.New("production privacy floors violated")
 	}
+	if c.Limits.MaxBodyBytes > 4096 || c.Limits.NetworkWindowSeconds > 600 || c.Limits.CleanupBatchSize > 1000 || c.Limits.NewSignalsPerNetworkWindow > c.Limits.RequestsPerNetworkWindow {
+		return errors.New("abuse/cleanup configuration outside bounds")
+	}
 	return nil
 }
 

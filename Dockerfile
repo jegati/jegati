@@ -10,6 +10,7 @@ RUN CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags="-s -w" -o /gati .
 FROM scratch
 COPY --from=build /gati /gati
 COPY config/gati.yaml /config/gati.yaml
+COPY data/tirana/roads.geojson /data/tirana/roads.geojson
 USER 10001:10001
 EXPOSE 8080
 ENTRYPOINT ["/gati"]

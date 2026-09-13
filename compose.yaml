@@ -5,12 +5,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    command: ["-listen", "0.0.0.0:8080", "-config", "/config/gati.yaml", "-store-address", "valkey:6379", "-store-password-file", "/run/secrets/app-password"]
+    depends_on:
+      valkey:
+        condition: service_healthy
     ports: ["127.0.0.1:8080:8080"]
-    volumes: ["./config/gati.yaml:/config/gati.yaml:ro"]
+    volumes:
+      - ./config/gati.yaml:/config/gati.yaml:ro
+      - ./.runtime/app-password:/run/secrets/app-password:ro
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     logging: {driver: "none"}
+    ulimits:
+      core: 0
     networks: [frontend, backend]
   web:
     build:
@@ -26,15 +34,22 @@ services:
   valkey:
     image: valkey/valkey:9.1.2-alpine@sha256:a0dbf4c1d5708782907c10e2c72deff317518518b5288a58416981d9db95d30b
     command: ["valkey-server", "/etc/valkey/valkey.conf"]
-    volumes: ["./deploy/valkey.dev.conf:/etc/valkey/valkey.conf:ro"]
+    volumes:
+      - ./deploy/valkey.dev.conf:/etc/valkey/valkey.conf:ro
+      - ./.runtime/users.acl:/run/secrets/users.acl:ro
+      - ./.runtime/health-password:/run/secrets/health-password:ro
     tmpfs: ["/data:size=128m"]
+    mem_limit: 256m
+    memswap_limit: 256m
     read_only: true
     user: "999:999"
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     logging: {driver: "none"}
+    ulimits:
+      core: 0
     healthcheck:
-      test: ["CMD", "valkey-cli", "ping"]
+      test: ["CMD-SHELL", "VALKEYCLI_AUTH=$$(cat /run/secrets/health-password) valkey-cli --user health ping"]
       interval: 5s
       timeout: 2s
       retries: 5

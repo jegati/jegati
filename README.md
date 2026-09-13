@@ -8,9 +8,10 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-Milestone 02 is complete: a typed configuration loader, minimal Go API and
-Albanian client scaffold are implemented. Participation, matching, arrivals and
-maps are not implemented yet. The local Compose stack has passed runtime validation.
+Milestones 02–04 are complete: configuration, coarse Tirana geography and expiring
+willingness APIs are implemented and tested against real Valkey. The browser is
+still a preparation screen; its participation flow is the next milestone. Matching,
+arrivals, collective maps and notifications are not implemented yet.
 
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 

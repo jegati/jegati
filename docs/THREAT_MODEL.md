@@ -1,7 +1,7 @@
 # Initial threat model and evidence index
 
-Status: initial threat design plus milestone 02 scaffold evidence. Participant
-features and their protections are not implemented. See the
+Status: initial threat design plus milestone 02 scaffold evidence. Willingness lifecycle, limited network/write admission and service ACLs are implemented;
+activation/arrival/publication controls remain planned. See STORAGE.md and API.md. See the
 [scaffold report](reports/02-scaffold.md) for config validation, API headers and
 simulation-profile rejection tests. Keep this document updated as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
 defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.

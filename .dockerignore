@@ -9,3 +9,7 @@ coverage
 reports
 *.pem
 *.key
+
+.runtime
+data/tirana/source
+commands.txt

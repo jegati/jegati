@@ -69,7 +69,7 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 ### Willingness
 
 - Defaults to evaluate in simulation: duration choices 30/60/90/120 minutes, with a minimum of 30 minutes, travel radius 1/3/5 km, approximately 1 km cells. These are tunable hypotheses, not privacy-certified numbers.
-- The client generates a cryptographically random capability of at least 256 bits. Only its hash is stored; send the capability in an authorization header, never a URL. Local storage is strictly expiring and cleared on cancellation/expiry; no automatic session renewal or permanent browser ID. Explain that browser backups and a compromised device are outside server deletion guarantees.
+- The client generates a cryptographically random capability of at least 256 bits. Only its hash is stored; send the capability in an authorization header, never a URL. Client credentials must be cleared on cancellation/expiry while the client runs and rechecked immediately on reopening; a closed browser cannot execute a cleanup timer. no automatic session renewal or permanent browser ID. Explain that browser backups and a compromised device are outside server deletion guarantees.
 - Store coarse cell, radius bucket, server timestamps, deadline, temporary state and optional current gathering reference. Derive everything else where possible. One active signal per capability; renewing creates a fresh session after the old session ends. Multiple devices or browser resets can still create multiple credentials.
 - Validate supported geography, enum choices, schema sizes, expiry and replay atomically. A server-generated deadline is authoritative.
 

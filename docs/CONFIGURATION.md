@@ -1,7 +1,7 @@
 # Functional configuration
 
 `config/gati.yaml` is the complete production-default document. `internal/config`
-is its authoritative typed schema and validation policy (schema version 1).
+is its authoritative typed schema and validation policy (schema version 2).
 Every field is required, including explicit zero/false values. Unknown or duplicate
 keys, aliases, nulls, coercion from strings to numbers, extra documents and files
 above 64 KiB are rejected. No field accepts credentials or external URLs.
@@ -13,7 +13,8 @@ There are no clock-control or test routes in either scaffold build.
 
 Configuration values for matching, arrivals, aggregates and notifications are
 validated **future functional inputs**, not evidence that those features exist.
-At this milestone the server exposes configuration and health only. New features
+The server now implements willingness lifecycle and abuse-limit settings; activation,
+arrival, aggregate and notification settings still await their feature milestones. New features
 must use these values and add behavioral tests as they land.
 
 The public representation uses deterministic JSON field order and a SHA-256 hash
@@ -33,3 +34,8 @@ still applies. Changing a threshold does not change other independent thresholds
 Changing schema guardrails requires a visible code/doc review rather than an env
 variable bypass. Proposed geographic settings still require validation against
 actual crossing fixtures in milestone 03.
+
+Schema 2 adds a required `limits` section: body size, network window/request/create
+counts, global writes/second, active-signal capacity and cleanup batch size. Bounds
+are enforced before serving; every limit remains public and auditable. The defaults
+are starting controls, not evidence of effective Sybil resistance at production load.

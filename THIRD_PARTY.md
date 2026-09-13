@@ -16,3 +16,6 @@ Tirana public map data is now included under `data/tirana`, with OpenStreetMap
 attribution, ODbL-1.0 terms, a source manifest, archived input and reproducible import.
 See data/tirana/README.md. Geographic calculations use github.com/paulmach/orb
 (MIT); its exact version/checksum is pinned in go.mod/go.sum.
+
+Valkey access uses github.com/redis/go-redis/v9 (BSD-2-Clause), with pinned versions
+and transitive checksums in go.mod/go.sum. No client-side state caching is enabled.

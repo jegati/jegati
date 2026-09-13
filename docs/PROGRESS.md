@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–03 complete; next is expiring willingness.
+Updated: 2026-09-13. Status: milestones 02–04 complete; next is the Albanian willingness UI.
 
 ## Current task and authorization
 
@@ -19,7 +19,8 @@ is authorized, and GitHub authentication/write access remains unverified.
 - AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
 - Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API does not yet connect to Valkey.
 - Fixed coarse Tirana grid, public map import/provenance and static crossing reachability index.
-- No willingness, activation engine, arrival, map UI, notification or participant-storage code.
+- Expiring willingness APIs, replay tombstones, bounded indexes, rate limits and restricted ephemeral Valkey roles.
+- No activation engine, arrival, map UI or notification code yet.
   The configuration fields for those features describe future functional inputs.
 
 ## Milestone tracker
@@ -29,7 +30,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 01 — Product/threat boundaries | Documented | Requirements, plan, decision 0001, THREAT_MODEL |
 | 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
 | 03 — Coarse geography and crossing fixtures | Complete | 2,571 imported crossings, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
-| 04 — Expiring willingness | Not started | Capability API, restricted store credentials/ACLs, retention/index and replay tests |
+| 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
 | 05 — Albanian willingness UI | Not started | Duration/radius/coarse area participation flow and browser network inspection |
 | 06 — Seeded Tirana simulation | Not started | Isolated real-API driver and deterministic scenarios |
 | 07 — Continuous activation and late admission | Not started | Matching/timers/crosswalk selection, races and joining |
@@ -71,11 +72,24 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Implement milestone 04: restricted temporary Valkey storage, expiring capabilities,
-create/status/cancel APIs and meaningful real-store lifecycle tests. Docker Engine
+Implement milestone 05: Albanian duration/radius/coarse map selection, client
+capabilities, cancellation and browser privacy/accessibility checks. Docker Engine
 29.1.3 and Compose 5.5.1 are usable. Scaffold containers run on loopback.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
 rebuild needs no network. `make map-check` and geographic race tests passed.
 Keep updating this tracker with tests, failures and the next concrete action.
+
+## Milestone 04 evidence
+
+`make test-store` passed using a disposable Valkey (TTL, cleanup, concurrent retries,
+cancel/replay, rate counters, denied privileged commands and real HTTP validation).
+`make verify-local` passed race/unit/config/build/native smoke checks. Updated pinned
+Compose images built and the running stack passed `make check-containers` plus a
+synthetic create/status/cancel/410 check through Vite. Source secrets live only in
+ignored `.runtime/`; no values were printed. API schema and retention are documented
+in API.md/STORAGE.md. Configuration schema 2 adds public abuse/cleanup limits.
+
+Setup tests found/fixed a Redis client logger-interface mismatch and repeated ACL
+file write permissions. No current credential blocker remains.

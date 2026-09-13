@@ -102,3 +102,13 @@ to publisher index digests; schema parsing alone does not verify those image bui
 After starting the stack, `make check-containers` checks actual service health,
 configuration proxying and Valkey persistence/network/mount settings. These checks
 passed locally on 2026-09-13; remote CI and clean-host deployment remain separate.
+
+## Willingness storage tests
+
+`make secrets` creates local ignored service credentials without printing them;
+`make dev` performs this prerequisite automatically. `make test-store` starts a
+disposable synthetic-only Valkey with a random loopback port and removes it after
+the integration suite. It never runs the suite against your application database.
+The running Compose API now connects to private Valkey. `make dev-native` still
+starts a read-only shell with participant writes unavailable unless an explicit
+store address/password-file is supplied. Use Compose for the actual willingness API.

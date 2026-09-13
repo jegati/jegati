@@ -5,12 +5,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/jegati/jegati/internal/store"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -29,6 +31,9 @@ func run() error {
 	mode := flag.String("mode", "api", "api, config-check or config-show")
 	path := flag.String("config", "config/gati.yaml", "functional configuration path")
 	address := flag.String("listen", "127.0.0.1:8080", "HTTP bind address")
+	storeAddress := flag.String("store-address", "", "Valkey address (empty disables participant writes)")
+	passwordFile := flag.String("store-password-file", "", "mounted service password file")
+	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
 	flag.Parse()
 	if flag.NArg() != 0 {
 		return errors.New("unexpected positional arguments")
@@ -57,12 +62,47 @@ func run() error {
 	if err != nil {
 		return errors.New("cannot bind HTTP listener")
 	}
-	server := &http.Server{Handler: httpapi.Handler(c), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
+	var backend *store.Store
+	if *storeAddress != "" {
+		password, e := os.ReadFile(*passwordFile)
+		if e != nil {
+			return errors.New("cannot read store credential file")
+		}
+		backend, e = store.Connect(context.Background(), *storeAddress, "app", strings.TrimSpace(string(password)))
+		if e != nil {
+			return e
+		}
+		defer backend.Client.Close()
+	}
+	roads, e := os.ReadFile(*mapFile)
+	if e != nil {
+		return errors.New("cannot read public map asset")
+	}
+	server := &http.Server{Handler: httpapi.Handler(c, backend, roads), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 8192, ErrorLog: log.New(io.Discard, "", 0)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if backend != nil {
+		go func() {
+			ticker := time.NewTicker(time.Duration(c.Matching.ReconciliationSeconds) * time.Second)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					for i := 0; i < 10; i++ {
+						n, e := backend.Cleanup(ctx, c.Limits.CleanupBatchSize)
+						if e != nil || n < c.Limits.CleanupBatchSize {
+							break
+						}
+					}
+				}
+			}
+		}()
+	}
 	done := make(chan error, 1)
 	go func() { done <- server.Serve(listener) }()
-	fmt.Fprintln(os.Stdout, "GATI API scaffold started; no participant endpoints are implemented.")
+	fmt.Fprintln(os.Stdout, "GATI API started.")
 	select {
 	case err := <-done:
 		if !errors.Is(err, http.ErrServerClosed) {

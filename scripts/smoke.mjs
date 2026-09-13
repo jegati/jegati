@@ -19,15 +19,15 @@ let web;
 let startup = '';
 api.stdout.on('data', (chunk) => { startup += chunk; });
 try {
-  for (let i = 0; i < 100 && !startup.includes('scaffold started'); i++) {
+  for (let i = 0; i < 100 && !startup.includes('API started'); i++) {
     if (api.exitCode !== null) throw new Error('API exited before readiness');
     await delay(50);
   }
-  assert.ok(startup.includes('scaffold started'), 'API did not start');
+  assert.ok(startup.includes('API started'), 'API did not start');
   const base = `http://127.0.0.1:${port}`;
   const health = await fetch(`${base}/healthz`);
   assert.equal(health.status, 200);
-  assert.equal((await health.json()).stage, 'scaffold');
+  assert.equal((await health.json()).stage, 'willingness');
   const response = await fetch(`${base}/api/config`);
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('set-cookie'), null);

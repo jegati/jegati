@@ -13,3 +13,6 @@ coverage/
 reports/local/
 *.test
 *.out
+
+# Generated service secrets (never participant data)
+.runtime/

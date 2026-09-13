@@ -17,7 +17,7 @@ func TestPublicConfigIsCanonicalAndNoTracking(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := Handler(c)
+	h := Handler(c, nil, nil)
 	for _, target := range []string{"/api/config", "/healthz", "/missing"} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest("GET", target, nil))
@@ -47,7 +47,7 @@ func TestNoParticipantOrSimulationEndpoints(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := Handler(c)
+	h := Handler(c, nil, nil)
 	for _, target := range []string{"/api/signals", "/api/members", "/api/admin", "/api/simulation/clock"} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest("GET", target, nil))
