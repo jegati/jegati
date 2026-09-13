@@ -18,8 +18,10 @@ reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
 implemented. Delayed aggregate statistics and a cell-only public activity map now
 work locally, including explicit joining from map entries. Public cells default to
-1 km; private matching remains 100 m. Background push/follows are not implemented
-yet and will remain optional, chosen by the user. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
+1 km; private matching remains 100 m. Eligible users can preview a private destination
+before committing. [Optional background push](docs/NOTIFICATIONS.md) is implemented
+with temporary opt-in/resume and remains disabled by default; real provider/device
+verification and area follows remain. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
 include a 3,000-person response/journey driver, a standalone map replay,
 expiry/replay checks and smaller Sybil cases. Run `make simulate-population` using
 your current configuration, or `make simulate-suite` for a scenario comparison.

@@ -1,6 +1,6 @@
 # Matching parameters: current implementation reference
 
-Checked against schema 7 and the implementation on 2026-09-13. Values below are
+Checked against schema 8 and the implementation on 2026-09-13. Values below are
 the current operating settings, not recommendations inferred from the experiments. Bounds
 are validation choices, not privacy guarantees. Cross-field checks can reject
 combinations even when each value is individually within its range.
@@ -127,9 +127,9 @@ and the daily-summary retention remain validated plans, not implemented behavior
 | `public_activity.daily_summary_retention_days` | 30 | Planned protected summary lifetime, ≤30 days; summaries not implemented. |
 | `notifications.nearby_gati_count` / `nearby_arrival_count` | 50 / 50 | Large-nearby alert thresholds, both must be public bucket boundaries. |
 | `notifications.nearby_radius_km` | 5 | Proposed alert distance, 1–20 km; not participants' travel-radius setting. |
-| `notifications.push_min_interval_seconds` | 300 | Proposed minimum push gap, at least queue TTL. |
-| `notifications.push_max_per_hour` | 6 | Proposed maximum pushes per handle/hour, 1–60. |
-| `notifications.queue_ttl_seconds` | 300 | Proposed queued update lifetime, 1–300 seconds. |
+| `notifications.push_min_interval_seconds` | 300 | Minimum new-notification gap, at least queue TTL. |
+| `notifications.push_max_per_hour` | 6 | New-notification per-capability rate bound, 1–60; retries separately bounded. |
+| `notifications.queue_ttl_seconds` | 300 | Queued update lifetime, 1–300 seconds. |
 | `notifications.area_follow_max_hours` | 24 | Proposed temporary follow lifetime, 1–24 hours. |
 
 All integer fields are positive and ≤1,000,000 unless tighter bounds or the explicit
@@ -140,8 +140,8 @@ is `matching.activation_count` (30 normal/population, 3 small regression profile
 
 ## Optional Web Push configuration (schema 8)
 
-Delivery integration is in progress; the following typed settings are not yet a
-claim of working provider delivery. `push_enabled` defaults to false. `push_contact`
+Delivery is connected and tested with fake transport and browser fixtures; live
+provider/device interoperability remains unverified. See NOTIFICATIONS.md. `push_enabled` defaults to false. `push_contact`
 is the operator's public HTTPS/mailto contact, never a participant email; replace
 the localhost development placeholder before external use. `push_endpoint_hosts`
 is an exact DNS allowlist (no wildcards, URLs or IP literals). Default providers are
@@ -152,4 +152,6 @@ bounds simultaneous workers; `push_timeout_seconds` (5, max 10) bounds delivery;
 `push_max_attempts` (3, max 5) and `push_retry_seconds` (10, max 60) bound exponential
 retry attempts within `queue_ttl_seconds` (300 maximum). Existing
 `push_min_interval_seconds` and `push_max_per_hour` jointly set the minimum gap
-between newly queued notifications; opting out and back in cannot reset it.
+between new notifications: the default is max(300, ceil(3600/6)) = 600 seconds.
+Opting out and back in cannot reset it. A stable changed state waits for this gap
+before its queue TTL begins; intermediate states may coalesce.

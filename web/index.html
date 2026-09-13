@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#fff8f3" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>GATI 🦩 — Bëje vullnetin tënd të dukshëm.</title>
   </head>
   <body>
@@ -55,6 +56,14 @@
         <p>Mund ta mbyllësh gatishmërinë kur të duash.</p>
         <button id="retry" type="button" hidden>Provo përsëri</button>
         <button id="cancel" type="button">Mbyll gatishmërinë</button>
+      </section>
+      <section id="push-controls" hidden aria-label="Njoftimet opsionale">
+        <p class="hint">Njoftimet janë opsionale. Me aktivizimin, shfletuesi përdor ofruesin e tij të njoftimeve dhe ruan përkohësisht mundësinë për të rihapur gatishmërinë. Njoftimet nuk tregojnë vendin ose pjesëmarrësit.</p>
+        <p id="push-status" role="status"></p>
+        <button id="push-enable" type="button">Aktivizo njoftimet</button>
+        <button id="push-disable" type="button" hidden>Çaktivizo njoftimet</button>
+        <button id="push-recover" type="button" hidden>Rikthe gatishmërinë</button>
+        <button id="push-cancel-session" type="button" hidden>Mbyll gatishmërinë e mëparshme</button>
       </section>
       <section id="city-activity" aria-label="Aktiviteti në Tiranë">
         <h2>GATI në Tiranë</h2>

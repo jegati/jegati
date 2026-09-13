@@ -6,7 +6,7 @@ Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/d
 
 The user resumed implementation after documentation preparation. Installing needed
 tools, implementing/testing milestones and making incremental local commits are
-authorized. Docker access is now available; continue through the plan. No push or deployment
+authorized. Docker access is now available; continue through the plan. No remote Git push or public deployment
 is authorized, and GitHub authentication/write access remains unverified.
 
 ## Actual repository state
@@ -23,7 +23,8 @@ is authorized, and GitHub authentication/write access remains unverified.
 - Albanian willingness UI with first-party roads, required one-shot device location, expiring client capability and cancellation.
 - Continuous activation, late admission, going/decline and temporary arrivals are implemented.
   Delayed public cell maps and willingness/going/here statistics are implemented.
-  Background notification subscriptions and daily history remain future work.
+  Optional temporary background notifications are implemented with local fake-provider
+  and browser evidence; real provider/device verification and daily history remain.
 
 ## Milestone tracker
 
@@ -38,7 +39,7 @@ is authorized, and GitHub authentication/write access remains unverified.
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
 | 09 — Aggregate map/statistics | Current activity implemented; daily history remains | Cell-only delayed releases/API/cards/map, real-store and browser evidence below; inference accepted in decision 0007 |
-| 10 — Notifications and follows | In progress | Worker-side offers and foreground display implemented; optional push/subscriptions/fake sink/follows remain |
+| 10 — Notifications and follows | In progress | Worker-side offers, foreground display and temporary optional push/outbox/browser resume implemented; live provider/device verification and follows remain |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
 | 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
 | 13 — Deployment | Not started | Production stack, backup/restore/rollback and clean VM validation |
@@ -72,13 +73,15 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Continue USABILITY_IMPLEMENTATION_PLAN.md steps D–H: server-side offer discovery
-and optional push delivery/resume. Steps B/C (one-action willingness, waiting/recovery
-and private destination preview) are implemented. User selected review suggestions 1, 2, 3 and 5;
-sharing links/QR and new purpose copy are excluded. No native location verification
-is claimed. Prior statistics/map slice is implemented/tested; new work is not yet
-complete. Tools are installed and usable through scripts/env.sh. No new credential
-blocker for the first local milestones. Preserve all existing privacy bounds.
+USABILITY_IMPLEMENTATION_PLAN.md selections 1/2/3/5 are implemented locally:
+optional push, one-action willingness, private destination preview and clearer
+waiting/recovery. Final integration evidence is recorded below as it completes.
+Sharing links/QR (4) and new purpose copy (6) remain excluded. Default push stays
+off until the operator supplies a real public project/security-contact URL and
+provider/device delivery is tested. Local service keys already exist in ignored
+.runtime; no credentials should be posted in chat. No native location verification
+is claimed. Broader daily summaries, follows, deployment hardening, 100k benchmark
+and independently verified releases remain separate incomplete milestones.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -610,3 +613,39 @@ changes wait for the rate gap before starting queue TTL; otherwise the default
 including stale registration, quota preservation, stable post-gap presence and
 index cleanup while another long-lived subscription keeps the shared key alive.
 `make verify-local` passed. Browser lifecycle integration and final evidence follow.
+
+
+## Optional push browser and local integration — 2026-09-13
+
+Steps G/H now have local evidence: explicit permission/opt-in, first-party manifest
+and worker, temporary metadata-only IndexedDB resume, live-state fetch before generic
+Albanian display, no private response cache, and opt-out independent of willingness.
+Missing/denied push and a delayed optional configuration request do not block the
+first action. Provider/browser operations are bounded; late registration/cancellation
+callbacks cannot recreate the resume record. Reopening recovers the existing
+capability; uncertain recovery offers retry/cancel without enrolling again.
+
+All **28 browser tests passed** against the rebuilt local API and current built
+client: 19 participation/activity checks plus nine push lifecycle checks. The push
+suite uses full Chromium headless; CDP injects a PushEvent into the installed worker
+with the app page closed, exercising IndexedDB, private fetch and native generic
+notification display. Provider registration and delivery are synthetic fixtures;
+no live browser provider or real OS click was tested. Tests cover denial/unsupported,
+revocation, expiry, lost reply/idempotent retry, cancellation during registration,
+stale/forged push metadata, closed/reopened page and uncertain server recovery.
+
+A preliminary full-suite run timed out in the existing collective-arrival test and
+its cleanup obscured the failing step. A focused rerun passed; stage labels and
+bounded cleanup were added. The final full suite passed in 24.7 seconds. The
+original timeout's cause is unconfirmed; it is not counted as a passing run.
+The initial push reopen test also needed to wait for a visible recovered section
+before inspecting sessionStorage. Native persistent notifications worked in full
+Chromium, whereas the headless-shell variant rejected notification permission.
+
+`make verify-local`, `make test-store` (actual restricted Valkey/race, including HTTP
+stale-revision rejection), `make simulate` and `make check-containers` passed. Local
+API/web images were rebuilt; push remains off. Effective schema-8 config SHA-256:
+13aedb29ea15f34e845cd4234e124d1047397fc1cfc631d4fb162cbdf51503aa.
+The latest small browser cleanup timeout correction is tested by the final browser
+build; a final development web-image refresh and schema-8 3,000-person regression
+will follow. Setup, lifecycle and manual provider checks are in NOTIFICATIONS.md.

@@ -24,7 +24,7 @@ func TestPushBodyIsStrict(t *testing.T) {
 	if _, e := readPush(strings.NewReader(valid)); e != nil {
 		t.Fatal(e)
 	}
-	for _, body := range []string{valid + `{}`, strings.Replace(valid, `"auth":"a"`, `"auth":"a","auth":"b"`, 1), strings.Replace(valid, `"auth":"a"`, `"latitude":41.3`, 1), strings.Replace(valid, `"auth":"a"`, `"auth":null`, 1), strings.Replace(valid, `"expires_at":123`, `"expires_at":"123"`, 1), `[]`} {
+	for _, body := range []string{valid + `{}`, strings.Replace(valid, `"revision":0,`, ``, 1), strings.Replace(valid, `"auth":"a"`, `"auth":"a","auth":"b"`, 1), strings.Replace(valid, `"auth":"a"`, `"latitude":41.3`, 1), strings.Replace(valid, `"auth":"a"`, `"auth":null`, 1), strings.Replace(valid, `"expires_at":123`, `"expires_at":"123"`, 1), `[]`} {
 		if _, e := readPush(strings.NewReader(body)); e == nil {
 			t.Fatal("non-strict push body accepted")
 		}
@@ -126,6 +126,14 @@ func TestRealPushAPIOptInAndOptOut(t *testing.T) {
 	}
 	if _, e = backend.PushStatus(ctx, hash); e != store.ErrGone {
 		t.Fatal("opt-out retained delivery binding")
+	}
+	engine.Push = service
+	if stale := call("POST", "/api/push", "Bearer "+token, string(body), ""); stale.Code != 409 {
+		t.Fatal("late pre-opt-out registration was accepted", stale.Code)
+	}
+	status := call("GET", "/api/push", "Bearer "+token, "", "")
+	if !strings.Contains(status.Body.String(), `"revision":1`) || !strings.Contains(status.Body.String(), `"enabled":false`) {
+		t.Fatal("opt-out fence missing from private metadata")
 	}
 	current, e = backend.Status(ctx, hash)
 	if e != nil || current.State != "gati" {

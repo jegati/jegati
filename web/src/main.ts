@@ -7,6 +7,7 @@ maplibregl.setWorkerUrl(workerURL);
 import { polygon, type Grid } from './area';
 import * as sessions from './session';
 import { locateCell } from './location';
+import { PushController } from './push';
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const form = el<HTMLFormElement>('willingness'), active = el('active'), status = el('status');
@@ -25,6 +26,7 @@ function finish() { operations--; busy = operations > 0; render(); }
 let map: maplibregl.Map | undefined;
 let initialized = false;
 let activityView: ActivityView | undefined;
+let push: PushController | undefined;
 let preview: { candidate: sessions.Session; invitation: Invitation; expires: number; existing: boolean } | null = null;
 let previewMap: maplibregl.Map | undefined;
 let joinTarget: { id: string; ends_at: number } | null = null;
@@ -65,9 +67,9 @@ function invitationView() {
 }
 const message = (text: string) => { status.textContent = text; };
 function render() {
-  form.hidden = session !== null; active.hidden = session === null;
+  form.hidden = session !== null || !!push?.pendingResume; active.hidden = session === null;
   cancel.disabled = cancelling; retry.disabled = busy;
-  ready.disabled = busy || !initialized || !navigator.onLine;
+  ready.disabled = busy || !initialized || !navigator.onLine || !!push?.pendingResume;
   duration.disabled = busy; radius.disabled = busy;
   el<HTMLButtonElement>('join-back').disabled = busy;
   el('location-cancel').hidden = !locationRequest;
@@ -78,6 +80,7 @@ function render() {
   el('active-title').textContent = session?.confirmed ? (here ? 'JAM KËTU.' : 'JAM GATI.') : 'Po kontrollojmë gatishmërinë…';
   invitationView();
   activityView?.render();
+  push?.render();
   if (preview) {
     const expired = preview.expires <= Date.now();
     el<HTMLButtonElement>('public-join-confirm').disabled = busy || expired || !navigator.onLine;
@@ -89,6 +92,7 @@ function render() {
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
+  if (session) void push?.forget(session.token);
   closePreview(); locationRequest?.abort(); joinTarget = null; session = null; sessions.clear(); invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
   el('area-status').textContent = 'Vendndodhja ende nuk është marrë.';
@@ -265,6 +269,8 @@ async function start() {
   for (const km of config.geography.travel_radius_choices_km) radius.add(new Option(`${km} km`, String(km)));
   radius.value = String(config.geography.travel_radius_choices_km.includes(3) ? 3 : config.geography.travel_radius_choices_km[0]);
   el('nearby-area-description').textContent = `Në zonën publike ${config.public_activity.area_size_meters / 1000} km që përmban vendndodhjen e dhënë. Nuk është rrezja jote e udhëtimit.`;
+  push = new PushController(() => session, value => { if (!session) { session = value; sessions.save(value); if (initialized) { drawArea(value.request.cell); void sync(); } } }, render);
+  await push.initialize();
   initialized = true; render();
   try {
     map = new maplibregl.Map({ container: 'map', center: [19.818, 41.327], zoom: 12,
@@ -305,6 +311,7 @@ async function start() {
   message('');
   if (session) { drawArea(session.request.cell); await sync(); }
   setInterval(() => {
+    push?.tick();
     if (preview) render();
     if (joinTarget && joinTarget.ends_at <= Date.now()) { joinTarget = null; render(); }
     if (pendingNonce && pendingNonce.expires <= Date.now()) pendingNonce = null;
@@ -315,7 +322,8 @@ async function start() {
     if (session) render();
   }, 1000);
   window.addEventListener('offline', render);
-  window.addEventListener('online', () => { render(); if (session) void sync(); });
+  window.addEventListener('online', () => { render(); if (session) void sync(); else if (push?.pendingResume) void push.initialize(); });
+  navigator.serviceWorker?.addEventListener('message', event => { if (event.data?.type === 'gati-refresh') { if (session) void sync(); else void push?.initialize(); } });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && session) void sync(); });
 }
 setInterval(() => {

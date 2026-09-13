@@ -62,11 +62,15 @@ external device/provider interoperability step. No remote push/deployment is aut
 The broader area's follow notifications, daily summaries, production hardening,
 100k benchmark and independently verifiable release remain tracked separately.
 
-## Implemented start (2026-09-13)
+## Implementation status (2026-09-13)
 
-A–D are implemented and committed. B/C passed 19 browser checks plus real-store
-preview/expiry tests; D passed worker-only discovery in the fixed-clock integration
-and a 3,000-person synthetic run. A final cursor-expiry bound was checked with Go
-race tests and the smaller fixed-clock integration. E–H remain the next milestones;
-background push itself is not yet available. PROGRESS and reports/usability-3000.md
-record exact evidence and limitations. Suggestions 4 and 6 remain excluded.
+A–G are implemented: one-action willingness, waiting/recovery, eligible private
+preview, background offer discovery, bounded temporary subscription/outbox,
+encrypted provider transport and explicit browser opt-in/resume. Step H local
+checks passed (28 browser tests, real-store/race, native checks and fixed-clock
+integration; see PROGRESS); actual provider/device delivery remains
+unverified. Push is off by default while the public operator contact is unset.
+Service keys are already generated locally and ignored by Git. The earlier
+3,000-person run and exact source/config provenance are in reports/usability-3000.md.
+Sharing links/QR and new purpose copy remain excluded. No stronger location proof
+or public deployment readiness is claimed.

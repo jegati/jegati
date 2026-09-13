@@ -113,11 +113,11 @@ The API accepts a documented coarse-cell format, never participant coordinates. 
 
 ### Central functional configuration
 
-Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching/arrival behavior is implemented; public notification subscriptions remain future work. See MATCHING_PARAMETERS.md for active versus reserved settings.
+Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, nonsecret effective-configuration endpoint consumed by the client. Operators change counts, radius choices and timing in this file rather than editing code. Keep credentials in a separate secret source. The configuration file and validation/inspection commands are implemented in milestone 02. Matching/arrival behavior and optional session push are implemented; public area follows remain future work. See MATCHING_PARAMETERS.md for active versus reserved settings.
 
 ```yaml
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 6
+schema_version: 8
 profile: production
 availability:
   minimum_minutes: 30
@@ -149,6 +149,9 @@ arrivals:
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:
+  area_size_meters: 1000
+  capture_max_seconds: 30
+  max_snapshot_bytes: 1000000
   minimum_count: 20
   count_buckets: [20, 50, 100, 250, 500, 1000]
   release_seconds: 300
@@ -156,6 +159,15 @@ public_activity:
   snapshot_retention_minutes: 15
   daily_summary_retention_days: 30
 notifications:
+  push_enabled: false
+  push_contact: "https://localhost"
+  push_endpoint_hosts: ["fcm.googleapis.com", "updates.push.services.mozilla.com", "web.push.apple.com"]
+  push_worker_batch_size: 1000
+  push_worker_seconds: 2
+  push_concurrency: 8
+  push_timeout_seconds: 5
+  push_max_attempts: 3
+  push_retry_seconds: 10
   nearby_gati_count: 50
   nearby_arrival_count: 50
   nearby_radius_km: 5
@@ -200,7 +212,7 @@ Foreground notifications use a short authenticated status poll with jitter/backo
 
 Optional Web Push requests permission only after an explicit user action. Store its endpoint and keys separately under an expiring notification handle, limited to the session lifetime or a maximum 24-hour area follow. Push subscriptions are identifying/correlatable delivery capabilities, and involve browser push providers [3]. Background push therefore has a clear privacy tradeoff and is never required to participate. Expire/unsubscribe server-side and clean up the browser subscription when possible; providers may retain their own metadata.
 
-Lock-screen payloads are generic, such as “Ka një përditësim në GATI.” Fetch the relevant **JEMI GATI**, meeting information or **JEMI KËTU** after opening. Deduplicate by notification handle/event/epoch, cap delivery (initially one update per five minutes and six per hour), coalesce events, and expire failed deliveries. The cap applies to push delivery, not in-app state updates or joining; always fetch the latest state on opening. Area follows store one coarse area or a bounded list, no travel history; large-nearby alerts use these same public snapshots and coarse areas, with configurable bucket-aligned counts and nearby distance. Include a gathering reference only when its publication rules allow it, so the recipient can open the current gathering and join. Follows alone do not register willingness. Foreground-only operation remains fully functional when push is unavailable. Local development uses a fake delivery sink; live push interoperability is a separate opt-in check.
+Lock-screen payloads are generic, such as “Ka një përditësim në GATI.” Fetch the relevant **JEMI GATI**, meeting information or **JEMI KËTU** after opening. Deduplicate by notification handle/event/epoch, cap delivery (a configured five-minute minimum and six new notifications per hour, jointly enforced as a ten-minute gap), coalesce events, and expire failed deliveries. The cap applies to push delivery, not in-app state updates or joining; always fetch the latest state on opening. Area follows store one coarse area or a bounded list, no travel history; large-nearby alerts use these same public snapshots and coarse areas, with configurable bucket-aligned counts and nearby distance. Include a gathering reference only when its publication rules allow it, so the recipient can open the current gathering and join. Follows alone do not register willingness. Foreground-only operation remains fully functional when push is unavailable. Local development uses a fake delivery sink; live push interoperability is a separate opt-in check.
 
 ## 6. Data inventory and expiry contract
 

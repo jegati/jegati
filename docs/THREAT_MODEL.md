@@ -229,3 +229,20 @@ The reviewed pinned transport and actual restricted-store fake-provider tests ch
 endpoint encryption, immutable registration, cancellation before send, padded/encrypted
 requests, expiry and claim races. They do not establish Chrome/Firefox/Safari provider
 interoperability or OS notification behavior; that needs real-device evidence.
+
+
+Browser opt-in persists only a bounded capability/binding/revision/deadline/status,
+without location/history. Reopening fetches existing state without re-enrollment;
+uncertain recovery offers explicit retry/cancel. Opt-out removes local display/resume
+before provider cleanup. Server opt-out revisions fence delayed registration writes;
+claim fences prevent old delivery acknowledgements from overwriting newer work.
+Expiry cleanup removes due-index entries before freeing admission capacity. Tests
+exercise both cancellation during registration and retained-index churn.
+
+The actual first-party worker has no fetch interception or response caches. Browser
+tests inject provider delivery via CDP with the app closed and check native generic
+notification display, stale/forged binding rejection and cancellation. Permission
+revocation is checked on resume and worker execution. Local opt-out cannot recall an
+already-displayed OS notification or provider request. Suspended browsers can retain
+expired bytes until running again, and browser-managed push subscriptions may outlive
+app records; no forensic erasure or guaranteed background cleanup is claimed.

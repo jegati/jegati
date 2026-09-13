@@ -105,15 +105,19 @@ test('real collective invitation, arrival retry, retraction and decline', async 
   expect(cell).not.toBeNull();
   const tokens: string[] = [];
   try {
+    await test.step('create synthetic founding signals', async () => {
     // Synthetic founding signals use the same coarse cell as the mocked device fix.
     for (let i = 1; i < config.matching.activation_count; i++) {
       const token = Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64url'); tokens.push(token);
       const response = await request.post('/api/signals', { headers: { Authorization: `Bearer ${token}` }, data: { cell, radius_km: 3, availability_minutes: 30 } });
       expect(response.status()).toBe(200);
     }
-    await page.goto('/');
+    });
+    await test.step('wait for the real invitation', async () => {
+      await page.goto('/');
       await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
-    await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
+      await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
+    });
     await expect(page.locator('#destination-map')).toHaveAttribute('data-ready', 'true');
     await page.screenshot({ path: '../reports/local/invitation.png', fullPage: true });
     const destination = await page.locator('#destination').textContent();
@@ -149,7 +153,9 @@ test('real collective invitation, arrival retry, retraction and decline', async 
     await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
     await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
   } finally {
-    for (const token of tokens) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${token}` } });
+    await test.step('remove synthetic founding signals', async () => {
+      for (const token of tokens) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${token}` }, timeout: 5000 });
+    });
     const activeToken = await page.evaluate(() => { try { return JSON.parse(sessionStorage.getItem('gati-session-v2') ?? 'null')?.token; } catch { return null; } }).catch(() => null);
     if (activeToken) await request.delete('/api/signal', { headers: { Authorization: `Bearer ${activeToken}` } });
   }

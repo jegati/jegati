@@ -13,7 +13,7 @@ Implementation order and remaining work are in
 | Journey | Verdict | Present and tested | Missing / qualification |
 | --- | --- | --- | --- |
 | 1. First visit → JAM GATI → nearby willingness count | Implemented locally | Device-only willingness, cancellation/expiry and a nearby published-area bucket. Real-store capture/API tests plus browser presentation with fixed public fixtures. | Public figures describe a delayed observation, not immediate occupancy. Below-minimum values remain unavailable, never zero. |
-| 2. Nearby threshold → invitation → accept/decline | Partial | Continuous private activation, foreground JEMI GATI, PO, PO SHKOJ / JO TANI; browser and fixed-clock API tests. | No background push, follows or server-side notification outbox yet. Push stays optional/off by default; JO TANI preserves willingness. |
+| 2. Nearby threshold → invitation → accept/decline | Partial | Continuous private activation, foreground JEMI GATI, PO, PO SHKOJ / JO TANI; browser and fixed-clock API tests. | Optional background push/outbox is implemented and tested with fake transport/browser delivery; real provider/device verification and follows remain. JO TANI preserves willingness. |
 | 3. Going → location-checked JAM KËTU → approximate going/arrival statistics | Implemented locally | Real API/browser arrival, nonce retry/retraction and expiry; same published going/here cards before/after arrival. Real fixed-clock publisher tests verify public suppression independently of private JEMI KËTU. | Presentation tests use fixed public fixtures alongside real arrival tests. No live-device presence proof; fresh claims last at most 15 minutes. Full browser-to-real-publisher test under the normal 5–10 minute delay remains a later integration extension. |
 | 4. Tirana activity map | Implemented locally | Always-visible first-party city map; willingness polygons and gathering entries in the same public cells; statistics/list, explicit public-map join and capability-preserving retry. | Exact crossroads appear only in private invitations/admission and explicit eligible private previews (decision 0008). No daily-history summaries yet. Population discovery still uses its existing synthetic scheduling; it does not yet consume the new map API. |
 
@@ -48,8 +48,8 @@ anonymity, a 100k benchmark, or a production deployment certification.
 
 | Requirement | Status | What remains |
 | --- | --- | --- |
-| Notifications | Partial | Foreground own-status polling shows invitations and gathering state. No background push, area-follow subscriptions, large-nearby alerts or notification queue/delivery lifecycle. |
-| Newly notified people joining | Partial end-to-end | Public-map discovery/join is implemented; background notification/follow discovery and deep links remain. |
+| Notifications | Partial | Foreground status and optional temporary Web Push/outbox/resume are implemented. Real provider/device verification, area follows and large-nearby alerts remain. |
+| Newly notified people joining | Partial end-to-end | Public-map discovery/join is implemented; worker-side invitations and opt-in push are implemented; live provider verification and nonparticipant follows remain. Sharing links are excluded from the selected scope. |
 | Public collective map/counts/history | Partial | Delayed bucketed snapshots, nearby/going/here cards and cell-only map are implemented. Daily aggregate history is missing; inferred information is explicitly accepted. |
 | Architectural privacy | Partial; known unmet requirement | Coarse inputs, temporary hashes, TTL checks, private nonpersistent store and no individual public views have evidence. A prior-config colluding-input probe reconstructs a target cell. No complete cross-surface/differencing or privileged-operator protection; the new 100 m default is not an anonymity proof. |
 | Abuse resistance | Partial | Request/body/create/global/arrival limits, replay controls, atomic transitions and rate-secret rollover regression exist. Distributed Sybils, fabricated device claims, effective anomaly detection and upstream/edge DoS protection remain unresolved. Shared-network exclusions are measured, not solved. |
@@ -58,8 +58,8 @@ anonymity, a 100k benchmark, or a production deployment certification.
 | Simple local maintenance | Partial | Pinned toolchain, Compose, ephemeral-store settings, health endpoint and local checks exist. Full operational monitoring, production deployment/rollback, host hardening and nonparticipant backup/restore evidence remain later work. |
 | Open-source auditability | Partial | AGPL source, schema, infrastructure, tests, threat/data-flow docs, config/map hashes and reviewed reports exist. Independent security/privacy audit has not run. |
 | Actual deployment verification | Missing | No published production release/deployment, signed release/SBOM/independent build comparison or privileged host verification. A config hash is not remote attestation. |
-| PWA packaging/offline installation | Missing | Browser app exists; service-worker/offline shell/installability work remains. Native apps are outside the MVP. |
-| All configurable knobs affect behavior | Partial | Matching/arrival/device settings are active. Public snapshots are active; notification delivery and daily-summary settings are pending, and matching.intersection_index_batch_size is validated but unused. See MATCHING_PARAMETERS.md. |
+| PWA packaging/offline installation | Partial | First-party manifest/icon/push worker exist. No offline response cache; real-device installation and push interoperability remain unverified. Native apps are outside the MVP. |
+| All configurable knobs affect behavior | Partial | Matching/arrival/device settings are active. Public snapshots are active; push delivery settings are active; area alerts/follows and daily summaries are pending, and matching.intersection_index_batch_size is validated but unused. See MATCHING_PARAMETERS.md. |
 
 ## Validation refreshed for the 100 m default
 
@@ -99,5 +99,13 @@ worker-side invitation discovery without polling. Preview neither enrolls nor
 changes intent. Nineteen Chromium tests passed, including preview cancellation,
 offline recovery, expiry, and return from expired arrival to the JAM KËTU action.
 Real-store fixed-clock checks verify preview gating/no enrollment and background
-offers. Optional Web Push transport, subscriptions and browser resume remain pending
-in USABILITY_IMPLEMENTATION_PLAN.md. Sharing links/QR and new purpose copy are excluded.
+offers. Optional Web Push transport, subscriptions and browser resume are implemented;
+local lifecycle evidence and remaining provider verification are in NOTIFICATIONS.md. Sharing links/QR and new purpose copy are excluded.
+
+
+The selected optional push refinement passed nine additional full-Chromium checks
+(28 browser tests total). Closed-page delivery uses CDP injection into the actual
+worker plus native notification display, with provider registration and current-state
+fixtures; this is distinct from external provider/device verification. Real-store
+transport tests separately cover encryption, opt-out revisions, queue/rate bounds,
+stale acknowledgements and expiry-index cleanup. See NOTIFICATIONS.md and PROGRESS.
