@@ -48,9 +48,13 @@ def prepare(root,host):
   try:run('docker','cp',container+':/srv/.',d)
   finally:run('docker','rm',container)
   assets={str(p.relative_to(d)):digest(p) for p in sorted(pathlib.Path(d).rglob('*')) if p.is_file()}
+  container=run('docker','create','--network','none',refs['api'])
+  try:run('docker','cp',container+':/gati',str(pathlib.Path(d)/'gati-container'))
+  finally:run('docker','rm',container)
+  api_binary_hash=digest(pathlib.Path(d)/'gati-container')
  run('docker','save','-o',str(root/'images.tar'),*[image['reference'] for image in images.values()])
  immutable={str(p.relative_to(root)):digest(p) for p in sorted(root.rglob('*')) if p.is_file() and p.name!='build.log'}
- manifest={'version':1,'source_revision':revision,'config_sha256':digest(root/'config/gati.yaml'),'effective_config_sha256':hashlib.sha256(effective_raw.encode()).hexdigest(),'push_enabled':effective['notifications']['push_enabled'],'images':images,'browser_assets':assets,'files':immutable,'scope':'source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation'}
+ manifest={'version':1,'source_revision':revision,'config_sha256':digest(root/'config/gati.yaml'),'effective_config_sha256':hashlib.sha256(effective_raw.encode()).hexdigest(),'push_enabled':effective['notifications']['push_enabled'],'api_binary_sha256':api_binary_hash,'images':images,'browser_assets':assets,'files':immutable,'scope':'source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation'}
  (root/'release.json').write_text(json.dumps(manifest,indent=2)+'\n')
  (root/'release.sha256').write_text(digest(root/'release.json')+'  release.json\n')
  print('Prepared local release',revision,'manifest SHA256',digest(root/'release.json'))

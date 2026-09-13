@@ -1018,3 +1018,9 @@ and Cloudflare authentication, and explicit public-deployment authorization. Kee
 host privacy controls, actual edge/cache behavior, target-host capacity, real-device
 location/push and private alert routing as separate gates. No remote push or public
 service has been created. Preserve commands.txt.
+
+Release verification refinement: record SHA256 of the actual /gati executable from
+its production image and reproduce the Dockerfile's stripped binary alongside the
+native development binary. This avoids treating differing OCI metadata/image IDs
+as proof of differing executable code. The earlier clean-build check remains valid;
+a final comparison will explicitly connect the clean stripped artifact to the image.

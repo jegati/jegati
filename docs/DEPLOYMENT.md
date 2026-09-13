@@ -85,9 +85,14 @@ IDs before use. Upstream images are pinned and included in the image archive.
 `build.log` is diagnostic output, excluded from the file manifest; review it before
 publication. Source/dependency/map licenses remain in the exported repository.
 
-`reproduce-build` compares the native API and browser assets from two clean exports
+`reproduce-build` compares the native API, an API built with the Dockerfile's strip
+flags (`gati-container`) and browser assets from two clean exports
 with independent compilation caches on the same host/toolchain. It does not prove
 cross-platform reproducibility, identical OCI metadata or a remote operator's honesty.
+Compare `gati-container` to `api_binary_sha256` extracted from the actual release
+image. Image IDs can differ because of OCI/build timestamps even when that executable
+is byte-identical. A host auditor can extract `/gati` from the running container and
+compare it too; this still does not prove the process or host is honest.
 Use `python3 scripts/verify-public.py --release /PATH/RELEASE --url https://gati.example`
 to compare served browser bytes and the advertised config hash against a separately
 obtained release. Disable content rewriting at the edge. A privileged
