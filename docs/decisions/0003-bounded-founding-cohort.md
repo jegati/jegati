@@ -4,13 +4,13 @@ Date: 2026-09-13. Status: implementation direction for milestone 07.
 
 A dense compatible crowd must not require one unbounded transaction to activate.
 Select exactly `activation_count` oldest eligible signals from the highest-ranked
-compatible crossing candidate. Compute the nearest shared mapped crossing using
+compatible intersection candidate. Compute the nearest shared mapped intersection using
 those founders' coarse centers. Other compatible people receive the same open
 gathering through the late invitation/admission flow. They need not be counted in
 the initial threshold. This preserves configurable activation and late joining.
 
 Reserve that founding cohort while testing the configured stability interval.
-Recheck all founders, remaining availability and the common crossing at activation.
+Recheck all founders, remaining availability and the common intersection at activation.
 A cancelled/expired/unavailable founder invalidates the reservation even if a new
 signal has since replaced it. This conservatively delays some groups; it avoids
 claiming uninterrupted eligibility based only on two snapshots. New willingness

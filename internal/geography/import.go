@@ -67,8 +67,23 @@ func shortName(s string) string {
 	return string(r)
 }
 
-// Import consumes a bounded public Overpass extract, not an HTTP request. Retain
-// only road geometry/names and crossing features in derived application assets.
+// eligibleStreet restricts destinations to mapped public street junctions. Road
+// paths, driveways, ramps and grade-separated roads are not gathering landmarks.
+func eligibleStreet(tags map[string]string) bool {
+	if forbidden(tags) || (tags["bridge"] != "" && tags["bridge"] != "no") ||
+		(tags["tunnel"] != "" && tags["tunnel"] != "no") || tags["motorroad"] == "yes" || tags["area"] == "yes" {
+		return false
+	}
+	switch tags["highway"] {
+	case "primary", "secondary", "tertiary", "unclassified", "residential", "living_street", "pedestrian":
+		return true
+	}
+	return false
+}
+
+// Import consumes a bounded archived public extract, never a participant query.
+// A junction has at least three distinct adjacent street nodes. Shared node IDs,
+// not intersecting geometry or split-way counts, establish road connectivity.
 func Import(raw []byte, version string) (Dataset, Roads, error) {
 	var input struct {
 		Elements []osmElement `json:"elements"`
@@ -90,17 +105,14 @@ func Import(raw []byte, version string) (Dataset, Roads, error) {
 		}
 		return a.ID < b.ID
 	})
-	nodes := map[int64]*Crossing{}
-	roadNames := map[int64]string{}
-	seen := map[string]bool{}
-	blockedNodes := map[int64]bool{}
-	for _, e := range input.Elements {
-		if e.Type == "way" && forbidden(e.Tags) {
-			for _, n := range e.Nodes {
-				blockedNodes[n] = true
-			}
-		}
+	type junction struct {
+		point          Point
+		neighbors      map[int64]bool
+		sources, names map[string]bool
 	}
+	nodes := map[int64]*junction{}
+	blocked := map[int64]bool{}
+	seen := map[string]bool{}
 	roads := Roads{Type: "FeatureCollection", Features: []Feature{}}
 	for _, e := range input.Elements {
 		id := fmt.Sprintf("%s/%d", e.Type, e.ID)
@@ -108,90 +120,99 @@ func Import(raw []byte, version string) (Dataset, Roads, error) {
 			return Dataset{}, Roads{}, errors.New("duplicate map element")
 		}
 		seen[id] = true
-		if e.ID <= 0 || forbidden(e.Tags) || (e.Type == "node" && blockedNodes[e.ID]) {
+		if e.ID <= 0 {
+			return Dataset{}, Roads{}, errors.New("invalid map element ID")
+		}
+		if e.Type == "node" && forbidden(e.Tags) {
+			blocked[e.ID] = true
+		}
+		// Conservatively omit a junction touching an explicitly prohibited street.
+		if e.Type == "way" && (forbidden(e.Tags) || e.Tags["highway"] == "motorway" || e.Tags["highway"] == "trunk" || e.Tags["motorroad"] == "yes" || (e.Tags["bridge"] != "" && e.Tags["bridge"] != "no") || (e.Tags["tunnel"] != "" && e.Tags["tunnel"] != "no")) {
+			for _, n := range e.Nodes {
+				blocked[n] = true
+			}
+		}
+		if e.Type != "way" || e.Tags["highway"] == "" || forbidden(e.Tags) {
 			continue
 		}
-		if e.Type == "node" && e.Tags["highway"] == "crossing" && Inside(Point{e.Lon, e.Lat}) {
-			nodes[e.ID] = &Crossing{ID: id, SourceIDs: []string{id}, Point: Point{e.Lon, e.Lat}, Label: "Vendkalim këmbësorësh"}
-		}
-		if e.Type == "way" && e.Tags["highway"] != "" {
-			name := shortName(e.Tags["name"])
-			if name != "" {
-				for _, n := range e.Nodes {
-					if roadNames[n] == "" {
-						roadNames[n] = name
-					}
-				}
+		name := shortName(e.Tags["name"])
+		part := 0
+		coordinates := []Point{}
+		flush := func() {
+			if len(coordinates) >= 2 {
+				roads.Features = append(roads.Features, Feature{"Feature", fmt.Sprintf("%s/%d", id, part), map[string]string{"name": name, "highway": e.Tags["highway"]}, LineGeometry{"LineString", coordinates}})
+				part++
 			}
-			part := 0
-			coordinates := []Point{}
-			flush := func() {
-				if len(coordinates) >= 2 {
-					roads.Features = append(roads.Features, Feature{"Feature", fmt.Sprintf("%s/%d", id, part), map[string]string{"name": name, "highway": e.Tags["highway"]}, LineGeometry{"LineString", coordinates}})
-					part++
-				}
-				coordinates = []Point{}
-			}
-			for _, p := range e.Geometry {
-				q := Point{p.Lon, p.Lat}
-				if Inside(q) {
-					coordinates = append(coordinates, q)
-				} else {
-					flush()
-				}
-			}
-			flush()
+			coordinates = []Point{}
 		}
-	}
-	ways := []Crossing{}
-	for _, e := range input.Elements {
-		if e.Type != "way" || e.Tags["highway"] != "footway" || e.Tags["footway"] != "crossing" || forbidden(e.Tags) || len(e.Geometry) < 2 {
-			continue
-		}
-		geom := []Point{}
-		valid := true
 		for _, p := range e.Geometry {
 			q := Point{p.Lon, p.Lat}
-			if !Inside(q) {
-				valid = false
-				break
+			if Inside(q) {
+				coordinates = append(coordinates, q)
+			} else {
+				flush()
 			}
-			geom = append(geom, q)
 		}
-		if !valid {
+		flush()
+		if !eligibleStreet(e.Tags) {
 			continue
 		}
-		id := fmt.Sprintf("way/%d", e.ID)
-		linked := false
-		for _, n := range e.Nodes {
-			if c := nodes[n]; c != nil {
-				linked = true
-				c.SourceIDs = append(c.SourceIDs, id)
-				if len(c.Geometry) == 0 {
-					c.Geometry = geom
+		if len(e.Nodes) < 2 || len(e.Nodes) != len(e.Geometry) {
+			return Dataset{}, Roads{}, errors.New("street node/geometry mismatch")
+		}
+		for i, n := range e.Nodes {
+			if n <= 0 {
+				return Dataset{}, Roads{}, errors.New("invalid street node ID")
+			}
+			point := Point{e.Geometry[i].Lon, e.Geometry[i].Lat}
+			if !Inside(point) {
+				continue
+			}
+			j := nodes[n]
+			if j == nil {
+				j = &junction{point, map[int64]bool{}, map[string]bool{}, map[string]bool{}}
+				nodes[n] = j
+			}
+			if j.point != point {
+				return Dataset{}, Roads{}, errors.New("inconsistent shared street node geometry")
+			}
+			for _, adjacent := range []int{i - 1, i + 1} {
+				if adjacent >= 0 && adjacent < len(e.Nodes) && e.Nodes[adjacent] != n {
+					j.neighbors[e.Nodes[adjacent]] = true
 				}
 			}
+			j.sources[id] = true
+			if name != "" {
+				j.names[name] = true
+			}
 		}
-		if linked {
+	}
+	intersections := []Intersection{}
+	for n, j := range nodes {
+		if blocked[n] || len(j.neighbors) < 3 {
 			continue
-		} // Node and crossing-way representations become one record.
-		midpoint := Point{}
-		for _, p := range geom {
-			midpoint[0] += p[0] / float64(len(geom))
-			midpoint[1] += p[1] / float64(len(geom))
 		}
-		ways = append(ways, Crossing{ID: id, SourceIDs: []string{id}, Point: midpoint, Geometry: geom, Label: "Vendkalim këmbësorësh"})
-	}
-	for id, c := range nodes {
-		if name := roadNames[id]; name != "" {
-			c.Label += " — " + name
+		id := fmt.Sprintf("node/%d", n)
+		sources := []string{id}
+		names := []string{}
+		for source := range j.sources {
+			sources = append(sources, source)
 		}
-		ways = append(ways, *c)
+		sort.Strings(sources)
+		for name := range j.names {
+			names = append(names, name)
+		}
+		sort.Strings(names)
+		label := "Kryqëzim rrugësh"
+		if len(names) > 0 {
+			label += " — " + shortName(strings.Join(names, " / "))
+		}
+		intersections = append(intersections, Intersection{ID: id, SourceIDs: sources, Point: j.point, Label: label})
 	}
-	sort.Slice(ways, func(i, j int) bool { return ways[i].ID < ways[j].ID })
-	if len(ways) == 0 {
-		return Dataset{}, Roads{}, errors.New("extract has no eligible crossings")
+	sort.Slice(intersections, func(i, j int) bool { return intersections[i].ID < intersections[j].ID })
+	if len(intersections) == 0 {
+		return Dataset{}, Roads{}, errors.New("extract has no eligible intersections")
 	}
 	sum := sha256.Sum256(raw)
-	return Dataset{version, hex.EncodeToString(sum[:]), input.Meta.Timestamp, ways}, roads, nil
+	return Dataset{version, hex.EncodeToString(sum[:]), input.Meta.Timestamp, intersections}, roads, nil
 }

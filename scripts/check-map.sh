@@ -6,7 +6,7 @@ source scripts/env.sh
 staging=$(mktemp -d)
 trap 'rm -rf -- "$staging"' EXIT
 go run ./cmd/map-import -out "$staging"
-cmp data/tirana/crossings.json "$staging/crossings.json"
+cmp data/tirana/intersections.json "$staging/intersections.json"
 cmp data/tirana/roads.geojson "$staging/roads.geojson"
 node --input-type=module <<'JS'
 import { readFileSync } from 'node:fs';
@@ -20,6 +20,6 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 assert.equal(hash(archive), manifest.gzip_sha256);
 assert.equal(hash(raw), manifest.raw_sha256);
 assert.equal(JSON.parse(raw).osm3s.timestamp_osm_base, manifest.osm_base_timestamp);
-assert.equal(JSON.parse(readFileSync('data/tirana/crossings.json')).source_sha256, manifest.raw_sha256);
+assert.equal(JSON.parse(readFileSync('data/tirana/intersections.json')).source_sha256, manifest.raw_sha256);
 console.log('Map source checksums and byte-identical offline rebuild passed.');
 JS

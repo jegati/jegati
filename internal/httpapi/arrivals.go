@@ -110,7 +110,7 @@ func (s signalAPI) arrival(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, e)
 		return
 	}
-	destination, e := s.grid.CellAt(g.Crossing.Point)
+	destination, e := s.grid.CellAt(g.Intersection.Point)
 	rings := s.config.Arrivals.AllowedCellNeighborRings
 	if e != nil || abs(cell.X-destination.X) > rings || abs(cell.Y-destination.Y) > rings {
 		writeError(w, 409)

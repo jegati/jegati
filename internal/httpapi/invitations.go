@@ -40,7 +40,7 @@ func (s signalAPI) respond(w http.ResponseWriter, r *http.Request, hash string, 
 			participant := matching.Signal{Area: geography.ParticipantArea{Cell: cell, RadiusKM: value.RadiusKM}, ExpiresAt: value.ExpiresAt, Declined: value.Declined}
 			open := []matching.Gathering{}
 			for _, g := range s.engine.Open() {
-				open = append(open, matching.Gathering{ID: g.ID, Crossing: g.Crossing, EndsAt: g.EndsAt})
+				open = append(open, matching.Gathering{ID: g.ID, Intersection: g.Intersection, EndsAt: g.EndsAt})
 			}
 			if g, ok := s.engine.Planner.Offer(now, participant, open); ok {
 				updated, e := s.store.SetIntent(r.Context(), hash, g.ID, "offer", value.Cell, value.RadiusKM, s.config.Limits.MaxDeclinesPerSignal, int64(s.config.Matching.LateJoinMinRemainingMinutes)*60000, int64(s.config.Matching.InvitationCooldownSeconds)*1000)
@@ -105,7 +105,7 @@ func (s signalAPI) changeIntent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cell, e := s.grid.Parse(value.Cell)
-	if e != nil || !s.engine.Planner.Index.CanReach(geography.ParticipantArea{Cell: cell, RadiusKM: value.RadiusKM}, g.Crossing.ID) {
+	if e != nil || !s.engine.Planner.Index.CanReach(geography.ParticipantArea{Cell: cell, RadiusKM: value.RadiusKM}, g.Intersection.ID) {
 		writeError(w, 409)
 		return
 	}
@@ -188,7 +188,7 @@ func (s signalAPI) join(w http.ResponseWriter, r *http.Request) {
 		s.fail(w, e)
 		return
 	}
-	if !s.engine.Planner.Index.CanReach(geography.ParticipantArea{Cell: cell, RadiusKM: input.RadiusKM}, g.Crossing.ID) {
+	if !s.engine.Planner.Index.CanReach(geography.ParticipantArea{Cell: cell, RadiusKM: input.RadiusKM}, g.Intersection.ID) {
 		writeError(w, 409)
 		return
 	}

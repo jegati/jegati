@@ -182,10 +182,13 @@ func (c Config) Validate(allowSimulation bool) error {
 	if !ascending(g.TravelRadiusChoicesKm) || g.TravelRadiusChoicesKm[len(g.TravelRadiusChoicesKm)-1] > 20 || g.CellSizeMeters < 500 || g.CellSizeMeters > 5000 {
 		return errors.New("geographic configuration outside supported bounds")
 	}
-	if !regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`).MatchString(g.CrossingDataset) {
-		return errors.New("invalid crossing dataset identifier")
+	if g.LocationMaxAccuracyMeters > g.CellSizeMeters/2 || g.LocationFixMaxAgeSeconds < 5 || g.LocationFixMaxAgeSeconds > 120 {
+		return errors.New("device location quality bounds violated")
 	}
-	if m.DestinationRule != "nearest_eligible_crosswalk_to_coarse_group_center" || !m.PreferOpenGatherings {
+	if !regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`).MatchString(g.IntersectionDataset) {
+		return errors.New("invalid intersection dataset identifier")
+	}
+	if m.DestinationRule != "nearest_eligible_crossroad_to_coarse_group_center" || !m.PreferOpenGatherings {
 		return errors.New("unsupported destination or admission policy")
 	}
 	if c.Limits.ArrivalRequestsPerSignalWindow > 60 {

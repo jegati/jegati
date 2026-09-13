@@ -12,9 +12,9 @@ func fixture(t *testing.T) (Planner, []Signal, int64) {
 	g, _ := geography.NewGrid(1000)
 	c, _ := g.CellAt(geography.Point{19.818, 41.327})
 	center := g.Center(c)
-	crossing := geography.Crossing{ID: "near", Point: center}
-	other := geography.Crossing{ID: "far", Point: geography.Point{center[0] + .01, center[1]}}
-	index, e := geography.NewIndex(g, []geography.Crossing{other, crossing}, []int{1, 3, 5})
+	intersection := geography.Intersection{ID: "near", Point: center}
+	other := geography.Intersection{ID: "far", Point: geography.Point{center[0] + .01, center[1]}}
+	index, e := geography.NewIndex(g, []geography.Intersection{other, intersection}, []int{1, 3, 5})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -29,10 +29,10 @@ func fixture(t *testing.T) (Planner, []Signal, int64) {
 	}
 	return Planner{index, cfg.Matching}, signals, now
 }
-func TestNearestCrossingAndOldestBoundedFounders(t *testing.T) {
+func TestNearestIntersectionAndOldestBoundedFounders(t *testing.T) {
 	p, signals, now := fixture(t)
 	proposal, ok := p.Propose(now, signals, nil)
-	if !ok || proposal.Crossing.ID != "near" || len(proposal.Founders) != 3 {
+	if !ok || proposal.Intersection.ID != "near" || len(proposal.Founders) != 3 {
 		t.Fatal("missing automatic bounded formation")
 	}
 	for n, s := range proposal.Founders {
@@ -62,7 +62,7 @@ func TestContinuousAvailabilityAtUnalignedTime(t *testing.T) {
 func TestOpenGatheringLateOfferAndDecline(t *testing.T) {
 	p, signals, now := fixture(t)
 	proposal, _ := p.Propose(now, signals, nil)
-	open := []Gathering{{"existing", proposal.Crossing, now + 20*60000}}
+	open := []Gathering{{"existing", proposal.Intersection, now + 20*60000}}
 	if _, ok := p.Propose(now, signals, open); ok {
 		t.Fatal("formed competitor despite compatible open gathering")
 	}
@@ -83,7 +83,7 @@ func TestOpenGatheringLateOfferAndDecline(t *testing.T) {
 		t.Fatal("offered after cutoff")
 	}
 }
-func TestMissingCommonCrossingAndReservations(t *testing.T) {
+func TestMissingCommonIntersectionAndReservations(t *testing.T) {
 	p, signals, now := fixture(t)
 	signals[0].Assigned = true
 	signals[1].ReservedUntil = now + 10000
@@ -98,6 +98,6 @@ func TestMissingCommonCrossingAndReservations(t *testing.T) {
 		signals[n].ExpiresAt = now + 30*60000
 	}
 	if _, ok := p.Propose(now, signals, nil); ok {
-		t.Fatal("invented meeting point without mapped crossing")
+		t.Fatal("invented meeting point without mapped intersection")
 	}
 }

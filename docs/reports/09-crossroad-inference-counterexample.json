@@ -1,0 +1,24 @@
+{
+  "activation_threshold": 20,
+  "actual_synthetic_target_cell": "tirana-v1:1000:7:3",
+  "assumptions": [
+    "Observer controls all but one founding credential and knows its own coarse inputs.",
+    "Exactly one additional synthetic signal exists in this isolated candidate neighborhood.",
+    "Target radius is unknown; all configured radii are included in the inference set.",
+    "No exact target GPS, account identity, database contents, or public aggregate endpoint is observed."
+  ],
+  "compatible_target_cells_before_intersection": 127,
+  "config_sha256": "dfe524f94219924fec9d3107ccdebf74ca576909d65db16ac88d6cf005664276",
+  "controlled_credentials": 19,
+  "controlled_networks": 1,
+  "dataset": "tirana-intersections-v1",
+  "finding": "The ordinary anonymous invitation reveals the extra signal's participation and narrows its private coarse cell under these assumptions. It does not reveal a civil identity or exact GPS by itself.",
+  "invitation_with_target": true,
+  "invitation_without_target": false,
+  "observed_intersection": "node/10124813384",
+  "possible_target_cells_after_intersection": [
+    "tirana-v1:1000:7:3"
+  ],
+  "status": "privacy_gate_failed",
+  "synthetic_only": true
+}

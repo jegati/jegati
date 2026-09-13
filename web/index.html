@@ -19,10 +19,11 @@
           <label>Sa larg mund të shkosh?<select id="radius" required></select></label>
         </div>
         <fieldset><legend>Ku je afërsisht?</legend>
-          <p class="hint">Zgjidh zonën në hartë. Dërgohet vetëm zona e përafërt.</p>
+          <p class="hint">Lejo vendndodhjen nga pajisja. Dërgohet vetëm zona e përafërt.</p>
           <div id="map" role="region" aria-label="Harta e Tiranës"></div>
-          <div class="area-actions"><button id="map-center" type="button">Zgjidh zonën në qendër të hartës</button><button id="location" type="button">Përdor vendndodhjen një herë</button></div>
-          <p id="area-status" role="status">Ende nuk ke zgjedhur zonë.</p>
+          <div class="area-actions"><button id="location" type="button">Përdor vendndodhjen një herë</button></div>
+          <p id="area-status" role="status">Vendndodhja ende nuk është marrë.</p>
+        <p class="hint">Vendndodhja e pajisjes mund të ketë pasaktësi.</p>
         </fieldset>
         <button id="ready" class="primary" type="submit" disabled>JAM GATI</button>
       </form>
@@ -32,7 +33,7 @@
         <section id="invitation" hidden aria-label="Takimi pranë teje">
           <h3 id="collective-title">JEMI GATI.</h3>
           <p id="destination"></p>
-          <p class="hint">Në hapësirën për këmbësorë pranë vendkalimit. Mos qëndro në rrugë.</p>
+          <p class="hint">Në hapësirën për këmbësorë pranë kryqëzimit. Mos qëndro në rrugë.</p>
           <div id="destination-map" role="region" aria-label="Harta e pikës së takimit"></div>
           <p id="gathering-time"></p>
           <p id="going-status" role="status"></p>

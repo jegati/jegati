@@ -15,7 +15,7 @@ func proposalTest(t *testing.T, s *Store) (matching.Proposal, geography.Grid) {
 	t.Helper()
 	g, _ := geography.NewGrid(1000)
 	cell := geography.Cell{X: 5, Y: 5}
-	p := matching.Proposal{Crossing: geography.Crossing{ID: fresh(), Point: g.Center(cell)}}
+	p := matching.Proposal{Intersection: geography.Intersection{ID: fresh(), Point: g.Center(cell)}}
 	for n := 0; n < 3; n++ {
 		hash := fresh()
 		value, e := s.Create(context.Background(), hash, g.ID(cell), 3, 30, time.Minute, 1000)
@@ -55,7 +55,7 @@ func TestAtomicReservationActivationAndPrivateFields(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if g.ActivatedAt < r.ReadyAt || g.EndsAt != p.Founders[0].ExpiresAt || g.Crossing.ID != p.Crossing.ID {
+	if g.ActivatedAt < r.ReadyAt || g.EndsAt != p.Founders[0].ExpiresAt || g.Intersection.ID != p.Intersection.ID {
 		t.Fatal("activation changed deadline/destination or ignored stability")
 	}
 	again, e := s.Activate(ctx, id, "test-config", 1000, 60000)

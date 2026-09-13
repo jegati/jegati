@@ -1,6 +1,6 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–08 implemented; paused at milestone 09 for a privacy/product decision.
+Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. Milestone 09 can resume under the disclosed inference limitation.
 
 ## Current task and authorization
 
@@ -18,11 +18,11 @@ is authorized, and GitHub authentication/write access remains unverified.
   Go config/health API, Albanian client preparation screen and native HTTP smoke.
 - AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
 - Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API connects to private Valkey with a restricted role.
-- Fixed coarse Tirana grid, public map import/provenance and static crossing reachability index.
+- Fixed coarse Tirana grid, public map import/provenance and static intersection reachability index (6,491 road junctions).
 - Expiring willingness APIs, replay tombstones, bounded indexes, rate limits and restricted ephemeral Valkey roles.
-- Albanian willingness UI with first-party roads/coarse selection, optional location, expiring client capability and cancellation.
-- No activation engine, arrival, collective map or notification code yet.
-  The configuration fields for those features describe future functional inputs.
+- Albanian willingness UI with first-party roads, required one-shot device location, expiring client capability and cancellation.
+- Continuous activation, late admission, going/decline and temporary arrivals are implemented.
+  Collective public maps/statistics and notification subscriptions remain future work.
 
 ## Milestone tracker
 
@@ -30,13 +30,13 @@ is authorized, and GitHub authentication/write access remains unverified.
 | --- | --- | --- |
 | 01 — Product/threat boundaries | Documented | Requirements, plan, decision 0001, THREAT_MODEL |
 | 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
-| 03 — Coarse geography and crossing fixtures | Complete | 2,571 imported crossings, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
+| 03 — Coarse geography and intersection fixtures | Complete | 6,491 imported road intersections, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
 | 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
-| 05 — Albanian willingness UI | Complete | Five Chromium browser checks: actual map load, manual/GPS coarse-only payloads, reload, retry/cancel failures, expiry restoration and mobile/keyboard layout |
+| 05 — Albanian willingness UI | Complete | 13 Chromium checks pass after device-only correction; previous five-check milestone evidence below is historical |
 | 06 — Seeded Tirana simulation | Complete for willingness stage | Dedicated store/credentials/build, frozen clock, seeded API scenarios, standalone synthetic map and repeatable report |
 | 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
 | 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
-| 09 — Aggregate map/statistics | Privacy gate failed; decision needed | Production-threshold collusion probe reconstructs one synthetic target cell; see reports/09-inference-gate.md |
+| 09 — Aggregate map/statistics | Known failure accepted for local work | Production-threshold collusion probe reconstructs one synthetic target cell; see reports/09-inference-gate.md |
 | 10 — Notifications and follows | Not started | Foreground, fake sink, expiring optional push and joins |
 | 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
 | 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
@@ -71,13 +71,10 @@ separate coherent local commit. Do not embed a commit's own hash in its files.
 
 ## Next action
 
-Resolve the product decision in reports/09-inference-gate.md before adding public
-activity surfaces: retain deterministic closest-crossing behavior with explicitly
-bounded anonymity, or revise the behavior/privacy model. The user authorized
-continuing until credentials or a material product decision were needed; this is
-that boundary. Do not silently accept the residual risk or change the requested
-closest-crossing rule. Resume milestone 09 after the decision, preserving the
-implemented anonymous local core flow and remaining release gates.
+Resume milestone 09 public aggregate releases, keeping the known
+collusion limitation visible and reviewing additional public inference surfaces.
+The user retained nearest destinations after disclosure; this resolves the local
+implementation decision, not the absolute inference requirement or release gates.
 The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
 
 The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
@@ -127,8 +124,8 @@ is written to a report or committed. Normal Compose remains separate.
 
 ## Milestone 07, planner slice
 
-`internal/matching` selects oldest compatible founders, ranks mapped crossings,
-computes the nearest common crossing, enforces unaligned remaining availability,
+`internal/matching` selects oldest compatible founders, ranks mapped intersections,
+computes the nearest common intersection, enforces unaligned remaining availability,
 prefers compatible open gatherings, respects declines/cutoffs and freezes the
 proposed deadline. Focused race tests passed. Decision 0003 explains the bounded
 cohort and conservative reservation stability. This planner is not wired into the
@@ -190,18 +187,43 @@ to mount the updated restrictive ACL; this deliberately resets ephemeral local
 sessions. GPS was mocked for all tests. Distinct credentials and claimed coarse
 location do not establish independent humans or proof of physical presence.
 
-## Milestone 09 privacy gate — needs user input
+## Milestone 09 original privacy gate — historical decision request
 
 `make privacy-probe` reproduced a counterexample against the actual API with the
 production activation threshold of 20 and normal rate limits. Nineteen controlled
-credentials from one network plus one unknown synthetic signal produced a crossing
+credentials from one network plus one unknown synthetic signal produced a intersection
 that narrowed 127 compatible coarse cells to one. No database or public aggregate
 endpoint was needed. The command deliberately exited 2: this is a FAILED privacy
 gate, not a passing assurance test. Synthetic evidence and assumptions are committed
 in reports/09-inference-gate.md and 09-inference-counterexample.json.
 
 No public map/statistics/follow surfaces were shipped after finding the issue.
-Changing the deterministic closest-crossing rule or accepting weaker protection
+Changing the deterministic closest-intersection rule or accepting weaker protection
 against colluding inputs is a material product decision. The default unit/race/
 store/browser checks remain separate from this deliberately failing counterexample.
 No credentials, remote push, public deployment or real location were used.
+
+## Crossroad and required device-location correction
+
+Decision 0004 records the user's correction: derive road intersections, require
+fresh device-service location with no manual fallback, and retain nearest selection
+with the known collusion limitation. Schema 5 changes map/config/destination names
+explicitly and adds local fix-quality settings (100m maximum reported error, 60s
+maximum age, configurable). Old manual-input client sessions are discarded.
+
+The original archived OSM response rebuilds 6,491 street junctions and the unchanged
+28,124 road segments offline. Shared-node connectivity, three distinct road legs,
+access filters and no geometry-only crossing inference are tested. Road map tags
+and browser coordinates cannot prove pedestrian suitability or physical presence.
+
+Validation so far: make map-check, make verify-local and make test-store passed.
+The isolated 40-person scenario and continuous activation/arrival tests passed.
+make privacy-probe deliberately exited 2: with the new intersection dataset, 19
+controlled credentials again narrow 127 possible target cells to one. New evidence
+is in reports/09-crossroad-inference-counterexample.json; original evidence retained.
+Rebuilt/recreated local Compose and make check-containers passed. All 13 Chromium
+checks passed against the built client and real API, including permission denial,
+missing location service, stale/poor/out-of-area fixes, selection expiry, no manual
+map input, keyboard/mobile, retry/cancellation and the complete arrival flow.
+Inspected the synthetic mobile screenshot. No real device location was requested.
+The disposable local store was recreated for the incompatible destination schema.

@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 4, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 5, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |
@@ -38,7 +38,7 @@ explicit bearer capability and same-host Origin check prevent ambient-cookie CSR
 This is not strong human/Sybil verification.
 
 Own-session responses can include an `invitation` with a random gathering ID,
-public crossing, activation/end times, state and configuration hash. They never
+public intersection, activation/end times, state and configuration hash. They never
 include counts, founder/member lists, pending reservations or a group center.
 
 Going/decline accept exactly `gathering_id`; join accepts the three willingness
@@ -54,7 +54,7 @@ Arrival issuance and confirmation also require `X-Gati-Arrival-Nonce`, an
 authorization header containing a client-generated random 32-byte base64url nonce.
 Issuance has an empty body and returns only `expires_at`; repeated unused issuance
 preserves the first deadline. Confirmation accepts exactly `cell`, checked against
-the current crossing's allowed coarse cell/rings. One credential contributes once.
+the current intersection's allowed coarse cell/rings. One credential contributes once.
 The own-session view includes `state: here` and `arrival_until` while fresh. A
 gathering becomes `jemi_ketu` after configured stable presence; it resets if current
 accepted arrivals fall below threshold. Internal nonce/member/cohort data is never

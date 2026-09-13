@@ -18,13 +18,13 @@ type Signal struct {
 	Declined      map[string]bool
 }
 type Gathering struct {
-	ID       string
-	Crossing geography.Crossing
-	EndsAt   int64
+	ID           string
+	Intersection geography.Intersection
+	EndsAt       int64
 }
 type Proposal struct {
-	Crossing geography.Crossing
-	Founders []Signal
+	Intersection geography.Intersection
+	Founders     []Signal
 }
 type Planner struct {
 	Index  *geography.Index
@@ -41,10 +41,10 @@ func (p Planner) Offer(now int64, s Signal, open []Gathering) (Gathering, bool) 
 		return best, false
 	}
 	for _, g := range open {
-		if g.EndsAt < minimum || s.Declined[g.ID] || !p.Index.CanReach(s.Area, g.Crossing.ID) {
+		if g.EndsAt < minimum || s.Declined[g.ID] || !p.Index.CanReach(s.Area, g.Intersection.ID) {
 			continue
 		}
-		d := geography.Distance(p.Index.Grid.Center(s.Area.Cell), g.Crossing.Point)
+		d := geography.Distance(p.Index.Grid.Center(s.Area.Cell), g.Intersection.Point)
 		if best.ID == "" || d < distance || (d == distance && g.ID < best.ID) {
 			best = g
 			distance = d
@@ -56,7 +56,7 @@ func (p Planner) Offer(now int64, s Signal, open []Gathering) (Gathering, bool) 
 // Propose reserves exactly the activation threshold's oldest compatible signals.
 // Other compatible people can receive the activated gathering through Offer. This
 // bounds an atomic reservation/activation; a large crowd need not be written in a
-// single transaction. Counts rank candidate crossings but are not public output.
+// single transaction. Counts rank candidate intersections but are not public output.
 func (p Planner) Propose(now int64, signals []Signal, open []Gathering) (Proposal, bool) {
 	var none Proposal
 	eligible := make([]Signal, 0, len(signals))
@@ -97,7 +97,7 @@ func (p Planner) Propose(now int64, signals []Signal, open []Gathering) (Proposa
 		b.count++
 		areas[s.Area] = b
 	}
-	stats := make([]bucket, len(p.Index.Crossings))
+	stats := make([]bucket, len(p.Index.Intersections))
 	for area, b := range areas {
 		for _, n := range p.Index.Reachable(area) {
 			v := stats[n]
@@ -122,12 +122,12 @@ func (p Planner) Propose(now int64, signals []Signal, open []Gathering) (Proposa
 		if a.oldest != b.oldest {
 			return a.oldest < b.oldest
 		}
-		return p.Index.Crossings[candidates[i]].ID < p.Index.Crossings[candidates[j]].ID
+		return p.Index.Intersections[candidates[i]].ID < p.Index.Intersections[candidates[j]].ID
 	})
 	if len(candidates) == 0 {
 		return none, false
 	}
-	seed := p.Index.Crossings[candidates[0]]
+	seed := p.Index.Intersections[candidates[0]]
 	group := make([]Signal, 0, p.Config.ActivationCount)
 	groupAreas := make([]geography.ParticipantArea, 0, p.Config.ActivationCount)
 	reachable := map[geography.ParticipantArea]bool{}
@@ -143,11 +143,11 @@ func (p Planner) Propose(now int64, signals []Signal, open []Gathering) (Proposa
 			}
 		}
 	}
-	crossing, ok := p.Index.Closest(groupAreas)
+	intersection, ok := p.Index.Closest(groupAreas)
 	if !ok {
 		return none, false
 	}
-	return Proposal{crossing, group}, true
+	return Proposal{intersection, group}, true
 }
 
 // Deadline is frozen at activation. Later admission cannot call this to renew it.

@@ -8,7 +8,7 @@ not completion evidence; see PROGRESS.md for implemented controls and checks.
 GATI needs an actionable collective gathering flow without identity, organizers,
 chat or permanent history. It must be practical to develop locally, audit and
 deploy as a small project. User corrections require continuous matching, a
-30-minute minimum availability, automatic crosswalk destinations, late joining
+30-minute minimum availability, automatic crossroad destinations, late joining
 and easy functional configuration.
 
 ## Decisions
@@ -16,12 +16,13 @@ and easy functional configuration.
 1. Use a TypeScript/Vite PWA, MapLibre, one Go API/worker codebase, temporary Valkey
    and Compose/Caddy. Pin versions during setup. Add services only for a measured
    need. Live participant state has no persistence or backups.
-2. Convert coordinates to coarse cells on the device. Use temporary random
+2. Require one-shot device location without manual area entry; convert coordinates
+   to coarse cells on the device (correction in decision 0004). Use temporary random
    capabilities to control sessions. Source data must describe their bounded
    linkability, not promise that actions within a session cannot be linked.
-3. Continuously evaluate shared crossing reachability and overlapping remaining
-   availability. Choose the eligible crossing nearest the coarse group center;
-   break ties deterministically. Import crossings from versioned map data. Keep
+3. Continuously evaluate shared intersection reachability and overlapping remaining
+   availability. Choose the eligible intersection nearest the coarse group center;
+   break ties deterministically. Import intersections from versioned map data. Keep
    activated destinations/deadlines fixed; missing map coverage does not authorize
    invented destinations. Coarse matching may miss boundary opportunities.
 4. Admit newly notified users to still-open gatherings after revalidation. Going
@@ -47,7 +48,7 @@ and easy functional configuration.
 - A privileged host operator can inspect live memory or add logging. Memory-only
   storage reduces retained exposure but does not solve malicious administration.
 - Suppression, bucketing and delay are not a formal anonymity proof. Test private
-  probes, temporal differencing and crossing-selection inference before publication.
+  probes, temporal differencing and intersection-selection inference before publication.
 - Restarting the ephemeral store can lose sessions; do not reconstruct attendance.
 - Crosswalk map tags are not a guarantee of pedestrian space or crowd capacity.
 - The 100k capacity, operating cost and reproducible deployment remain targets

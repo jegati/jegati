@@ -16,19 +16,23 @@ The core flow is:
 **A JE GATI? → JAM GATI → JEMI GATI → PO, PO SHKOJ → JAM KËTU → JEMI KËTU**
 
 The first meaningful action takes seconds: choose availability, travel radius and
-provide a coarse area or optional one-time location fix, then press JAM GATI. There
+allow a one-time device-location fix, then press JAM GATI. There
 is no registration, identity form or complex onboarding. Willingness expires
 automatically and is not a commitment to attend. No response means no attendance.
 Declining/cancelling is neutral, easy and never guilt-inducing.
 
 ## Matching, destination and joining
 
+- Participant location comes only from the device location service. No manual
+  map pin, address or area input is offered. Require a fresh, sufficiently precise
+  reported fix, coarsen locally and discard exact coordinates. Device estimates
+  can be inaccurate or spoofed; this is not a guarantee of genuine location.
 - Minimum offered availability is **30 minutes**.
 - Matching is **continuous**, based on geographic proximity, compatible remaining
   availability, user-selected travel radius and configurable thresholds.
-- Destinations are selected automatically from mapped **pedestrian crosswalks**,
+- Destinations are selected automatically from mapped **road intersections (crossroads)**,
   not a handpicked catalog of meeting places. The plan defines closest as nearest
-  to the group's coarse center among crossings reachable by every counted member.
+  to the group's coarse center among intersections reachable by every counted member.
 - JEMI GATI gives relevant users a destination and remaining time with
   **PO, PO SHKOJ** and **JO TANI**. No in-app communication is required.
 - Newly notified people can join **current gatherings**, including those already
@@ -66,6 +70,11 @@ Protect against location inference, repeated-query/differencing attacks, tempora
 signal correlation, database compromise and administrator abuse. Public interfaces
 must not allow individual participation reconstruction. Do not claim that listing
 residual risks satisfies an absolute guarantee; track unresolved properties visibly.
+The user elected to retain nearest-destination matching after the demonstrated
+colluding-input inference failure, correcting the landmark to a crossroad. Continue
+local MVP development under this bounded claim; the original absolute inference
+guarantee remains unmet. See decision 0004. Device-only UI does not fix API spoofing
+or collusion. This acceptance is not authorization for public deployment.
 
 Assume fake mass willingness, fake arrivals, notification flooding, API abuse,
 scraping, DoS, identification attempts and manipulated statistics. Use appropriate

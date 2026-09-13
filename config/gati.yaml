@@ -1,14 +1,16 @@
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 4
+schema_version: 5
 profile: production
 availability:
   minimum_minutes: 30
   choices_minutes: [30, 60, 90, 120]
   maximum_minutes: 120
 geography:
+  location_max_accuracy_meters: 100
+  location_fix_max_age_seconds: 60
   cell_size_meters: 1000
   travel_radius_choices_km: [1, 3, 5]
-  crossing_dataset: tirana-crossings-v1
+  intersection_dataset: tirana-intersections-v1
 matching:
   invitation_cooldown_seconds: 60
   activation_count: 20
@@ -16,9 +18,9 @@ matching:
   maximum_debounce_seconds: 2
   reconciliation_seconds: 10
   minimum_remaining_minutes: 15
-  crossing_index_batch_size: 500
+  intersection_index_batch_size: 500
   candidate_batch_size: 100
-  destination_rule: nearest_eligible_crosswalk_to_coarse_group_center
+  destination_rule: nearest_eligible_crossroad_to_coarse_group_center
   prefer_open_gatherings: true
   maximum_gathering_minutes: 60
   late_join_min_remaining_minutes: 5

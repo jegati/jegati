@@ -12,7 +12,7 @@ public map features; they are not GATI participants or arrivals.
 SHA-256 digests. `source/overpass.json.gz` contains the exact response, compressed
 with mtime=0. No user-specific API requests were involved. A first provider request
 timed out; the successful complete response is retained. Source snapshots may be
-incomplete or outdated and do not establish real-world crossing suitability.
+incomplete or outdated and do not establish real-world intersection suitability.
 
 Rebuild the derived assets without network access:
 
@@ -21,13 +21,27 @@ make map-import
 make map-check
 ```
 
-`crossings.json` keeps eligible pedestrian crossing nodes/ways and source IDs,
-normalizes crossing ways already represented by nodes, and records a shared map
-reference point plus available geometry. Explicit access/foot prohibitions,
-private/disused/construction features and crossings on forbidden mapped ways are
-excluded conservatively. No proximity-only merge combines distinct nearby crossings.
-Way-only crossings use the mean of public mapped vertices as the reference point;
-the UI must describe the pedestrian space beside that crossing, not the roadway.
+`intersections.json` (tirana-intersections-v1) derives crossroads from shared OSM
+street node IDs with at least three distinct neighboring nodes. T-junctions and
+four-way intersections qualify; bends, duplicate/split ways and geometric overlaps
+without a shared node do not. Source IDs identify the junction node and its ways.
+This follows [OSM's road-junction representation](https://wiki.openstreetmap.org/wiki/Junctions).
+
+Eligible classes are primary, secondary, tertiary, unclassified, residential,
+living_street and pedestrian streets. Paths, service driveways, ramps, motorway/
+trunk roads, area outlines, explicitly restricted/private/disused/construction,
+bridge/tunnel and motorroad ways do not contribute. Junctions touching explicitly
+prohibited or grade-separated ways are conservatively omitted. A mapped roundabout
+entry may qualify where three street legs connect; its central island is never
+invented as a meeting point. Nearby nodes of complex junctions remain distinct.
+No proximity merge invents geometry. The UI describes pedestrian space beside the
+junction landmark; this import does not certify access, a sidewalk or crowd capacity.
+
+The original archived extract includes highway ways with full node/geometry arrays
+and selected pedestrian-crossing nodes. It lacks other node-only restrictions;
+missing map metadata remains a limitation. The original query/checksums are preserved
+for reproducibility. The obsolete crosswalk-derived artifact has been replaced;
+original probe evidence still identifies its original map version.
 
 `roads.geojson` is a minimal basemap of in-bounds road/path geometry and names.
 It needs no external tiles/fonts. Features are sorted deterministically; road

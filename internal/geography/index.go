@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-type Crossing struct {
+type Intersection struct {
 	ID        string   `json:"id"`
 	SourceIDs []string `json:"source_ids"`
 	Point     Point    `json:"point"`
@@ -13,30 +13,30 @@ type Crossing struct {
 	Label     string   `json:"label"`
 }
 type Dataset struct {
-	Version         string     `json:"version"`
-	SourceSHA256    string     `json:"source_sha256"`
-	SourceTimestamp string     `json:"source_timestamp"`
-	Crossings       []Crossing `json:"crossings"`
+	Version         string         `json:"version"`
+	SourceSHA256    string         `json:"source_sha256"`
+	SourceTimestamp string         `json:"source_timestamp"`
+	Intersections   []Intersection `json:"intersections"`
 }
 type ParticipantArea struct {
 	Cell     Cell
 	RadiusKM int
 }
 type Index struct {
-	Grid      Grid
-	Crossings []Crossing
-	reachable map[ParticipantArea][]int
+	Grid          Grid
+	Intersections []Intersection
+	reachable     map[ParticipantArea][]int
 }
 
-func NewIndex(g Grid, crossings []Crossing, radii []int) (*Index, error) {
-	if len(crossings) > 100000 || len(radii) == 0 || len(radii) > 32 {
+func NewIndex(g Grid, intersections []Intersection, radii []int) (*Index, error) {
+	if len(intersections) > 100000 || len(radii) == 0 || len(radii) > 32 {
 		return nil, errors.New("geography index outside bounds")
 	}
-	cs := append([]Crossing(nil), crossings...)
+	cs := append([]Intersection(nil), intersections...)
 	sort.Slice(cs, func(i, j int) bool { return cs[i].ID < cs[j].ID })
 	for i, c := range cs {
 		if !Inside(c.Point) || c.ID == "" || (i > 0 && cs[i-1].ID == c.ID) {
-			return nil, errors.New("invalid crossing dataset")
+			return nil, errors.New("invalid intersection dataset")
 		}
 	}
 	idx := &Index{g, cs, make(map[ParticipantArea][]int)}
@@ -64,22 +64,22 @@ func NewIndex(g Grid, crossings []Crossing, radii []int) (*Index, error) {
 func (i *Index) Reachable(p ParticipantArea) []int { return append([]int(nil), i.reachable[p]...) }
 func (i *Index) CanReach(p ParticipantArea, id string) bool {
 	for _, n := range i.reachable[p] {
-		if i.Crossings[n].ID == id {
+		if i.Intersections[n].ID == id {
 			return true
 		}
 	}
 	return false
 }
-func (i *Index) Closest(group []ParticipantArea) (Crossing, bool) {
+func (i *Index) Closest(group []ParticipantArea) (Intersection, bool) {
 	if len(group) == 0 {
-		return Crossing{}, false
+		return Intersection{}, false
 	}
 	counts := map[int]int{}
 	center := Point{}
 	for _, p := range group {
 		candidates, ok := i.reachable[p]
 		if !ok {
-			return Crossing{}, false
+			return Intersection{}, false
 		}
 		for _, n := range candidates {
 			counts[n]++
@@ -91,7 +91,7 @@ func (i *Index) Closest(group []ParticipantArea) (Crossing, bool) {
 	best := -1
 	distance := 0.0
 	// Scan stable ID order so equal distances resolve deterministically.
-	for n, c := range i.Crossings {
+	for n, c := range i.Intersections {
 		if counts[n] != len(group) {
 			continue
 		}
@@ -102,7 +102,7 @@ func (i *Index) Closest(group []ParticipantArea) (Crossing, bool) {
 		}
 	}
 	if best < 0 {
-		return Crossing{}, false
+		return Intersection{}, false
 	}
-	return i.Crossings[best], true
+	return i.Intersections[best], true
 }

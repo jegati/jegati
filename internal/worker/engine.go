@@ -116,7 +116,7 @@ func (e *Engine) Step(ctx context.Context) error {
 	}
 	open := []matching.Gathering{}
 	for _, g := range e.Open() {
-		open = append(open, matching.Gathering{ID: g.ID, Crossing: g.Crossing, EndsAt: g.EndsAt})
+		open = append(open, matching.Gathering{ID: g.ID, Intersection: g.Intersection, EndsAt: g.EndsAt})
 	}
 	pending, err := e.Store.PendingReservations(ctx, e.Config.Limits.MaxActiveSignals)
 	if err != nil {
@@ -126,7 +126,7 @@ func (e *Engine) Step(ctx context.Context) error {
 	// competing gatherings while the original cohort's stability timer is running.
 	for _, p := range pending {
 		if p.ExpiresAt > now {
-			open = append(open, matching.Gathering{ID: p.ID, Crossing: p.Crossing, EndsAt: p.ReadyAt + int64(e.Config.Matching.MinimumRemainingMinutes)*60000})
+			open = append(open, matching.Gathering{ID: p.ID, Intersection: p.Intersection, EndsAt: p.ReadyAt + int64(e.Config.Matching.MinimumRemainingMinutes)*60000})
 		}
 	}
 	for n := 0; n < e.Config.Matching.CandidateBatchSize; n++ {
@@ -142,7 +142,7 @@ func (e *Engine) Step(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		open = append(open, matching.Gathering{ID: id, Crossing: proposal.Crossing, EndsAt: reservation.ReadyAt + int64(e.Config.Matching.MinimumRemainingMinutes)*60000})
+		open = append(open, matching.Gathering{ID: id, Intersection: proposal.Intersection, EndsAt: reservation.ReadyAt + int64(e.Config.Matching.MinimumRemainingMinutes)*60000})
 	}
 	return nil
 }

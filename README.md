@@ -10,18 +10,19 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 Milestones 02–08 are complete: configuration, coarse Tirana geography, expiring
 willingness APIs and the Albanian browser participation flow. The UI supports
-manual coarse areas, optional one-shot location, availability/radius choices,
-reload recovery and cancellation. Continuous matching, automatic crosswalk
+required one-shot device location, availability/radius choices,
+reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
 implemented. Collective maps and notification subscriptions are not implemented yet. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
 exercise willingness, retries, cancellation, expiry and Sybil bursts with a local
 synthetic map report.
 
-**Privacy gate unresolved:** a reproducible synthetic collusion test reconstructs
-one participant's coarse cell from the ordinary nearest-crossing invitation.
+**Known privacy limitation:** a reproducible synthetic collusion test reconstructs
+one participant's coarse cell from the ordinary nearest-intersection invitation.
 See the [evidence and product decision](docs/reports/09-inference-gate.md).
 The prototype does not yet meet the full inference-protection requirement and is
-not ready for public deployment. Public activity features are paused at this gate.
+not ready for public deployment. The user retained nearest-crossroad matching with
+this limitation; local development can continue (see [decision 0004](docs/decisions/0004-crossroads-and-device-location.md)).
 
 Read the [local development guide](docs/DEVELOPMENT.md) for setup and working commands.
 

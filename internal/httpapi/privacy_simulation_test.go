@@ -45,7 +45,7 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	}
 	_, configHash := c.Canonical()
 	grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
-	raw, e = os.ReadFile("../../data/tirana/crossings.json")
+	raw, e = os.ReadFile("../../data/tirana/intersections.json")
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -53,7 +53,7 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	if json.Unmarshal(raw, &dataset) != nil {
 		t.Fatal("invalid fixture")
 	}
-	index, e := geography.NewIndex(grid, dataset.Crossings, c.Geography.TravelRadiusChoicesKm)
+	index, e := geography.NewIndex(grid, dataset.Intersections, c.Geography.TravelRadiusChoicesKm)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -64,22 +64,22 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	}
 	possible := map[string]map[string]bool{}
 	compatible := map[string]bool{}
-	targetByCrossing := map[string]geography.ParticipantArea{}
+	targetByIntersection := map[string]geography.ParticipantArea{}
 	for y := 0; y < grid.Rows; y++ {
 		for x := 0; x < grid.Columns; x++ {
 			for _, radius := range c.Geography.TravelRadiusChoicesKm {
 				target := geography.ParticipantArea{Cell: geography.Cell{X: x, Y: y}, RadiusKM: radius}
-				crossing, ok := index.Closest(append(group, target))
+				intersection, ok := index.Closest(append(group, target))
 				if !ok {
 					continue
 				}
 				cell := grid.ID(target.Cell)
 				compatible[cell] = true
-				if possible[crossing.ID] == nil {
-					possible[crossing.ID] = map[string]bool{}
-					targetByCrossing[crossing.ID] = target
+				if possible[intersection.ID] == nil {
+					possible[intersection.ID] = map[string]bool{}
+					targetByIntersection[intersection.ID] = target
 				}
-				possible[crossing.ID][cell] = true
+				possible[intersection.ID][cell] = true
 			}
 		}
 	}
@@ -97,7 +97,7 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 		t.Fatal("no compatible synthetic target")
 	}
 	selected := ids[0]
-	target := targetByCrossing[selected]
+	target := targetByIntersection[selected]
 	engine := worker.New(backend, index, c)
 	handler := Handler(c, backend, nil, engine)
 	call := func(method, path, token, body string) *httptest.ResponseRecorder {
@@ -148,7 +148,7 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	after := call("GET", "/api/signal", attacker[0], "")
 	var afterView sessionView
 	json.Unmarshal(after.Body.Bytes(), &afterView)
-	if afterView.Invitation == nil || afterView.Invitation.Crossing.ID != selected {
+	if afterView.Invitation == nil || afterView.Invitation.Intersection.ID != selected {
 		t.Fatal("observed invitation did not reproduce selection model")
 	}
 	cells := []string{}
@@ -159,8 +159,8 @@ func TestKnownColludingInvitationInference(t *testing.T) {
 	report := map[string]any{
 		"status": "privacy_gate_failed", "synthetic_only": true, "config_sha256": configHash, "dataset": dataset.Version,
 		"activation_threshold": c.Matching.ActivationCount, "controlled_credentials": len(attacker), "controlled_networks": 1,
-		"invitation_without_target": false, "invitation_with_target": true, "compatible_target_cells_before_crossing": len(compatible),
-		"possible_target_cells_after_crossing": cells, "actual_synthetic_target_cell": grid.ID(target.Cell), "observed_crossing": selected,
+		"invitation_without_target": false, "invitation_with_target": true, "compatible_target_cells_before_intersection": len(compatible),
+		"possible_target_cells_after_intersection": cells, "actual_synthetic_target_cell": grid.ID(target.Cell), "observed_intersection": selected,
 		"assumptions": []string{"Observer controls all but one founding credential and knows its own coarse inputs.", "Exactly one additional synthetic signal exists in this isolated candidate neighborhood.", "Target radius is unknown; all configured radii are included in the inference set.", "No exact target GPS, account identity, database contents, or public aggregate endpoint is observed."},
 		"finding":     "The ordinary anonymous invitation reveals the extra signal's participation and narrows its private coarse cell under these assumptions. It does not reveal a civil identity or exact GPS by itself.",
 	}

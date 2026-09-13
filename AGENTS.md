@@ -57,11 +57,11 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
 - Availability starts at 30 minutes. Match continuously on changes/expiry and
   timer deadlines, without aligned appointment slots. Delayed public publication
   is a separate privacy mechanism, not a delay imposed on internal matching.
-- Automatically choose the eligible mapped pedestrian crosswalk nearest the
+- Automatically choose the eligible mapped road intersection (crossroad) nearest the
   coarse group's center that all counted users can reach within their radii.
   Use imported map data, not a manually predefined meeting-area catalog. No shared
-  mapped crossing means no invented destination. Describe pedestrian space beside
-  the crossing; do not position a gathering in the roadway.
+  mapped intersection means no invented destination. Describe pedestrian space beside
+  the intersection; do not position a gathering in the roadway.
 - Freeze an activated gathering's destination and deadline. Newly notified users
   can join before the admission cutoff, including after JEMI KËTU. Revalidate
   reachability, remaining availability and live gathering state on admission.
@@ -75,8 +75,11 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
 
 ## Privacy and security invariants
 
+- Require a fresh device-location fix for willingness and arrival; no manual
+  participant-location selection. Reject stale/poor fixes using public settings.
+  Device location is not authenticated proof of accuracy or presence.
 - Convert one-shot device coordinates to coarse cells locally. Never transmit or
-  persist exact participant coordinates. Public crossing geometry is map data.
+  persist exact participant coordinates. Public intersection geometry is map data.
 - Use random expiring capabilities; store their hashes, transmit secrets only in
   authorization headers, and never introduce permanent participant/device IDs.
 - Every participant record, link, index entry, nonce, queue item, subscription and
@@ -92,7 +95,7 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
   represent destinations and must pass publication rules.
 - Review all observable surfaces together: maps, private invitations, admission
   responses, arrival updates, history, area alerts, caches and configuration.
-  Test differencing, colluding inputs and nearest-crossing inference.
+  Test differencing, colluding inputs and nearest-intersection inference.
 - Never cache authenticated responses in shared caches. Public alerts use released
   buckets; they cannot consult suppressed raw counts. Push is optional, expiring,
   minimally revealing and separate from willingness. Use first-party map assets.
@@ -118,7 +121,7 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
   Never commit credentials, real participant data, downloaded toolchains or caches.
 - Tests should verify behavior and threats rather than mirror implementation.
   Cover configuration rejection, expiry, race/retry behavior, radius boundaries,
-  continuous timing, automatic crossing selection, late admission, arrival replay,
+  continuous timing, automatic intersection selection, late admission, arrival replay,
   aggregate leakage and notification lifecycle as each feature lands.
 - Use seeded synthetic Tirana scenarios and a controllable clock for functional
   tests. Use real time for load tests, report hardware and accepted/rejected traffic,

@@ -69,10 +69,10 @@ creation retries now explicitly check stored deadlines as well as native TTL.
 Signals can contain private `_pending`, `_pending_until`, `_gathering`,
 `_gathering_until` and `_declined` bookkeeping. The own-session API removes these
 fields; the upcoming invitation view will expose only the selected gathering.
-`pending:<id>` holds a bounded founding hash list and public crossing while the
+`pending:<id>` holds a bounded founding hash list and public intersection while the
 stability timer runs; its TTL covers stability plus bounded recovery. The `pending`
 sorted index uses ready-at scores and a TTL no longer than its latest reservation.
-`destination:<crossing-id>` prevents duplicate use of that exact crossing while
+`destination:<intersection-id>` prevents duplicate use of that exact intersection while
 reserved/open, with the corresponding reservation/gathering lifetime.
 Activation deletes the pending record/index member and sets `gathering:<id>` plus
 a deadline-scored `gatherings` index, with TTL at the fixed end (maximum 60 minutes).

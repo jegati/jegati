@@ -67,7 +67,7 @@ var createAndJoin = newScript(`
 __CLOCK__
 local event=redis.call('GET',KEYS[5]);if not event then return 'GONE' end
 local g=cjson.decode(event)
-if g.ends_at<=now or g.crossing.id~=ARGV[9] then return 'GONE' end
+if g.ends_at<=now or g.intersection.id~=ARGV[9] then return 'GONE' end
 local previous=redis.call('GET',KEYS[1])
 if previous then
  local v=cjson.decode(previous)
@@ -89,7 +89,7 @@ return cjson.encode(s)
 `)
 
 func (s *Store) CreateAndJoin(ctx context.Context, hash, cell string, radius, minutes, capacity int, g Gathering, minimumMS int64) (Signal, error) {
-	raw, e := createAndJoin.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell, keyPrefix + "gathering:" + g.ID}, cell, radius, minutes, int64(minutes)*60000, capacity, hash+"|"+cell, hash, minimumMS, g.Crossing.ID).Text()
+	raw, e := createAndJoin.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "cap:" + hash, keyPrefix + "expiry", keyPrefix + "cell:" + cell, keyPrefix + "gathering:" + g.ID}, cell, radius, minutes, int64(minutes)*60000, capacity, hash+"|"+cell, hash, minimumMS, g.Intersection.ID).Text()
 	if e != nil {
 		return Signal{}, errors.New("joining unavailable")
 	}

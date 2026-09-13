@@ -50,7 +50,7 @@ __CLOCK__
 local raw=redis.call('GET',KEYS[1]);local challenge=redis.call('GET',KEYS[2]);local event=redis.call('GET',KEYS[3])
 if not raw or not challenge or not event then return 'GONE' end
 local s=cjson.decode(raw);local nonce=cjson.decode(challenge);local g=cjson.decode(event)
-if s.expires_at<=now or g.ends_at<=now or nonce.expires_at<=now or nonce.hash~=ARGV[1] or nonce.gathering~=g.id or s._gathering~=g.id or g.crossing.id~=ARGV[3] then return 'GONE' end
+if s.expires_at<=now or g.ends_at<=now or nonce.expires_at<=now or nonce.hash~=ARGV[1] or nonce.gathering~=g.id or s._gathering~=g.id or g.intersection.id~=ARGV[3] then return 'GONE' end
 if nonce.used then if s.state=='here' and (s.arrival_until or 0)>now and s._arrival_member==ARGV[4]..'|'..ARGV[1] then return raw end;return 'GONE' end
 if s.state~='going' or (s.arrival_until or 0)>now then return 'CONFLICT' end
 if s._arrival_member then redis.call('ZREM',KEYS[4],s._arrival_member) end
@@ -64,7 +64,7 @@ return cjson.encode(s)
 `)
 
 func (s *Store) ConfirmArrival(ctx context.Context, hash, nonceHash string, g Gathering, freshnessMS int64) (Signal, error) {
-	raw, e := confirmArrival.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash, keyPrefix + "gathering:" + g.ID, keyPrefix + "arrivals:" + g.ID}, nonceHash, freshnessMS, g.Crossing.ID, hash).Text()
+	raw, e := confirmArrival.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash, keyPrefix + "gathering:" + g.ID, keyPrefix + "arrivals:" + g.ID}, nonceHash, freshnessMS, g.Intersection.ID, hash).Text()
 	if e != nil {
 		return Signal{}, errors.New("arrival confirmation unavailable")
 	}

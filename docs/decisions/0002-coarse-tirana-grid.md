@@ -1,4 +1,4 @@
-# 0002 — Fixed coarse Tirana grid and imported crossing index
+# 0002 — Fixed coarse Tirana grid and imported intersection index
 
 Date: 2026-09-13. Status: implemented geographic foundation; matching engine pending.
 
@@ -21,9 +21,9 @@ coefficients. This is more conservative than checking only a cell center. Unit t
 sample cell interiors/boundaries and verify rejection of center-only radius matches.
 It is a geographic distance rule, not a pedestrian-route or travel-time guarantee.
 
-Build a finite cell/radius-to-crossing index at startup/offline, sorted by map ID.
-Closest shared selection uses the mean of member cell centers and only crossings
-reachable for every member. No crossings produces no destination. The higher-level
+Build a finite cell/radius-to-intersection index at startup/offline, sorted by map ID.
+Closest shared selection uses the mean of member cell centers and only intersections
+reachable for every member. No intersections produces no destination. The higher-level
 continuous allocation/stability algorithm remains milestone 07.
 
 Import actual OSM nodes/ways and archive provenance. Do not manufacture missing map

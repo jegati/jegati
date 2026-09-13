@@ -35,7 +35,7 @@ func run() error {
 	address := flag.String("listen", "127.0.0.1:8080", "HTTP bind address")
 	storeAddress := flag.String("store-address", "", "Valkey address (empty disables participant writes)")
 	passwordFile := flag.String("store-password-file", "", "mounted service password file")
-	crossingFile := flag.String("crossings", "data/tirana/crossings.json", "versioned public crossing dataset")
+	intersectionFile := flag.String("intersections", "data/tirana/intersections.json", "versioned public intersection dataset")
 	mapFile := flag.String("roads", "data/tirana/roads.geojson", "public road asset")
 	flag.Parse()
 	if flag.NArg() != 0 {
@@ -83,16 +83,16 @@ func run() error {
 	}
 	var engine *worker.Engine
 	if backend != nil {
-		raw, e := os.ReadFile(*crossingFile)
+		raw, e := os.ReadFile(*intersectionFile)
 		if e != nil {
-			return errors.New("cannot read crossing dataset")
+			return errors.New("cannot read intersection dataset")
 		}
 		var dataset geography.Dataset
-		if json.Unmarshal(raw, &dataset) != nil || dataset.Version != c.Geography.CrossingDataset {
-			return errors.New("crossing dataset version mismatch")
+		if json.Unmarshal(raw, &dataset) != nil || dataset.Version != c.Geography.IntersectionDataset {
+			return errors.New("intersection dataset version mismatch")
 		}
 		grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
-		index, e := geography.NewIndex(grid, dataset.Crossings, c.Geography.TravelRadiusChoicesKm)
+		index, e := geography.NewIndex(grid, dataset.Intersections, c.Geography.TravelRadiusChoicesKm)
 		if e != nil {
 			return e
 		}

@@ -23,7 +23,7 @@ anonymous to network providers or its operator.
 | Threat / actor | Planned mitigation | Evidence required; current gap |
 | --- | --- | --- |
 | Public scraper infers a participant | Fixed delayed releases, suppression/buckets, no individual/queryable counts | Map/history/cache composition and withdrawal/differencing tests; inference unresolved |
-| Enrolled attacker probes private decisions | Bounded admission/invites, stable threshold, no counts, coarse selection | Colluding enrollment, late-join and crossing-choice probe scenarios; no formal guarantee |
+| Enrolled attacker probes private decisions | Bounded admission/invites, stable threshold, no counts, coarse selection | Colluding enrollment, late-join and intersection-choice probe scenarios; no formal guarantee |
 | Sybil attacker fabricates signals/arrivals | Rate/admission budgets, temporary credentials, bounded challenges if useful | Measure false activations and shared-NAT fairness; unique humans unproven |
 | Client spoofs presence/replays requests | One-use nonce, eligibility, atomic one-claim rule, freshness | Replay/race/expiry tests; genuine physical presence unproven |
 | API client exhausts resources | Schema/body/deadline limits, bounded work/queues, rate limits | Sustained/burst/hotspot tests including accepted and rejected requests |
@@ -80,21 +80,21 @@ They establish neither independent arrivals nor resistance to distributed Sybils
 Reservations lock the same bounded founding cohort through stability; atomic
 activation rechecks immutable geographic claims, availability and configuration.
 Public serialization removes reservation IDs, founder hashes and decline links.
-Private invitations expose a collective crossing/time event, not counts. New
+Private invitations expose a collective intersection/time event, not counts. New
 recipients can atomically join without an orphan willingness on rejection. Going
 and decline revalidate expiry, reachability and state; retries do not renew time.
 Cached destination offers are revalidated against the live store before admission.
 
-This does not solve colluding threshold probes or nearest-crossing inference. Full
+This does not solve colluding threshold probes or nearest-intersection inference. Full
 cross-surface review is still a release gate. The worker's snapshot/selection cost,
-lease recovery, fairness, same-crossing conflicts and temporary-index cleanup need
+lease recovery, fairness, same-intersection conflicts and temporary-index cleanup need
 stress/failure testing. Config changes invalidate pending reservations; handling a
-removed crossing in an already-open gathering remains hardening work.
+removed intersection in an already-open gathering remains hardening work.
 
 ### Implemented arrival boundary (milestone 08)
 
 A fresh one-shot browser position is coarsened locally; the request sends only the
-coarse cell and authorization headers. The server validates the allowed crossing
+coarse cell and authorization headers. The server validates the allowed intersection
 cell/rings, current going state, gathering/session deadlines and a one-use nonce.
 Raw nonces remain in browser memory only; the store keeps hashes with bounded TTL.
 Replays cannot duplicate/refresh confirmation or restore a retracted claim. Stable
@@ -115,5 +115,20 @@ controls the other 19 founding signals. It reduces 127 compatible cells to one
 while allowing every configured target radius. This is a concrete unmet privacy
 requirement, not merely a hypothetical residual risk or an anonymity-proof caveat.
 No public aggregate endpoint is involved. Rate limits/TTL/delayed public releases
-do not eliminate this counterexample. Public activity work is paused for the
-product/privacy decision; no stronger claim is authorized by the current tests.
+do not eliminate this counterexample. The user retained nearest-crossroad selection under this bounded claim (decision
+0004); local work may continue, with no stronger privacy claim.
+
+### Device-only location boundary (schema 5)
+
+The shipped UI requires device geolocation for willingness and arrival; it offers
+no manual participant area, pin or address input. One-shot high-accuracy requests
+and public-config age/accuracy checks reject poor fixes locally. Exact coordinates
+and reported accuracy are discarded after local coarsening, not uploaded. Required
+permission may exclude devices without a usable fix. Browser/OS location services
+may use external providers; GATI cannot control their metadata handling.
+
+A modified browser or direct API caller can still fabricate the coarse cell and
+reported quality. The server has no authenticated evidence of GPS, a person's
+location or unique humanity. Removing manual entry does not repair the collusion
+counterexample. W3C describes device position and accuracy estimates, not physical
+presence attestation: https://www.w3.org/TR/geolocation/.

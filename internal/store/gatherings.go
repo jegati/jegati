@@ -12,20 +12,20 @@ import (
 )
 
 type Reservation struct {
-	ID         string             `json:"id"`
-	Crossing   geography.Crossing `json:"crossing"`
-	Founders   []string           `json:"founders"`
-	ReadyAt    int64              `json:"ready_at"`
-	ExpiresAt  int64              `json:"expires_at"`
-	ConfigHash string             `json:"config_sha256"`
+	ID           string                 `json:"id"`
+	Intersection geography.Intersection `json:"intersection"`
+	Founders     []string               `json:"founders"`
+	ReadyAt      int64                  `json:"ready_at"`
+	ExpiresAt    int64                  `json:"expires_at"`
+	ConfigHash   string                 `json:"config_sha256"`
 }
 type Gathering struct {
-	ID          string             `json:"id"`
-	Crossing    geography.Crossing `json:"crossing"`
-	ActivatedAt int64              `json:"activated_at"`
-	EndsAt      int64              `json:"ends_at"`
-	State       string             `json:"state"`
-	ConfigHash  string             `json:"config_sha256"`
+	ID           string                 `json:"id"`
+	Intersection geography.Intersection `json:"intersection"`
+	ActivatedAt  int64                  `json:"activated_at"`
+	EndsAt       int64                  `json:"ends_at"`
+	State        string                 `json:"state"`
+	ConfigHash   string                 `json:"config_sha256"`
 }
 
 var readClock = newScript(`__CLOCK__; return now`)
@@ -65,7 +65,7 @@ func (s *Store) Reserve(ctx context.Context, id, configHash string, p matching.P
 	if len(p.Founders) == 0 || len(p.Founders) > 500 || stabilityMS < 1 || recoveryMS < 1 || minimumMS < 1 {
 		return result, errors.New("reservation outside transaction bounds")
 	}
-	proposal := Reservation{ID: id, Crossing: p.Crossing, ConfigHash: configHash}
+	proposal := Reservation{ID: id, Intersection: p.Intersection, ConfigHash: configHash}
 	seen := map[string]bool{}
 	for _, founder := range p.Founders {
 		if seen[founder.Hash] {
@@ -80,7 +80,7 @@ func (s *Store) Reserve(ctx context.Context, id, configHash string, p matching.P
 	}
 	raw, _ := json.Marshal(proposal)
 	claims, _ := json.Marshal(expected)
-	value, e := reserve.Run(ctx, s.Client, []string{keyPrefix + "pending:" + id, keyPrefix + "pending", keyPrefix + "gathering:" + id, keyPrefix + "destination:" + p.Crossing.ID}, string(raw), stabilityMS, recoveryMS, minimumMS, string(claims)).Text()
+	value, e := reserve.Run(ctx, s.Client, []string{keyPrefix + "pending:" + id, keyPrefix + "pending", keyPrefix + "gathering:" + id, keyPrefix + "destination:" + p.Intersection.ID}, string(raw), stabilityMS, recoveryMS, minimumMS, string(claims)).Text()
 	if e != nil {
 		return result, errors.New("reservation failed")
 	}
@@ -110,11 +110,11 @@ if not valid then
  for _,entry in ipairs(records) do
   local v=entry.value;if v._pending==p.id then v._pending=nil;v._pending_until=nil;redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL') end
  end
- redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);if redis.call('GET','gati:destination:'..p.crossing.id)==p.id then redis.call('DEL','gati:destination:'..p.crossing.id) end;return 'GONE'
+ redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);if redis.call('GET','gati:destination:'..p.intersection.id)==p.id then redis.call('DEL','gati:destination:'..p.intersection.id) end;return 'GONE'
 end
-local g={id=p.id,crossing=p.crossing,activated_at=now,ends_at=ends,state='jemi_gati',config_sha256=p.config_sha256}
+local g={id=p.id,intersection=p.intersection,activated_at=now,ends_at=ends,state='jemi_gati',config_sha256=p.config_sha256}
 redis.call('SET',KEYS[3],cjson.encode(g),'PX',ends-now)
-redis.call('SET','gati:destination:'..g.crossing.id,g.id,'PX',ends-now)
+redis.call('SET','gati:destination:'..g.intersection.id,g.id,'PX',ends-now)
 redis.call('ZADD',KEYS[4],ends,g.id)
 if redis.call('PTTL',KEYS[4])<ends-now then redis.call('PEXPIRE',KEYS[4],ends-now) end
 for _,entry in ipairs(records) do

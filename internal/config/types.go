@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 4
+const SchemaVersion = 5
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -22,9 +22,11 @@ type Availability struct {
 }
 
 type Geography struct {
-	CellSizeMeters        int    `yaml:"cell_size_meters" json:"cell_size_meters"`
-	TravelRadiusChoicesKm []int  `yaml:"travel_radius_choices_km" json:"travel_radius_choices_km"`
-	CrossingDataset       string `yaml:"crossing_dataset" json:"crossing_dataset"`
+	LocationMaxAccuracyMeters int    `yaml:"location_max_accuracy_meters" json:"location_max_accuracy_meters"`
+	LocationFixMaxAgeSeconds  int    `yaml:"location_fix_max_age_seconds" json:"location_fix_max_age_seconds"`
+	CellSizeMeters            int    `yaml:"cell_size_meters" json:"cell_size_meters"`
+	TravelRadiusChoicesKm     []int  `yaml:"travel_radius_choices_km" json:"travel_radius_choices_km"`
+	IntersectionDataset       string `yaml:"intersection_dataset" json:"intersection_dataset"`
 }
 
 type Matching struct {
@@ -34,7 +36,7 @@ type Matching struct {
 	MaximumDebounceSeconds      int    `yaml:"maximum_debounce_seconds" json:"maximum_debounce_seconds"`
 	ReconciliationSeconds       int    `yaml:"reconciliation_seconds" json:"reconciliation_seconds"`
 	MinimumRemainingMinutes     int    `yaml:"minimum_remaining_minutes" json:"minimum_remaining_minutes"`
-	CrossingIndexBatchSize      int    `yaml:"crossing_index_batch_size" json:"crossing_index_batch_size"`
+	IntersectionIndexBatchSize  int    `yaml:"intersection_index_batch_size" json:"intersection_index_batch_size"`
 	CandidateBatchSize          int    `yaml:"candidate_batch_size" json:"candidate_batch_size"`
 	DestinationRule             string `yaml:"destination_rule" json:"destination_rule"`
 	PreferOpenGatherings        bool   `yaml:"prefer_open_gatherings" json:"prefer_open_gatherings"`

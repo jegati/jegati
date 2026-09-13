@@ -40,13 +40,13 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 		t.Fatal(e)
 	}
 	grid, _ := geography.NewGrid(c.Geography.CellSizeMeters)
-	mapData, e := os.ReadFile("../../data/tirana/crossings.json")
+	mapData, e := os.ReadFile("../../data/tirana/intersections.json")
 	if e != nil {
 		t.Fatal(e)
 	}
 	var dataset geography.Dataset
 	json.Unmarshal(mapData, &dataset)
-	index, e := geography.NewIndex(grid, dataset.Crossings, c.Geography.TravelRadiusChoicesKm)
+	index, e := geography.NewIndex(grid, dataset.Intersections, c.Geography.TravelRadiusChoicesKm)
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -126,7 +126,7 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 			t.Fatalf("late admission: %d", w.Code)
 		}
 		json.Unmarshal(w.Body.Bytes(), &newcomer)
-		if newcomer.State != "going" || newcomer.Invitation.EndsAt != original.EndsAt || newcomer.Invitation.Crossing.ID != original.Crossing.ID {
+		if newcomer.State != "going" || newcomer.Invitation.EndsAt != original.EndsAt || newcomer.Invitation.Intersection.ID != original.Intersection.ID {
 			t.Fatal("late admission moved destination/deadline or failed intent")
 		}
 	}
@@ -136,7 +136,7 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 	if w.Code != 200 {
 		t.Fatal("founder going failed")
 	}
-	arrivalCell, _ := grid.CellAt(original.Crossing.Point)
+	arrivalCell, _ := grid.CellAt(original.Intersection.Point)
 	arrivalBody := `{"cell":"` + grid.ID(arrivalCell) + `"}`
 	lastNonce := map[string]string{}
 	arrive := func(token string) {

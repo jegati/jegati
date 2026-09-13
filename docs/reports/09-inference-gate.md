@@ -1,9 +1,14 @@
 # Publication gate: colluding invitation inference
 
-Date: 2026-09-13. **Status: failed; product decision needed before continuing public
-activity features.** All inputs in this report are synthetic. No real participant
+Date: 2026-09-13. **Status: inference failure retained as an explicit limitation;
+user elected to retain nearest destinations (decision 0004).** All inputs in this report are synthetic. No real participant
 or device location was used. This is a counterexample to the broad inference
 protection requirement, not a failure of the documented exact-coordinate boundary.
+
+The original evidence below used the crosswalk dataset. The user subsequently
+corrected the landmark to a road intersection and required device-only location
+input. The original report is retained as historical evidence. Local development
+may continue under the bounded claim; this is not a privacy pass or deployment approval.
 
 ## Reproduction
 
@@ -67,7 +72,20 @@ for analysis, not a demonstrated fix; it would change the exact nearest-crosswal
 requirement and still needs a collusion/contribution model. No identity collection
 is proposed, and no homemade noise mechanism is being presented as a privacy proof.
 
-No choice has been inferred on the user's behalf. Public map/statistics/area-alert
-surfaces have not been added. The local core-flow prototype remains available for
-synthetic testing, with this limitation prominently recorded. Work can resume from
-milestone 09 after the intended privacy standard is resolved.
+## Decision and crossroad recheck
+
+The user retained nearest destinations after the decision request, correcting
+crosswalk to crossroad and removing manual location input. See
+[decision 0004](../decisions/0004-crossroads-and-device-location.md). The selected
+rule remains deterministic; the absolute inference requirement remains unmet.
+
+`make privacy-probe` was rerun on `tirana-intersections-v1`, schema 5. It again
+narrows 127 compatible cells to one, now `tirana-v1:1000:7:3`, from the invitation
+landmark `node/10124813384`. It used 19 controlled credentials plus one synthetic
+target under production limits and deliberately exited 2. The new independent
+[synthetic evidence](09-crossroad-inference-counterexample.json) retains the new
+config hash; the original crosswalk JSON was not overwritten.
+
+Device-only input in the shipped UI does not authenticate a direct API caller's
+coarse cell or prevent a modified client. No real geolocation was used in either
+probe. Keep this known-failure diagnostic distinct from passing lifecycle tests.

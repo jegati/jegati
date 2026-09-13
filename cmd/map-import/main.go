@@ -16,7 +16,7 @@ import (
 func main() {
 	source := flag.String("source", "data/tirana/source/overpass.json.gz", "gzip public source extract")
 	output := flag.String("out", "data/tirana", "output directory")
-	version := flag.String("version", "tirana-crossings-v1", "public dataset version")
+	version := flag.String("version", "tirana-intersections-v1", "public dataset version")
 	flag.Parse()
 	if err := run(*source, *output, *version); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -48,7 +48,7 @@ func run(source, output, version string) error {
 	for _, item := range []struct {
 		name  string
 		value any
-	}{{"crossings.json", dataset}, {"roads.geojson", roads}} {
+	}{{"intersections.json", dataset}, {"roads.geojson", roads}} {
 		b, e := json.Marshal(item.value)
 		if e != nil {
 			return e
@@ -58,6 +58,6 @@ func run(source, output, version string) error {
 			return e
 		}
 	}
-	fmt.Printf("Imported %d crossings and %d road segments; source sha256 %s\n", len(dataset.Crossings), len(roads.Features), dataset.SourceSHA256)
+	fmt.Printf("Imported %d intersections and %d road segments; source sha256 %s\n", len(dataset.Intersections), len(roads.Features), dataset.SourceSHA256)
 	return nil
 }

@@ -3,8 +3,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import * as maplibregl from 'maplibre-gl';
 import workerURL from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 maplibregl.setWorkerUrl(workerURL);
-import { cellAt, polygon, type Grid } from './area';
+import { polygon, type Grid } from './area';
 import * as sessions from './session';
+import { locateCell } from './location';
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const form = el<HTMLFormElement>('willingness'), active = el('active'), status = el('status');
@@ -14,12 +15,13 @@ let session = sessions.restore(), selected: string | null = null, busy = false;
 let pollSeconds = 30, nextPoll = 0, failures = 0, operations = 0, cancelling = false;
 let here = false, arrivalUntil = 0, nonceSeconds = 120;
 let currentGrid: Grid | undefined;
+let locationMaxAccuracy = 100, locationMaxAge = 60, selectedUntil = 0;
 let pendingNonce: { token: string; expires: number; issued: boolean } | null = null;
 function begin() { operations++; busy = true; render(); }
 function finish() { operations--; busy = operations > 0; render(); }
 let map: maplibregl.Map | undefined;
 let initialized = false;
-interface Invitation { id: string; crossing: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
+interface Invitation { id: string; intersection: { id: string; label: string; point: [number, number] }; ends_at: number; state: string }
 let invitation: Invitation | null = null, going = false, destinationMap: maplibregl.Map | undefined;
 let renderedDestination: string | null = null;
 function invitationView() {
@@ -31,7 +33,7 @@ function invitationView() {
   el<HTMLButtonElement>('retract').hidden = !here;
   el<HTMLButtonElement>('retract').disabled = busy;
   el('arrival-status').textContent = here ? 'Mbërritja jote është konfirmuar përkohësisht.' : going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
-  el('destination').textContent = invitation.crossing.label;
+  el('destination').textContent = invitation.intersection.label;
   el('gathering-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((invitation.ends_at - Date.now()) / 60_000))} minutash.`;
   el('going-status').textContent = going ? 'Ke zgjedhur të shkosh.' : 'Mund të zgjedhësh nëse do të shkosh.';
   el<HTMLButtonElement>('going').hidden = going;
@@ -41,7 +43,7 @@ function invitationView() {
   if (renderedDestination === invitation.id) return;
   destinationMap?.remove(); renderedDestination = invitation.id; el('destination-map').removeAttribute('data-ready');
   try {
-    destinationMap = new maplibregl.Map({ container: 'destination-map', center: invitation.crossing.point, zoom: 15,
+    destinationMap = new maplibregl.Map({ container: 'destination-map', center: invitation.intersection.point, zoom: 15,
       attributionControl: false, locale: { 'Map.Title': 'Harta e pikës së takimit' },
       style: { version: 8, sources: { roads: { type: 'geojson', data: '/api/map/roads' } }, layers: [
         { id: 'background', type: 'background', paint: { 'background-color': '#f0eee6' } },
@@ -49,25 +51,26 @@ function invitationView() {
     destinationMap.on('idle', () => { el('destination-map').setAttribute('data-ready', 'true'); });
     // This marker is the shared mapped destination, never a person's position.
     const marker = document.createElement('span'); marker.className = 'destination-marker'; marker.textContent = '🦩'; marker.setAttribute('role', 'img'); marker.setAttribute('aria-label', 'Pika e takimit');
-    new maplibregl.Marker({ element: marker }).setLngLat(invitation.crossing.point).addTo(destinationMap);
+    new maplibregl.Marker({ element: marker }).setLngLat(invitation.intersection.point).addTo(destinationMap);
     destinationMap.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '© OpenStreetMap · ODbL' }));
-    destinationMap.getCanvas().setAttribute('aria-label', 'Pika e takimit pranë vendkalimit për këmbësorë');
+    destinationMap.getCanvas().setAttribute('aria-label', 'Pika e takimit pranë kryqëzimit');
   } catch { el('destination-map').textContent = 'Harta nuk mund të hapet në këtë pajisje.'; }
 }
 const message = (text: string) => { status.textContent = text; };
 function render() {
   form.hidden = session !== null; active.hidden = session === null;
   cancel.disabled = cancelling; retry.disabled = busy;
-  ready.disabled = busy || !selected;
+  ready.disabled = busy || !selected || selectedUntil <= Date.now();
+  el<HTMLButtonElement>('location').disabled = busy;
   retry.hidden = !session || session.confirmed;
   el('active-title').textContent = session?.confirmed ? (here ? 'JAM KËTU.' : 'JAM GATI.') : 'Po kontrollojmë gatishmërinë…';
   invitationView();
   if (session) el('remaining').textContent = `Përfundon pas rreth ${Math.max(1, Math.ceil((session.expires - Date.now()) / 60_000))} minutash.`;
 }
 function end(text: string) {
-  session = null; sessions.clear(); selected = null; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
+  session = null; sessions.clear(); selected = null; selectedUntil = 0; invitation = null; going = false; here = false; arrivalUntil = 0; pendingNonce = null;
   map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
-  el('area-status').textContent = 'Ende nuk ke zgjedhur zonë.';
+  el('area-status').textContent = 'Vendndodhja ende nuk është marrë.';
   render(); map?.resize(); message(text);
 }
 async function request(method: string, path: string, body?: unknown, extraHeaders: Record<string, string> = {}) {
@@ -98,7 +101,7 @@ async function sync(create = false) {
 }
 form.addEventListener('submit', event => {
   event.preventDefault();
-  if (busy || !selected || session) return;
+  if (busy || !selected || selectedUntil <= Date.now() || session) return;
   session = sessions.create({ cell: selected, radius_km: Number(radius.value), availability_minutes: Number(duration.value) });
   sessions.save(session); void sync(true);
 });
@@ -136,14 +139,6 @@ function applySignal(signal: { invitation?: Invitation; state: string; arrival_u
   invitation = signal.invitation ?? null; going = signal.state === 'going' || signal.state === 'here';
   here = signal.state === 'here'; arrivalUntil = signal.arrival_until ?? 0;
 }
-function locateOnce(): Promise<GeolocationPosition> {
-  return new Promise((resolve, reject) => {
-    // Bound even time spent waiting for the browser permission prompt.
-    const timer = setTimeout(() => reject(new Error('location unavailable')), 12_000);
-    if (!navigator.geolocation) { clearTimeout(timer); reject(new Error('location unavailable')); return; }
-    navigator.geolocation.getCurrentPosition(position => { clearTimeout(timer); resolve(position); }, () => { clearTimeout(timer); reject(new Error('location unavailable')); }, { enableHighAccuracy: false, maximumAge: 0, timeout: 10_000 });
-  });
-}
 el<HTMLButtonElement>('arrive').onclick = async () => {
   if (busy || !session || !invitation || !currentGrid) return;
   const owner = session.token; begin();
@@ -159,10 +154,8 @@ el<HTMLButtonElement>('arrive').onclick = async () => {
       nonce.expires = Math.min(nonce.expires, challenge.expires_at); nonce.issued = true;
     }
     if (session?.token !== owner) return;
-    const position = await locateOnce();
+    const { cell } = await locateCell(currentGrid, locationMaxAccuracy, locationMaxAge);
     if (session?.token !== owner) return;
-    const cell = cellAt(currentGrid, position.coords.longitude, position.coords.latitude);
-    if (!cell) { message('Aktualisht GATI mbulon vetëm Tiranën.'); return; }
     const response = await request('POST', '/api/arrival', { cell }, headers);
     if (!response.ok) throw new Error('unavailable');
     if (session?.token !== owner) return;
@@ -184,10 +177,12 @@ async function start() {
   const [configResponse, gridResponse] = await Promise.all(['/api/config', '/api/geography'].map(url => fetch(url, { credentials: 'omit', cache: 'no-store' })));
   if (!configResponse.ok || !gridResponse.ok) throw new Error('unavailable');
   const configuration = await configResponse.json();
-  if (configuration.schema_version !== 4) throw new Error('unsupported schema');
+  if (configuration.schema_version !== 5) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   pollSeconds = config.notifications.foreground_poll_seconds;
   nonceSeconds = config.arrivals.nonce_seconds; currentGrid = grid;
+  locationMaxAccuracy = config.geography.location_max_accuracy_meters;
+  locationMaxAge = config.geography.location_fix_max_age_seconds;
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));
   for (const km of config.geography.travel_radius_choices_km) radius.add(new Option(`${km} km`, String(km)));
   radius.value = String(config.geography.travel_radius_choices_km.includes(3) ? 3 : config.geography.travel_radius_choices_km[0]);
@@ -204,35 +199,38 @@ async function start() {
     map.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">Të dhënat e hartës · OpenStreetMap</a>' }));
     map.getCanvas().setAttribute('aria-label', 'Harta e Tiranës. Përdor shigjetat për të lëvizur, plus dhe minus për zmadhimin.');
     map.on('idle', () => { el('map').setAttribute('data-ready', 'true'); });
-    map.on('click', event => choose(event.lngLat.lng, event.lngLat.lat));
     map.on('error', () => { el('area-status').textContent = 'Harta nuk u hap plotësisht. Mund të përdorësh vendndodhjen një herë.'; });
-    el<HTMLButtonElement>('map-center').onclick = () => { const center = map!.getCenter(); choose(center.lng, center.lat); };
   } catch {
     el('map').textContent = 'Harta nuk mund të hapet në këtë pajisje.';
-    el<HTMLButtonElement>('map-center').disabled = true;
   }
-  function choose(lon: number, lat: number) {
-    if (session || busy) return;
-    const cell = cellAt(grid, lon, lat);
-    if (!cell) { selected = null; render(); map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] }); el('area-status').textContent = 'Aktualisht GATI mbulon vetëm Tiranën. Zgjidh një zonë brenda hartës.'; return; }
-    selected = cell;
+  function drawArea(cell: string) {
     const coordinates = polygon(grid, cell);
     const draw = () => map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [coordinates] } });
     if (map?.isStyleLoaded()) draw(); else map?.once('load', draw);
     // Camera uses the coarse center too; exact device coordinates are discarded.
     map?.jumpTo({ center: [(coordinates[0][0] + coordinates[2][0]) / 2, (coordinates[0][1] + coordinates[2][1]) / 2] });
-    el('area-status').textContent = 'Zona u zgjodh. Pozicioni yt i saktë nuk dërgohet.'; render();
+    el('area-status').textContent = 'Zona u mor nga pajisja. Pozicioni yt i saktë nuk dërgohet.'; render();
   }
-  el<HTMLButtonElement>('location').onclick = () => {
-    if (!navigator.geolocation) { el('area-status').textContent = 'Vendndodhja nuk mbështetet. Zgjidh zonën në hartë.'; return; }
-    const button = el<HTMLButtonElement>('location'); button.disabled = true;
-    navigator.geolocation.getCurrentPosition(position => { button.disabled = false; choose(position.coords.longitude, position.coords.latitude); }, () => {
-      button.disabled = false; el('area-status').textContent = 'Vendndodhja nuk u mor. Mund të zgjedhësh zonën në hartë.';
-    }, { enableHighAccuracy: false, maximumAge: 0, timeout: 10_000 });
+  el<HTMLButtonElement>('location').onclick = async () => {
+    if (busy || session) return;
+    selected = null; selectedUntil = 0;
+    map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
+    begin(); el('area-status').textContent = 'Po merret vendndodhja nga pajisja…';
+    try {
+      const fix = await locateCell(grid, locationMaxAccuracy, locationMaxAge);
+      selected = fix.cell; selectedUntil = fix.expires; drawArea(fix.cell);
+    } catch (error) {
+      el('area-status').textContent = error instanceof Error ? error.message : 'Vendndodhja nuk u mor. Provo përsëri.';
+    } finally { finish(); }
   };
   message('');
   if (session) await sync();
   setInterval(() => {
+    if (selected && !session && selectedUntil <= Date.now()) {
+      selected = null; selectedUntil = 0;
+      map?.getSource<maplibregl.GeoJSONSource>('selection')?.setData({ type: 'FeatureCollection', features: [] });
+      el('area-status').textContent = 'Merr sërish vendndodhjen nga pajisja për të vazhduar.'; render();
+    }
     if (pendingNonce && pendingNonce.expires <= Date.now()) pendingNonce = null;
     if (here && arrivalUntil <= Date.now()) { here = false; arrivalUntil = 0; }
     if (invitation && invitation.ends_at <= Date.now()) { invitation = null; going = false; }
