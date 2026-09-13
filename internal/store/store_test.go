@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func connectTest(t *testing.T) *Store {
+func connectTest(t testing.TB) *Store {
 	t.Helper()
 	if os.Getenv("GATI_INTEGRATION") != "1" {
 		t.Skip("real Valkey test: use make test-store")

@@ -17,7 +17,7 @@ def evaluate(report):
         latency=phase.get('accepted_p95_upper_ms',phase['p95_upper_ms'] if accepted==phase['attempted'] else None)
         if latency is None:failures.append(name+': accepted latency not separately measured')
         elif not 0<latency<300:failures.append(name+': accepted p95 <300ms not established')
-        if name.startswith('status-') or name in ('post-burst-recovery','cancellation'):
+        if name.startswith('status-') or name in ('post-burst-recovery','cancellation','mixed-status','mixed-going','invitation-sample'):
             if accepted!=phase['attempted']:failures.append(name+': ordinary traffic rejected')
         if name.startswith('create-') and accepted/phase['seconds']<290:failures.append(name+': 300/s target not sustained within scheduling tolerance')
     stages=report.get('stages',[])

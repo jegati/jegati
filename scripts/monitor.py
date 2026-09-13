@@ -18,14 +18,17 @@ def snapshot(path):
         if not isinstance(v,dict):raise ValueError('invalid metrics object')
         if set(v) != {'version','window_seconds','retention_seconds','minimum_samples','observed_epoch','requests','failures','p95_upper_ms','workers'}: raise ValueError('unexpected metrics')
         if any(type(v[k]) is not int for k in ['version','window_seconds','retention_seconds','minimum_samples','observed_epoch','p95_upper_ms']): raise ValueError('invalid metrics')
-        if (v['version'],v['window_seconds'],v['retention_seconds'],v['minimum_samples']) != (1,60,120,20): raise ValueError('unknown privacy policy')
+        if v['version'] not in (1,2) or (v['window_seconds'],v['retention_seconds'],v['minimum_samples']) != (60,120,20): raise ValueError('unknown privacy policy')
         for key in ['requests','failures']:
             if v[key] not in ['suppressed','20+','50+','100+','250+','500+','1000+','5000+','10000+']: raise ValueError('invalid bucket')
         if v['p95_upper_ms'] not in [-1,0,10,50,100,300,1000,3000,10000]: raise ValueError('invalid latency')
         if not isinstance(v['workers'],dict) or not set(v['workers']) <= {'matcher','publisher','cleanup','push'}: raise ValueError('invalid workers')
         for w in v['workers'].values():
             if not isinstance(w,dict):raise ValueError('invalid worker object')
-            if set(w) != {'state','last_start_seconds','last_finish_seconds','last_success_seconds'} or w['state'] not in ['ok','error','running']: raise ValueError('invalid worker')
+            expected={'state','last_start_seconds','last_finish_seconds','last_success_seconds'}
+            if v['version']==2:expected|={'duration_upper_ms','deadline_lag_seconds'}
+            if set(w) != expected or w['state'] not in ['ok','error','running']: raise ValueError('invalid worker')
+            if v['version']==2 and w['duration_upper_ms'] not in [-1,0,10,50,100,300,1000,3000,10000]:raise ValueError('invalid duration')
             if any(type(w[k]) is not int or w[k]<-1 for k in w if k!='state'): raise ValueError('invalid age')
         return v
     finally: client.close()
@@ -38,6 +41,7 @@ def process_resources(pid):
 def alerts(metrics):
     result=[]
     for name,w in metrics['workers'].items():
+        if w.get('deadline_lag_seconds',-1)>=30:result.append(name+'_deadline_lag')
         if w['state']=='error': result.append(name+'_error')
         if w['last_success_seconds']>30 or (w['last_success_seconds']==-1 and w['last_start_seconds']>=30): result.append(name+'_stale')
     if metrics['failures']!='suppressed': result.append('server_errors')

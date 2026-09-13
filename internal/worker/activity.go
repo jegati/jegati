@@ -2,6 +2,8 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/jegati/jegati/internal/activity"
 	"github.com/jegati/jegati/internal/monitor"
 	"sync"
 	"time"
@@ -26,8 +28,30 @@ func NewActivityPublisher(s *store.Store, c config.Config) *ActivityPublisher {
 func (p *ActivityPublisher) Run(ctx context.Context) {
 	ticker := time.NewTicker(time.Duration(p.Config.Matching.ReconciliationSeconds) * time.Second)
 	defer ticker.Stop()
+	firstEpoch := int64(-1)
 	for {
 		p.Monitor.Begin(monitor.Publisher)
+		if p.Monitor != nil {
+			// Missing expected publication is distinct from a successful idle tick.
+			data, now, err := p.Store.LatestActivity(ctx, p.Config)
+			lag := time.Duration(-1)
+			if err == nil {
+				interval := int64(p.Config.PublicActivity.ReleaseSeconds) * 1000
+				if firstEpoch < 0 {
+					firstEpoch = now / interval
+				}
+				expected := (now/interval - int64(p.Config.PublicActivity.DelayEpochs) - 1) * interval
+				var release activity.Release
+				if len(data) > 0 && json.Unmarshal(data, &release) == nil {
+					lag = time.Duration(max(0, expected-release.ObservedFrom)) * time.Millisecond
+				} else if expected < firstEpoch*interval {
+					lag = 0 // No release from this process lifetime is due yet.
+				} else {
+					lag = time.Duration(interval) * time.Millisecond
+				}
+			}
+			p.Monitor.Lag(monitor.Publisher, lag)
+		}
 		err := p.Step(ctx)
 		p.Monitor.End(monitor.Publisher, err)
 		select {

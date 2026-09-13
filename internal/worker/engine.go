@@ -49,6 +49,10 @@ func (e *Engine) Run(ctx context.Context) {
 	defer ticker.Stop()
 	for {
 		e.Monitor.Begin(monitor.Matcher)
+		if e.Monitor != nil {
+			lag, _ := e.Store.PendingLag(ctx)
+			e.Monitor.Lag(monitor.Matcher, lag)
+		}
 		err := e.Step(ctx)
 		e.Monitor.End(monitor.Matcher, err)
 		select {

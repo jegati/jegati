@@ -15,7 +15,7 @@ and `--retention` accept bounded seconds (see CLI validation). It overwrites a b
 JSON file, never appends an event log. `expires_at` marks file freshness; an expired
 file means monitoring is unavailable. Physical old files can remain after a crash.
 
-Protocol v1 reports only a completed 60-second window, count buckets suppressed
+Protocol v2 reports only a completed 60-second request window, count buckets suppressed
 below 20, and a p95 latency upper bound. `p95_upper_ms: -1` means suppressed;
 `0` means above the largest 10,000 ms bucket. No individual request metadata is
 retained. Worker states describe loop completion, not delivery guarantees or a
@@ -51,4 +51,20 @@ Recovery tests inject a paused API owner and paused/restarted store, then verify
 alerts and recovery. A stopped collector's file expires; dashboards must honor that
 freshness deadline. Push loop completion alone cannot alert on provider delivery
 failure because individual send outcomes are deliberately not exposed here; this
-and public-release freshness probes remain monitoring gaps, not passing claims.
+remains a monitoring gap, not a passing claim.
+
+Protocol v2 adds each worker's last duration upper bound (`-1` unavailable, `0`
+above 10 seconds) and `deadline_lag_seconds` rounded down to five seconds. Both
+observations expire after 120 seconds; errors clear unavailable lag observations.
+Matcher lag measures the oldest due reservation before processing, not the time
+from each person's willingness to an invitation. Cleanup lag measures the oldest
+overdue expiry-index entry before cleanup, independently of logical key expiry.
+Publisher lag measures missing expected public releases, with a bounded initial
+publication warmup; it does not mistake the deliberate privacy delay for an outage.
+No identifiers, cells or queue members enter monitoring. The collector accepts
+archived v1 and current v2 and alerts on deadline lag of 30 seconds or more.
+
+`make load MIXED=1` additionally overlaps ordinary polling, public origin reads
+and up to 1,000 real going confirmations sampled from private invitations. It
+requires at least one invitation and records each HTTP phase separately. This
+does not test arrivals, all-population admission, synchronized expiry or a CDN.

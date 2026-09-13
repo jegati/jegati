@@ -110,3 +110,27 @@ func TestConcurrentMonitoringAndSocketBoundary(t *testing.T) {
 		}
 	}
 }
+
+func TestWorkerDurationLagAndRetention(t *testing.T) {
+	m := New()
+	now := time.Unix(600, 0)
+	m.now = func() time.Time { return now }
+	m.Begin(Matcher)
+	now = now.Add(230 * time.Millisecond)
+	m.End(Matcher, nil)
+	m.Lag(Matcher, 12*time.Second)
+	w := m.Snapshot().Workers["matcher"]
+	if w.DurationUpperMillis != 300 || w.DeadlineLagSeconds != 10 {
+		t.Fatal(w)
+	}
+	m.Lag(Matcher, -1)
+	if m.Snapshot().Workers["matcher"].DeadlineLagSeconds != -1 {
+		t.Fatal("missing observation presented as healthy")
+	}
+	m.Lag(Matcher, 20*time.Second)
+	now = now.Add(2 * time.Minute)
+	w = m.Snapshot().Workers["matcher"]
+	if w.DurationUpperMillis != -1 || w.DeadlineLagSeconds != -1 {
+		t.Fatal("old measurements retained")
+	}
+}

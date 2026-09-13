@@ -38,6 +38,9 @@ type taskState struct {
 	enabled                    bool
 	started, finished, success time.Time
 	failed                     bool
+	duration                   time.Duration
+	lag                        time.Duration
+	lagObserved                time.Time
 }
 type Registry struct {
 	mu                sync.Mutex
@@ -64,10 +67,23 @@ func (m *Registry) End(task Task, err error) {
 	defer m.mu.Unlock()
 	v := &m.tasks[task]
 	v.finished = m.now()
+	v.duration = v.finished.Sub(v.started)
 	v.failed = err != nil
 	if err == nil {
 		v.success = v.finished
 	}
+}
+
+// Lag records a fixed worker's scheduling delay, never queue members or IDs.
+// A negative duration clears an unavailable observation.
+func (m *Registry) Lag(task Task, delay time.Duration) {
+	if m == nil {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.tasks[task].lag = delay
+	m.tasks[task].lagObserved = m.now()
 }
 func (m *Registry) rotate(now time.Time) {
 	epoch := now.Unix() / WindowSeconds
@@ -145,10 +161,12 @@ func age(now, then time.Time) int64 {
 }
 
 type TaskView struct {
-	State              string `json:"state"`
-	LastStartSeconds   int64  `json:"last_start_seconds"`
-	LastFinishSeconds  int64  `json:"last_finish_seconds"`
-	LastSuccessSeconds int64  `json:"last_success_seconds"`
+	State               string `json:"state"`
+	LastStartSeconds    int64  `json:"last_start_seconds"`
+	LastFinishSeconds   int64  `json:"last_finish_seconds"`
+	LastSuccessSeconds  int64  `json:"last_success_seconds"`
+	DurationUpperMillis int64  `json:"duration_upper_ms"`
+	DeadlineLagSeconds  int64  `json:"deadline_lag_seconds"`
 }
 type Snapshot struct {
 	Version          int                 `json:"version"`
@@ -168,7 +186,7 @@ func (m *Registry) Snapshot() Snapshot {
 	now := m.now()
 	m.rotate(now)
 	v := m.previous
-	s := Snapshot{Version: 1, WindowSeconds: WindowSeconds, RetentionSeconds: 2 * WindowSeconds, MinimumSamples: MinimumSamples, ObservedEpoch: v.epoch, Requests: bucket(v.count), Failures: bucket(v.failed), P95Millis: -1, Workers: map[string]TaskView{}}
+	s := Snapshot{Version: 2, WindowSeconds: WindowSeconds, RetentionSeconds: 2 * WindowSeconds, MinimumSamples: MinimumSamples, ObservedEpoch: v.epoch, Requests: bucket(v.count), Failures: bucket(v.failed), P95Millis: -1, Workers: map[string]TaskView{}}
 	if v.count >= MinimumSamples {
 		n := 0
 		for i, count := range v.latency {
@@ -193,7 +211,20 @@ func (m *Registry) Snapshot() Snapshot {
 		} else if t.failed {
 			state = "error"
 		}
-		s.Workers[taskNames[i]] = TaskView{state, age(now, t.started), age(now, t.finished), age(now, t.success)}
+		duration, lag := int64(-1), int64(-1)
+		if !t.finished.IsZero() && now.Sub(t.finished) < 2*WindowSeconds*time.Second {
+			duration = 0 // zero means above the largest finite histogram bound
+			for _, bound := range latencyBounds {
+				if t.duration <= time.Duration(bound)*time.Millisecond {
+					duration = bound
+					break
+				}
+			}
+		}
+		if !t.lagObserved.IsZero() && now.Sub(t.lagObserved) < 2*WindowSeconds*time.Second && t.lag >= 0 {
+			lag = int64(t.lag.Seconds()) / 5 * 5
+		}
+		s.Workers[taskNames[i]] = TaskView{state, age(now, t.started), age(now, t.finished), age(now, t.success), duration, lag}
 	}
 	return s
 }

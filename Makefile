@@ -97,9 +97,13 @@ test-monitor:
 	python3 -m unittest discover -s scripts -p 'test_monitor.py'
 
 LOAD_SIZES ?= 1000,10000,100000
+.PHONY: benchmark-scaling
+benchmark-scaling:
+	OUTPUT="$(or $(OUTPUT),reports/local/scaling-$(shell date -u +%Y%m%dT%H%M%S))" bash scripts/benchmark-scaling.sh
+
 .PHONY: load
 load:
-	python3 scripts/load.py --output "$(or $(OUTPUT),reports/local/load-$(shell date -u +%Y%m%dT%H%M%S))" --sizes "$(or $(SIZES),$(LOAD_SIZES))" --seconds "$(or $(SECONDS),20)" --distribution "$(or $(DISTRIBUTION),uniform)" $(if $(BURST),--burst,)
+	python3 scripts/load.py --output "$(or $(OUTPUT),reports/local/load-$(shell date -u +%Y%m%dT%H%M%S))" --sizes "$(or $(SIZES),$(LOAD_SIZES))" --seconds "$(or $(SECONDS),20)" --distribution "$(or $(DISTRIBUTION),uniform)" $(if $(BURST),--burst,) $(if $(MIXED),--mixed,)
 
 .PHONY: test-full-journey
 test-full-journey:

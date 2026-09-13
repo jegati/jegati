@@ -151,6 +151,10 @@ func run() error {
 					return
 				case <-ticker.C:
 					metrics.Begin(monitor.Cleanup)
+					if metrics != nil {
+						lag, _ := backend.CleanupLag(ctx)
+						metrics.Lag(monitor.Cleanup, lag)
+					}
 					var cleanupError error
 					for i := 0; i < 10; i++ {
 						n, e := backend.Cleanup(ctx, c.Limits.CleanupBatchSize)

@@ -31,6 +31,7 @@ type owner struct {
 }
 type actor struct {
 	token, cell string
+	invitation  string
 	accepted    bool
 }
 type measurement struct {
@@ -186,6 +187,7 @@ func run() error {
 	seconds := flag.Int("seconds", 20, "seconds per measured traffic phase")
 	rate := flag.Int("create-rate", 300, "attempted creations per second")
 	burst := flag.Bool("burst", false, "include 3000 attempted writes/s for 60 seconds")
+	mixed := flag.Bool("mixed", false, "simultaneous polling, public reads and going confirmations")
 	flag.Parse()
 	if *lab == "" || *out == "" || *seconds < 1 || *seconds > 600 || *rate < 1 || *rate > 1000 || (*distribution != "uniform" && *distribution != "hotspot") {
 		return errors.New("invalid owned-lab load arguments")
@@ -275,6 +277,52 @@ func run() error {
 		if accepted < size/2 {
 			break
 		}
+	}
+	if *mixed {
+		// Sample destinations first; never count a missing invitation as a commit.
+		phases = append(phases, h.phase("invitation-sample", min(1000, len(h.actors)), 100, func(n int) int {
+			code, raw := h.call(n, "GET", "/api/signal", nil)
+			var v struct {
+				Invitation *struct {
+					ID string `json:"id"`
+				} `json:"invitation"`
+			}
+			if code == 200 && json.Unmarshal(raw, &v) == nil && v.Invitation != nil {
+				h.actors[n].invitation = v.Invitation.ID
+			}
+			return code
+		}))
+		eligible := []int{}
+		for n, a := range h.actors {
+			if a.invitation != "" {
+				eligible = append(eligible, n)
+			}
+		}
+		if len(eligible) == 0 {
+			return errors.New("mixed workload found no gathering invitations")
+		}
+		parallel := make([]*measurement, 3)
+		var wg sync.WaitGroup
+		statusRate := max(10, int(math.Ceil(float64(accepted)/30)))
+		wg.Add(3)
+		go func() {
+			defer wg.Done()
+			parallel[0] = h.phase("mixed-status", statusRate**seconds, statusRate, func(n int) int { code, _ := h.call(n%len(h.actors), "GET", "/api/signal", nil); return code })
+		}()
+		go func() {
+			defer wg.Done()
+			parallel[1] = h.phase("mixed-public-origin", 1000**seconds, 1000, func(n int) int { code, _ := h.call(-1, "GET", "/api/activity/latest", nil); return code })
+		}()
+		go func() {
+			defer wg.Done()
+			parallel[2] = h.phase("mixed-going", min(len(eligible), 50**seconds), 50, func(n int) int {
+				i := eligible[n]
+				code, _ := h.call(i, "POST", "/api/going", map[string]string{"gathering_id": h.actors[i].invitation})
+				return code
+			})
+		}()
+		wg.Wait()
+		phases = append(phases, parallel...)
 	}
 	if *burst {
 		phases = append(phases, h.phase("write-burst", 180000, 3000, func(n int) int {

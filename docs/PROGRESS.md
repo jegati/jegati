@@ -882,3 +882,22 @@ readiness. Next local action is representative mixed-load lag instrumentation an
 the bounded scan fix. Later staging needs domain/provider choice, credentials via
 interactive/local secret setup, and explicit authorization for remote publication.
 Preserve untracked commands.txt.
+
+## Scaling baseline and delay instrumentation — work in progress
+
+User authorized the deployment-preparation steps and explicitly requested measured
+speedups. Added an owned-store benchmark at 10k/100k/1M, geographic lookup benchmark,
+private v2 worker duration/deadline-lag observations and a simultaneous
+status/public-read/going load phase. Algorithm changes have not landed yet.
+Baseline raw output is reports/local/scaling-before: median snapshot 30.06 ms at
+10k, 292.33 ms at 100k and 2.814 s at 1M, three samples of three iterations. The
+fixture directly seeds expiring synthetic records and bypasses HTTP admission;
+it is traversal evidence, not million-participant application capacity. Timings
+were roughly linear on this fixture; theoretical offset costs did not dominate.
+Geographic last-hit/miss lookup baseline is also recorded at 100/1k/10k candidates.
+
+Focused monitor/race and disposable store/API/notification integration tests passed;
+load report unit checks and make test (Go race, simulation build, vet and TypeScript)
+passed. Pending: mixed 100k baseline,
+optimization and identical-workload comparisons. Source remains local; no provider
+credentials or publication were needed. Preserve commands.txt.
