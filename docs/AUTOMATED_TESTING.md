@@ -12,6 +12,7 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 | `make audit-journeys` | Sequential Chromium suite, normal-clock full journey and two-API production-image rehearsal; potentially 20+ minutes |
 | `make verify-local` | Go race/simulation/vet, frontend type/build, configuration and smoke checks; minutes |
 | `make test-store` | Restricted real-store behavior, state model, rollover, push outage/fanout; seconds |
+| `make test-planner-replay` | Deterministic 3,000-participant planner snapshots on the full Tirana map and current 100 m configuration; about 35 seconds locally |
 | `make test-monitor` | Private socket, suppression, retention, concurrency and collector checks |
 | `python3 -m unittest discover -s scripts -p 'test_*.py'` | Release/runtime guards, image audit, collector and synthetic load evidence rejection checks |
 | `make test-fuzz` | Five native fuzz targets, including strict request round trips, 30 seconds each by default |

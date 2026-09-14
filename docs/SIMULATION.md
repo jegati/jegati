@@ -37,6 +37,31 @@ and at most 50 m reported device error; it now matches the default. The historic
 0.1 or 0.5 km radii under the conservative whole-cell rule. Finer cells expose a
 more precise area and still exclude some boundary matches. See decisions 0005/0006. Historical report snapshots retain their original settings.
 
+## Deterministic refactor comparisons
+
+Run `make test-planner-replay` to compare eight fixed-time planner snapshots from
+3,000 seeded participants using the full 6,491-crossroad dataset and the current
+`config/gati.yaml` (100 m cells). It checks proposals, founder selection/deadlines,
+offers and exclusion after declining, then repeats each snapshot with shuffled
+input order. A reviewed JSON fixture pins configuration/map/input hashes, visible
+test summary counts and a digest of every decision. An intended configuration,
+map or behavior change requires inspecting the resulting differences before
+updating `internal/simulation/testdata/tirana-planner-replay.json`; the test never
+automatically overwrites that fixture. CI includes this target.
+
+This test performs no HTTP requests and issues no credentials. Its fixed labels
+exist only in `planner_replay_test.go`, which is excluded from application builds.
+The three-proposal bound per snapshot and synthetic halfway cancellation rule are
+fixture choices, not application settings or predictions of a complete gathering
+funnel. Normal `make test` skips this slower full-map fixture; use its explicit target.
+
+Keep running `make simulate` and the API population scenarios for storage,
+arrival, response and notification behavior. Those end-to-end runs deliberately
+retain cryptographic credentials and gathering IDs: the same population seed can
+still produce small differences in cohort tie-breaking and observed outcomes.
+The new fixture makes planner comparisons reproducible without weakening runtime
+randomness or changing the simulation's default behavior.
+
 ## Scenario inputs
 
 Edit the explicit YAML files in `simulation/scenarios/`. Population is bounded at

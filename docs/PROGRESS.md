@@ -1352,3 +1352,12 @@ passed both real simulation-store and HTTP integration packages
 (`reports/local/cleanup2-simulation`). `make test` passed race, simulation-build,
 vet and TypeScript checks. These layout changes do not change atomic boundaries,
 configuration, real/simulation clocks or script assembly.
+
+Added `make test-planner-replay` and CI wiring: 3,000 synthetic participants, the
+full 6,491-crossroad map, current 100 m configuration, eight time snapshots and a
+reviewed decision fixture. It passed in 33.35 seconds, including shuffled-input
+replays, founder reachability/deadline and decline-exclusion checks. Fixed labels
+exist only in the test file; production and normal simulation randomness remain
+unchanged. This is planner regression evidence, not a deterministic full API
+simulation or a new capacity claim. Python guards: 25 passed; formatting check:
+5 files unchanged. The normal-clock full browser journey is still running.

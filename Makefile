@@ -159,3 +159,7 @@ audit-journeys:
 	$(MAKE) test-deployment
 format-python-check:
 	$(RUFF) format --check
+
+.PHONY: test-planner-replay
+test-planner-replay:
+	GATI_PLANNER_REPLAY=1 go test -count=1 -timeout 10m -run '^TestTiranaPlannerReplay$$' -v ./internal/simulation

@@ -20,6 +20,7 @@ jobs:
       - run: make test-runtimes
       - run: make test-monitor
       - run: make test-fuzz
+      - run: make test-planner-replay
       - run: make simulate
       - run: make simulate SCENARIO=tirana-sybil
       - run: make simulate-population SCENARIO=tirana-success OUTPUT=reports/local/tirana-success
