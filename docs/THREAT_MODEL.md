@@ -420,3 +420,15 @@ may duplicate alerts. Retry/debounce coalesces current health without a disk que
 Same-host failure cannot report the host's complete outage. Local synthetic SMTP
 TLS, rejection, retry, payload and file-permission tests cover these controls;
 actual provider delivery remains unverified until private credentials are supplied.
+
+
+## Seconds-scale public updates and nearby arrivals (decision 0016)
+
+The user removed the multi-minute temporal buffer. At 10-second epochs and zero
+extra delay, colluding known inputs and bucket crossings can reveal an added or
+removed contribution much sooner. Existing threshold suppression and 1-km public
+cells prevent direct records, not temporal/differencing inference. The fast-epoch
+regression preserves a 19-to-20 counterexample. This supersedes earlier delay-based
+mitigation claims; no formal anonymity claim is made. Arrivals now accept a 3-by-3
+block of 100-m cells, reducing boundary false negatives while expanding spoofable
+presence. Freshness/nonces and per-user push permission remain unchanged.

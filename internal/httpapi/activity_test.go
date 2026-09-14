@@ -64,7 +64,7 @@ func TestRealPublicActivityCacheAndNoQueryContract(t *testing.T) {
 		t.Fatal(e)
 	}
 	w := read("/api/activity/latest", "", "")
-	if w.Code != 200 || w.Body.String() != string(data) || w.Header().Get("Cache-Control") != "public, max-age=30, must-revalidate" {
+	if w.Code != 200 || w.Body.String() != string(data) || w.Header().Get("Cache-Control") != "public, max-age=10, must-revalidate" {
 		t.Fatal("public cache contract", w.Code)
 	}
 	etag := w.Header().Get("ETag")

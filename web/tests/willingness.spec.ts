@@ -14,6 +14,7 @@ test('device area, minimum duration, reload and neutral cancellation against rea
   await page.goto('/');
   await expect(page.locator('#map')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('html')).toHaveAttribute('lang', 'sq');
+  expect((await (await page.request.get('/api/push-config')).json()).enabled).toBe(true);
   await expect(page.locator('#duration option')).toHaveText(['30 minuta', '60 minuta', '90 minuta', '120 minuta']);
   await expect(page.getByRole('button', { name: 'JAM GATI', exact: true })).toBeEnabled();
   const created = page.waitForRequest(r => r.url().endsWith('/api/signals') && r.method() === 'POST');
@@ -21,6 +22,7 @@ test('device area, minimum duration, reload and neutral cancellation against rea
   const request = await created;
   expect(Object.keys(request.postDataJSON()).sort()).toEqual(['availability_minutes', 'cell', 'radius_km']);
   expect(request.postDataJSON().availability_minutes).toBe(30);
+  expect(request.postDataJSON().radius_km).toBe(1);
   expect(request.headers().authorization).toMatch(/^Bearer [A-Za-z0-9_-]{43}$/);
   await expect(page.getByRole('heading', { name: 'JAM GATI.', exact: true })).toBeVisible();
   const stored = await page.evaluate(() => sessionStorage.getItem('gati-session-v2'));

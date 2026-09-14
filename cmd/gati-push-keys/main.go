@@ -3,29 +3,33 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/jegati/jegati/internal/notification"
 	"os"
+	"path/filepath"
 )
 
 func main() {
-	if e := run(); e != nil {
+	directory := flag.String("directory", ".runtime", "private operational key directory")
+	flag.Parse()
+	if e := run(*directory); e != nil {
 		fmt.Fprintln(os.Stderr, "Push key setup failed; existing files were not replaced.")
 		os.Exit(1)
 	}
 }
-func run() error {
-	if e := os.MkdirAll(".runtime", 0700); e != nil {
+func run(directory string) error {
+	if e := os.MkdirAll(directory, 0700); e != nil {
 		return e
 	}
-	if e := os.Chmod(".runtime", 0700); e != nil {
+	if e := os.Chmod(directory, 0700); e != nil {
 		return e
 	}
 	keys, e := notification.GenerateKeys()
 	if e != nil {
 		return e
 	}
-	file, e := os.OpenFile(".runtime/vapid.json", os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0444)
+	file, e := os.OpenFile(filepath.Join(directory, "vapid.json"), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0444)
 	if os.IsExist(e) {
 		fmt.Println("Existing project-local push key file retained.")
 		return nil
@@ -35,7 +39,7 @@ func run() error {
 	}
 	if e = json.NewEncoder(file).Encode(keys); e != nil {
 		file.Close()
-		os.Remove(".runtime/vapid.json")
+		os.Remove(filepath.Join(directory, "vapid.json"))
 		return e
 	}
 	if e = file.Close(); e != nil {

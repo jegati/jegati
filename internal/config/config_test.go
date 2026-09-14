@@ -66,8 +66,8 @@ func TestInvalidConfigurations(t *testing.T) {
 		{"public cells not aligned", "area_size_meters: 1000", "area_size_meters: 1500"},
 		{"capture too long", "capture_max_seconds: 30", "capture_max_seconds: 31"},
 		{"snapshot too small", "max_snapshot_bytes: 1000000", "max_snapshot_bytes: 100"},
-		{"public frequency", "release_seconds: 300", "release_seconds: 10"},
-		{"no publication delay", "delay_epochs: 1", "delay_epochs: 0"},
+		{"public frequency", "release_seconds: 300", "release_seconds: 4"},
+		{"negative publication delay", "delay_epochs: 1", "delay_epochs: -1"},
 		{"excessive publication delay", "delay_epochs: 1", "delay_epochs: 5"},
 		{"bucket ordering", "[20, 50, 100, 250, 500, 1000]", "[20, 100, 50]"},
 		{"private alert threshold", "nearby_gati_count: 50", "nearby_gati_count: 49"},
@@ -175,5 +175,19 @@ func TestFractionalRadiiAndFineGrid(t *testing.T) {
 		if _, err := Decode(strings.NewReader(strings.ReplaceAll(text, "[0.1, 0.5, 1, 3]", bad)), false); err == nil {
 			t.Fatalf("accepted %s", bad)
 		}
+	}
+}
+
+func TestFastPublicationAndNearbyArrivalDefaults(t *testing.T) {
+	c, err := Load("../../config/gati.yaml", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !c.Notifications.PushEnabled || c.Arrivals.AllowedCellNeighborRings != 1 || c.PublicActivity.DelayEpochs != 0 || c.PublicActivity.ReleaseSeconds != 10 {
+		t.Fatal("current user-directed defaults missing")
+	}
+	// The prior slower configuration remains supported, not silently migrated.
+	if _, err := Decode(strings.NewReader(source(t)), false); err != nil {
+		t.Fatal(err)
 	}
 }

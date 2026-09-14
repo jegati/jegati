@@ -1,3 +1,8 @@
+> Current amendment: decision 0016 supersedes earlier multi-minute publication and
+> server-push-off proposals. Use 10-second epochs, zero extra delay, 1-minute public
+> retention and arrival in the destination cell plus eight neighbours. Push transport
+> is enabled; participant opt-in remains required. Faster inference is accepted.
+
 # GATI 🦩 — development and verification plan
 
 Launch-sequencing update (2026-09-14): [decision 0015](decisions/0015-public-alpha-and-device-emulation.md)
@@ -173,20 +178,20 @@ arrivals:
   freshness_minutes: 15
   renewal_window_seconds: 120
   nonce_seconds: 120
-  allowed_cell_neighbor_rings: 0
+  allowed_cell_neighbor_rings: 1
 public_activity:
   area_size_meters: 1000
-  capture_max_seconds: 30
+  capture_max_seconds: 5
   max_snapshot_bytes: 1000000
   minimum_count: 20
   count_buckets: [20, 50, 100, 250, 500, 1000]
-  release_seconds: 300
-  delay_epochs: 1
-  snapshot_retention_minutes: 15
+  release_seconds: 10
+  delay_epochs: 0
+  snapshot_retention_minutes: 1
   daily_summary_retention_days: 30
 notifications:
-  push_enabled: false
-  push_contact: "https://localhost"
+  push_enabled: true
+  push_contact: "https://jamgati.com"
   push_endpoint_hosts: ["fcm.googleapis.com", "updates.push.services.mozilla.com", "web.push.apple.com"]
   push_worker_batch_size: 1000
   push_worker_seconds: 2

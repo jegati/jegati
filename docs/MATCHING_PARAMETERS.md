@@ -90,7 +90,7 @@ mocked-browser tests separately exercise the actual client quality checks.
 | `confirmation_stability_seconds` | 10 / 10 | Same valid arrival cohort must survive this interval; positive and strictly shorter than freshness and late-join remaining time. |
 | `freshness_minutes` | 15 / 15 | Maximum life of an arrival claim, further capped by session/gathering end; 1–15 minutes. No automatic claim renewal. |
 | `nonce_seconds` | 120 / 120 | Maximum arrival challenge lifetime; 1–120 seconds and strictly less than freshness. Replays cannot increase/refresh attendance. |
-| `allowed_cell_neighbor_rings` | 0 / 0 | `0`: claimed cell must equal destination cell. `1`: also allow the eight surrounding cells (within the service grid). Expands accepted approximate area, not a GPS accuracy proof. |
+| `allowed_cell_neighbor_rings` | 1 / 0 | `0`: claimed cell must equal destination cell. `1`: also allow the eight surrounding cells (within the service grid). Expands accepted approximate area, not a GPS accuracy proof. |
 
 ## Limits that affect observed matching
 
@@ -118,12 +118,12 @@ and the daily-summary retention remain validated plans, not implemented behavior
 | Setting | Normal default | Intended meaning / current validation |
 | --- | --- | --- |
 | `public_activity.area_size_meters` | 1000 | Shared public willingness/gathering grid, 1000–5000 m, integer multiple of private cells. |
-| `public_activity.capture_max_seconds` | 30 | Maximum capture interval, ≤30 s and below release interval; incomplete captures discarded. |
+| `public_activity.capture_max_seconds` | 5 | Maximum capture interval, ≤30 s and below release interval; incomplete captures discarded. |
 | `public_activity.max_snapshot_bytes` | 1000000 | Complete uncompressed release cap, 1024–1,000,000 bytes. |
 | `public_activity.minimum_count` | 20 | Minimum to publish area activity; normal ≥20. |
 | `public_activity.count_buckets` | `[20,50,100,250,500,1000]` | Ascending published lower bounds; first equals public minimum; 1–32 entries. |
-| `public_activity.release_seconds` / `delay_epochs` | 300 / 1 | Fixed release interval and delayed epochs; normal interval ≥300, delay positive. |
-| `public_activity.snapshot_retention_minutes` | 15 | Origin snapshot lifetime, ≤15; must exceed `release_seconds*(delay_epochs+1)` in seconds. |
+| `public_activity.release_seconds` / `delay_epochs` | 10 / 0 | Fixed release interval and extra delayed epochs; normal interval ≥5, delay nonnegative (0016). |
+| `public_activity.snapshot_retention_minutes` | 1 | Origin snapshot lifetime, ≤15; must exceed `release_seconds*(delay_epochs+1)` in seconds. |
 | `public_activity.daily_summary_retention_days` | 30 | Planned protected summary lifetime, ≤30 days; summaries not implemented. |
 | `notifications.nearby_gati_count` / `nearby_arrival_count` | 50 / 50 | Large-nearby alert thresholds, both must be public bucket boundaries. |
 | `notifications.nearby_radius_km` | 5 | Proposed alert distance, 1–20 km; not participants' travel-radius setting. |
@@ -133,7 +133,7 @@ and the daily-summary retention remain validated plans, not implemented behavior
 | `notifications.area_follow_max_hours` | 24 | Proposed temporary follow lifetime, 1–24 hours. |
 
 All integer fields are positive and ≤1,000,000 unless tighter bounds or the explicit
-zero-neighbor exception above apply. Simulation lowers some publication/activation
+zero-neighbor/zero-delay exceptions above apply. Simulation lowers some publication/activation
 floors; isolated clock steps also drive public snapshots. It does not enable unfinished notifications. Avoid interpreting the nearby
 50 threshold as today's activation threshold: the implemented JEMI GATI threshold
 is `matching.activation_count` (30 normal/population, 3 small regression profile).
@@ -141,9 +141,8 @@ is `matching.activation_count` (30 normal/population, 3 small regression profile
 ## Optional Web Push configuration (schema 8)
 
 Delivery is connected and tested with fake transport and browser fixtures; live
-provider/device interoperability remains unverified. See NOTIFICATIONS.md. `push_enabled` defaults to false. `push_contact`
-is the operator's public HTTPS/mailto contact, never a participant email; replace
-the localhost development placeholder before external use. `push_endpoint_hosts`
+provider/device interoperability remains unverified. See NOTIFICATIONS.md. `push_enabled` defaults to true; the participant still explicitly opts in. `push_contact`
+is the operator's public HTTPS/mailto contact, never a participant email; the current production contact is https://jamgati.com. `push_endpoint_hosts`
 is an exact DNS allowlist (no wildcards, URLs or IP literals). Default providers are
 Chrome/Firefox/Safari; network address validation is an additional transport gate.
 `push_worker_batch_size` (1000, max 1000) bounds due records per pass;

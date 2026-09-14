@@ -158,7 +158,7 @@ func (c Config) Validate(allowSimulation bool) error {
 			}
 		case reflect.Int:
 			min := int64(1)
-			if strings.HasSuffix(path, ".allowed_cell_neighbor_rings") {
+			if strings.HasSuffix(path, ".allowed_cell_neighbor_rings") || strings.HasSuffix(path, ".delay_epochs") {
 				min = 0
 			}
 			if v.Int() < min || v.Int() > 1000000 {
@@ -260,7 +260,7 @@ func (c Config) Validate(allowSimulation bool) error {
 		}
 		seenHosts[host] = true
 	}
-	if c.Profile == "production" && (m.ActivationCount < 10 || r.ConfirmationCount < 10 || p.MinimumCount < 20 || p.ReleaseSeconds < 300) {
+	if c.Profile == "production" && (m.ActivationCount < 10 || r.ConfirmationCount < 10 || p.MinimumCount < 20 || p.ReleaseSeconds < 5) {
 		return errors.New("production privacy floors violated")
 	}
 	if c.Limits.MaxBodyBytes > 4096 || c.Limits.NetworkWindowSeconds > 600 || c.Limits.CleanupBatchSize > 1000 || c.Limits.NewSignalsPerNetworkWindow > c.Limits.RequestsPerNetworkWindow {

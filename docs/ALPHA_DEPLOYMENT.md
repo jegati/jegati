@@ -2,8 +2,8 @@
 
 Canonical origin: **https://jamgati.com**. Initial topology: one combined API/worker,
 private Valkey, Caddy and the named Cloudflare tunnel on OVHcloud. Keep functional
-settings in config/gati.yaml; this package changes no thresholds, retention or
-capacity setting. Public push remains off. Host sizing is still unverified.
+settings in config/gati.yaml; decision 0016 sets 10-second publication, nearby arrivals and available opt-in
+push. Generate a private VAPID service key for activation. Host sizing is still unverified.
 
 ## Prepare on the development machine
 

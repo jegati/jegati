@@ -31,6 +31,8 @@ class Lab:
             with tarfile.open(archive) as tar:tar.extractall(self.source_root,filter='data')
         subprocess.run(['go','build','-trimpath','-buildvcs=false','-o',str(self.binary),'./cmd/gati'],cwd=self.source_root,check=True)
         c=json.loads(subprocess.check_output([str(self.binary),'-mode','config-show'],cwd=self.source_root));self.config=c
+        if c['notifications']['push_enabled']:
+            subprocess.run(['go','run','./cmd/gati-push-keys','-directory',str(self.directory/'push')],cwd=self.source_root,check=True,stdout=subprocess.DEVNULL)
         (self.output/'config.json').write_text(json.dumps(c,indent=2)+'\n')
         conf=(ROOT/'deploy/valkey.dev.conf').read_text().replace('maxmemory 128mb',f'maxmemory {self.store_mb}mb')
         (self.directory/'valkey.conf').write_text(conf);(self.directory/'valkey.conf').chmod(0o644)
@@ -51,6 +53,7 @@ class Lab:
         port=free_port();sock=self.directory/f'ops-{index}.sock'
         if sock.exists():sock.unlink() # This private lab owns the dead process/socket.
         args=[str(self.binary),'-listen',f'127.0.0.1:{port}','-config',str(self.output/'config.json'),'-store-address',self.store_address,'-store-password-file',str(ROOT/'.runtime/app-password'),'-monitor-socket',str(sock),'-roads',str(self.source_root/'data/tirana/roads.geojson'),'-intersections',str(self.source_root/'data/tirana/intersections.json')]
+        if self.config['notifications']['push_enabled']:args+=['-push-key-file',str(self.directory/'push/vapid.json')]
         with (self.output/f'api-{index}-startup.log').open('w') as log:
             process=subprocess.Popen(args,cwd=ROOT,stdout=log,stderr=log)
         value={'process':process,'base':f'http://127.0.0.1:{port}','socket':sock}
@@ -110,6 +113,6 @@ if __name__=='__main__':
     import argparse
     p=argparse.ArgumentParser();p.add_argument('--output',default='reports/local/browser-lab');p.add_argument('args',nargs=argparse.REMAINDER);a=p.parse_args()
     with Lab(a.output) as lab:
-        env={**os.environ,'GATI_TEST_API':lab.base};args=a.args[1:] if a.args[:1]==['--'] else a.args
+        env={**os.environ,'GATI_TEST_API':lab.base,'GATI_API_PROXY':lab.base};args=a.args[1:] if a.args[:1]==['--'] else a.args
         if not args:raise SystemExit('a local test command is required')
         command(*args,env=env)

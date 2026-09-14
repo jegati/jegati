@@ -1800,3 +1800,57 @@ The immutable 6efad34 deployment artifact predates this adapter; prepare/audit a
 new artifact before deploying the updated operator service. The overnight API run
 continues unaffected and has exercised renewal/public releases; final eight-hour
 expiry/drift gates remain pending in reports/local/jamgati-alpha-overnight/lifecycle.json.
+
+
+## Usability defaults and fast public activity — 2026-09-14
+
+Implemented user-directed decision 0016: server push enabled with public contact
+https://jamgati.com (participant opt-in remains explicit); arrival accepts the
+100-m destination cell plus its eight neighbours; canonical public epochs are
+10 seconds with zero extra delay, a five-second capture budget and one-minute
+retention. Public minimum 20, buckets and 1-km cells remain unchanged. Validator,
+publisher scheduling, cache max-age and browser polling follow the new cadence.
+A missing publisher now accumulates alertable lag even with short epochs.
+
+The form defaults to 30 minutes/1 km, retaining all choices. Albanian guidance
+explains compatible-signal thresholds, suppressed small groups, travel-time allowance,
+background notification/tab recovery, pedestrian meeting space and app deadlines.
+Manual About copy remains preserved. Faster timing inference and broader spoofable
+arrival area are explicitly documented; neither is an anonymity/presence proof.
+
+Default-on transport is wired through Compose/dev setup, owned labs and production
+rehearsals with private service keys. The key generator accepts a private output
+directory and preserves existing keys. Storeless smoke uses its fixed push-disabled
+fixture; actual defaults are tested against real owned stores. Native development
+now uses an owned API/Valkey lab instead of the obsolete storeless scaffold.
+
+Validation: make test passed (race/simulation/vet/types), focused key/monitor tests
+passed, all 45 Python guard tests passed, production/simulation config and Compose
+checks passed. Actual real-store race integration passed. Chromium 42/42 passed;
+full real-clock publisher/arrival/late-join journey passed in 1.2m; device presets
+108/108 passed in 3.0m, including the final explanatory copy. Production-image
+rehearsal with two APIs/worker and push egress/key mounts passed in 79.83s, no proxy
+5xx during failover. No actual provider push, real-phone GPS or remote host checks.
+
+Initial tests exposed outdated expectations: 30-second cache headers, one browser
+poll in 21 seconds, and assuming a published 20+ arrival count already implies the
+presence stability timer has completed. Updated assertions retain clock/expiry,
+suppression and transition checks. Public capture still fails closed if late.
+
+100k uniform real-clock load passed: 100,000/100,000 accepted creates, no rejected
+requests/errors/dropped generator work in the measured phases. p95 upper buckets:
+create 10ms, status 50ms, public-origin/mixed/going/cancel 10ms. Private monitor had
+no sampled alerts; max sampled API RSS 573.8 MiB, Valkey RSS 90.9 MiB. Two direct
+public observations during load captured in 435ms/549ms. This was a same-host
+worktree build before the final missing-publication monitor correction; actual
+release/capture logic and config were already current. Other local test/build jobs
+ran concurrently. This is not 100k simultaneous browser polling, production host
+capacity, complete memory budgeting, cached-edge or external push evidence.
+Raw evidence: reports/local/usability-fast-100k and usability-fast-deployment;
+browser/full/device outputs use the corresponding usability-fast paths.
+
+Next: commit, launch a new eight-hour run from committed current configuration,
+and record its PID/completion status separately. The earlier jamgati-alpha-overnight
+continues with the old config and cannot certify these new defaults. Old immutable
+release/audit packages are not current deployment candidates; export/audit/rehearse
+the final artifact again before public activation. No remote push or deployment.

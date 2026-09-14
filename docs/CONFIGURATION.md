@@ -38,9 +38,10 @@ inspect the effective settings and schema version. Changes require restart. Gath
 destination; pending reservations are revalidated.
 
 Production floors: activation/arrival counts ≥10, public minimum ≥20, publication
-interval ≥300 seconds and delay ≥1 epoch. Availability is 30..120 minutes. Retention
+interval ≥5 seconds and delay ≥0 epochs (decision 0016). The current default is
+10 seconds, zero extra epochs, a 5-second capture budget and 1-minute retention. Availability is 30..120 minutes. Retention
 caps follow the plan; deadlines must leave enough time for matching stability and
-delayed publication. Public alerts accept only released bucket boundaries. The
+periodic publication. Public alerts accept only released bucket boundaries. The
 schema also bounds geography, lists and numeric values to reject overflow or
 unbounded configuration. These are explicit review guardrails, not anonymity proofs.
 
@@ -127,3 +128,8 @@ new challenge and fresh device fix; it can refresh presence for up to the existi
 freshness duration, bounded by the original session and gathering deadlines.
 No setting here extends willingness or gathering duration. Both renewal endpoints
 share the existing arrival request budget. See decision 0014.
+
+Decision 0016 enables server push by default with https://jamgati.com as its public
+contact; each participant still explicitly opts in. Arrival rings default to 1:
+destination plus eight neighbours. Device fix quality remains 50 m maximum reported
+error. The form starts with 30 minutes/1 km when that radius is offered.

@@ -37,7 +37,7 @@ visually clear and accessible without adding onboarding or external embeds.
 
 Privacy/security claims must match the code: no registration or identity fields,
 locally coarsened device location, temporary coordination data with automatic
-expiry, suppressed/delayed public aggregates, rate/replay controls and open source
+expiry, suppressed/periodic public aggregates, rate/replay controls and open source
 with verification tooling. Do not say “zero data retention,” absolute anonymity,
 verified humans/location or independently audited deployment. Provide the source
 link and concise limits for inference, network/operator exposure and optional push.
@@ -76,7 +76,7 @@ link and concise limits for inference, network/operator exposure and optional pu
 ## Notifications, map and statistics
 
 Support JEMI GATI, relevant gathering information and JEMI KËTU notifications.
-Background push is off by default and explicitly chosen by each user; participation
+Server push is enabled by default; background delivery is explicitly chosen by each user; participation
 and in-app updates work without it.
 Optional area follows and sufficiently large nearby activity alerts are included.
 They must reveal only necessary information and offer an actionable join flow.
@@ -92,7 +92,7 @@ show approximate going and fresh-arrival statistics before and after JAM KËTU.
 Keep the Tirana collective activity map available throughout these states. These
 statistics use the same privacy-preserving release rules across cards and maps.
 
-Suppress or coarsen small groups. Mark deliberately delayed data with its time;
+Suppress or coarsen small groups. Mark released data with its observation time;
 do not describe historical releases as exact current occupancy.
 
 Counts for activation, arrival confirmation and large-nearby alerts, plus radii,
@@ -111,7 +111,7 @@ Reduce exposure to location inference, repeated-query/differencing and correlati
 and document database-compromise and administrator risks. The user explicitly
 accepted inferred information for implementation (decision 0007), including the
 public statistics surfaces; do not block development on eliminating these attacks.
-Keep suppression, fixed delayed buckets, temporary credentials and cell-only public
+Keep suppression, fixed periodic buckets, temporary credentials and cell-only public
 gathering geography. No raw counts, individual records or exact participant positions
 may be published. The original absolute inference guarantee remains unmet; describe
 counterexamples honestly. Device-only UI does not fix spoofing or establish unique
@@ -186,3 +186,8 @@ uses fixed health labels only, and requires a privately chosen destination.
 Operational alert delivery is selected as email to a privately configured project
 mailbox. Recipient/sender and SMTP credentials stay in a private untracked .env file,
 not alert source. This introduces no participant email collection.
+
+Decision 0016 implements the user-requested seconds-scale public releases (10 s,
+no extra delayed epoch), nearby arrival (destination cell plus eight neighbours),
+and initial 30-minute/1-km choice. Public 1-km geography, minimum 20 and bucketed
+counts remain; faster temporal inference is explicitly accepted and documented.

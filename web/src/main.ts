@@ -53,7 +53,7 @@ function invitationView() {
   el<HTMLButtonElement>('retract').disabled = state.busy;
   el('arrival-status').textContent = state.here ? `Mbërritja jote është konfirmuar për rreth ${Math.max(1, Math.ceil((state.arrivalUntil - Date.now()) / 60000))} minuta të tjera.` : state.going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
   el('destination').textContent = state.invitation.intersection.label;
-  el('gathering-time').textContent = `Takimi përfundon pas rreth ${Math.max(1, Math.ceil((state.invitation.ends_at - Date.now()) / 60_000))} minutash.`;
+  el('gathering-time').textContent = `Takimi në GATI përfundon pas rreth ${Math.max(1, Math.ceil((state.invitation.ends_at - Date.now()) / 60_000))} minutash. Kjo nuk do të thotë se njerëzit janë larguar.`;
   el('going-status').textContent = state.going ? 'Ke zgjedhur të shkosh.' : 'Mund të zgjedhësh nëse do të shkosh.';
   el<HTMLButtonElement>('going').hidden = state.going;
   el<HTMLButtonElement>('going').disabled = state.busy;
@@ -169,13 +169,15 @@ async function start() {
   if (configuration.schema_version !== 9) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   state.pollSeconds = config.notifications.foreground_poll_seconds;
+  el('matching-guidance').textContent = `Takimi formohet me të paktën ${config.matching.activation_count} sinjale gatishmërie me kohë dhe largësi të përputhshme.`;
+  el('count-guidance').textContent = `Grupet me më pak se ${config.public_activity.minimum_count} sinjale nuk shfaqen me numra. Shifrat janë të përafërta.`;
   state.nonceSeconds = config.arrivals.nonce_seconds;
   state.renewalWindowSeconds = config.arrivals.renewal_window_seconds; state.currentGrid = grid;
   state.locationMaxAccuracy = config.geography.location_max_accuracy_meters;
   state.locationMaxAge = config.geography.location_fix_max_age_seconds;
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));
   for (const km of config.geography.travel_radius_choices_km) radius.add(new Option(`${km} km`, String(km)));
-  radius.value = String(config.geography.travel_radius_choices_km.includes(3) ? 3 : config.geography.travel_radius_choices_km[0]);
+  radius.value = String(config.geography.travel_radius_choices_km.includes(1) ? 1 : config.geography.travel_radius_choices_km[0]);
   el('nearby-area-description').textContent = `Në zonën publike ${config.public_activity.area_size_meters / 1000} km që përmban vendndodhjen e dhënë. Nuk është rrezja jote e udhëtimit.`;
   push = new PushController(() => state.session, value => { if (!state.session) { state.session = value; sessions.save(value); if (initialized) { drawArea(value.request.cell); void sync(); } } }, render);
   await push.initialize();
@@ -203,7 +205,7 @@ async function start() {
       if (state.session) { void loadPreview(event.id, state.session, state.session.expires, true); return; }
       joinTarget = event; render();
       form.scrollIntoView({ block: 'start' }); ready.focus();
-    }, config.matching.late_join_min_remaining_minutes);
+    }, config.matching.late_join_min_remaining_minutes, config.public_activity.release_seconds);
   drawArea = (cell: string) => {
     const ratio = config.public_activity.area_size_meters / grid.size_meters;
     const parts = cell.split(':');

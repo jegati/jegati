@@ -7,15 +7,13 @@ support. Area follows and alerts for nonparticipants are separate unfinished wor
 
 ## Local setup
 
-The code is connected, but `config/gati.yaml` deliberately defaults to
-`notifications.push_enabled: false`. Real provider/device interoperability has not
+The service defaults to `notifications.push_enabled: true` with public contact
+https://jamgati.com (decision 0016). Each participant still explicitly opts in. Real provider/device interoperability has not
 been tested. For a live test:
 
-1. Set `notifications.push_contact` to the operator's real public project/security
-   contact URL (or service contact mailbox), then set `push_enabled: true` in that
-   same YAML. The `https://localhost` placeholder cannot enable production-profile
+1. Review the published `notifications.push_contact` and `push_enabled` settings. The `https://localhost` placeholder cannot enable production-profile
    delivery. No participant email or provider account is required by this setup.
-2. Run `make config-check`, then `make dev-push`. This creates local service keys
+2. Run `make config-check`, then `make dev`. This creates local service keys
    if absent and starts the usual Compose stack with the optional read-only key
    mount. Existing keys are retained. Do not commit or disclose `.runtime/vapid.json`.
 3. Open `http://127.0.0.1:5173`, express willingness, and explicitly activate
@@ -76,3 +74,8 @@ push suite uses full Chromium headless mode; CDP injects a push event into the a
 installed worker with the app page closed. IndexedDB, authenticated state fetches
 and native notification display execute. This is not Google/Apple/Mozilla delivery
 or a real OS notification-click test. No external provider is contacted by fixtures.
+
+Owned browser/lifecycle labs generate a disposable VAPID key and never opt in to
+external delivery. For a deployment key, run the committed key generator with
+`-directory /path/to/private/runtime` on the intended host; retain that private key
+across releases. Local production rehearsal generates a disposable service key.

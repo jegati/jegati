@@ -37,6 +37,8 @@ def rehearse(source, out):
             return subprocess.check_output(args, stderr=log, **kw).decode().strip()
 
         try:
+            if manifest.get("push_enabled"):
+                command("go", "run", "./cmd/gati-push-keys", "-directory", str(runtime_dir(a, project)), cwd=ROOT)
             activate(a, project, manifest, 1, False)
             web = compose(a, project, "ps", "-q", "web")
             command("docker", "network", "connect", project + "_backend", web)

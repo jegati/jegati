@@ -33,7 +33,7 @@ Delayed aggregate statistics and a cell-only public activity map now
 work locally, including explicit joining from map entries. Public cells default to
 1 km; private matching remains 100 m. Eligible users can preview a private destination
 before committing. [Optional background push](docs/NOTIFICATIONS.md) is implemented
-with temporary opt-in/resume and remains disabled by default; real provider/device
+with temporary opt-in/resume and is available by default; real provider/device
 verification and area follows remain. The Albanian **Rreth nesh** section explains
 peaceful Flamingo protest support, voluntary coordination and bounded privacy
 claims, with a source link and no added enrollment step. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
@@ -85,9 +85,10 @@ make dev
 ```
 
 Open http://127.0.0.1:5173. Docker is required for the temporary store.
-Public snapshots appear after the configured delay (normally 5–10 minutes) and
+Public snapshots use 10-second epochs with no extra delayed epoch (decision 0016) and
 small groups remain suppressed. Matching and personal state continue immediately.
-`make dev-native` remains a read-only UI/API preview without a store.
+`make dev-native` runs Vite with an owned disposable API/Valkey lab and temporary
+push keys. It removes that local state on exit.
 Run `make browser-install` once, then `make test-browser` with the Compose API up.
 
 ## License

@@ -18,7 +18,7 @@ export class ActivityView {
   private layer = 'willingness';
   private rendered = '';
   constructor(private map: CityMap | undefined, private hash: string, private own: () => Own,
-    private join: (event: Event) => void, private cutoffMinutes: number) {
+    private join: (event: Event) => void, private cutoffMinutes: number, private refreshSeconds = 30) {
     const selector = el('activity-layer') as HTMLSelectElement;
     selector.onchange = () => { this.layer = selector.value; this.drawn = ''; this.render(); };
     map?.on('load', () => { this.drawn = ''; this.render(); });
@@ -46,7 +46,7 @@ export class ActivityView {
         this.release = r;
       }
     } catch { /* Keep only a previously fetched, still-unexpired public release. */ }
-    finally { this.fetching = false; this.nextFetch = Date.now() + 30000 * (1 + Math.random() * .2); this.render(); }
+    finally { this.fetching = false; this.nextFetch = Date.now() + Math.max(5, Math.min(30, this.refreshSeconds)) * 1000 * (1 + Math.random() * .2); this.render(); }
   }
   render() {
     const r = this.release && this.release.expires_at > Date.now() ? this.release : null;
@@ -54,7 +54,7 @@ export class ActivityView {
     const now = Date.now();
     const liveGatherings = r?.gatherings.filter(g => g.ends_at > now) ?? [];
     el('nearby-statistics').hidden = !own.cell;
-    el('activity-time').textContent = r ? `Vëzhguar më ${new Date(r.observed_from).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}–${new Date(r.observed_until).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}. Shifrat publikohen me vonesë.` : 'Ende nuk ka të dhëna të publikuara. Kjo nuk do të thotë që nuk ka aktivitet.';
+    el('activity-time').textContent = r ? `Vëzhguar më ${new Date(r.observed_from).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}–${new Date(r.observed_until).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}. Shifrat janë një pamje e publikuar, jo numërim i çastit.` : 'Ende nuk ka të dhëna të publikuara. Kjo nuk do të thotë që nuk ka aktivitet.';
     let nearby = '';
     if (r && own.cell) {
       const [version, size, x, y] = own.cell.split(':');

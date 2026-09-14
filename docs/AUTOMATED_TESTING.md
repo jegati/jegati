@@ -19,7 +19,7 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 | `make test-browser` | Chromium journeys, optional push fixtures, accessibility and resilience; about one minute |
 | `make test-browser-matrix` | Core, accessibility and resilience in Firefox then WebKit; separate stores, a few minutes |
 | `make test-devices` | Pixel 7/Chromium, iPhone 13/WebKit and iPad Mini/WebKit presets; core/map/arrival/resilience/accessibility plus touch, rotation, offline cancellation and resume-after-expiry; a few minutes |
-| `make test-full-journey` | Actual production matching, arrival and delayed publisher, public map, private preview, late join; up to 20 minutes |
+| `make test-full-journey` | Actual matching, nearby/out-of-range arrival, 10-second publisher/cache, public map, preview and late join |
 | `make test-recovery` | Two API replicas, paused leader, arrival replay, killed API, disconnected/restarted store, disabled monitoring; about two minutes |
 | `make test-pressure` | Owned 8-MiB no-eviction saturation, fail-closed writes and recovery; about one minute |
 | `make test-soak SOAK_SECONDS=900 OUTPUT=reports/local/my-soak` | 15-minute real-clock storage churn with deliberately short synthetic TTLs |
@@ -41,11 +41,10 @@ reference-host capacity gate. The generator uses 512 loopback network addresses,
 polling and public-origin traffic are sequential measured phases, not a simultaneous
 combined workload. There is no cached-CDN traffic in this local origin test.
 
-The normal-delay journey changes neither functional configuration nor the clock.
-A release captures only once per five-minute epoch. A signal submitted after that
-capture waits for the next capture; with the additional delayed epoch, button-to-
-public-visibility can approach **15 minutes**. This differs from observation-to-
-release age. Private matching continues immediately under normal stability rules.
+The full journey uses current functional configuration and real time. With decision
+0016 it checks ten-second publication and up to forty-second browser observation,
+including capture, cache and polling; it also rejects a farther arrival before
+accepting one in a neighbouring cell. Older reports retain their five-minute epochs. Private matching continues immediately under normal stability rules.
 The full journey uses only synthetic coordinates/peers, without API-response mocks.
 The faster browser suites deliberately use public-response/provider fixtures where
 identified in their source; do not treat them as actual provider delivery.
@@ -133,7 +132,7 @@ HEAD export. Commit the driver before starting so its recorded hash/revision are
 reviewable. The Make targets set CGO_ENABLED=0 to match the release API build; use
 the same environment when invoking the Python driver directly. Compare the lab's
 binary_sha256 with the release's api_binary_sha256 before claiming an exact match.
-Production clocks/settings stay unchanged, push stays off, and synthetic
+Production clocks/settings stay unchanged; no participant opts in to external push, and synthetic
 capabilities remain in driver memory. The report records only totals and bounded
 minute samples; monitoring retains its existing one-hour rolling window.
 

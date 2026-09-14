@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["-listen", "0.0.0.0:8080", "-config", "/config/gati.yaml", "-store-address", "valkey:6379", "-store-password-file", "/run/secrets/app-password"]
+    command: ["-listen", "0.0.0.0:8080", "-config", "/config/gati.yaml", "-store-address", "valkey:6379", "-store-password-file", "/run/secrets/app-password", "-push-key-file", "/run/secrets/vapid.json"]
     depends_on:
       valkey:
         condition: service_healthy
@@ -13,6 +13,11 @@ services:
     volumes:
       - ./config/gati.yaml:/config/gati.yaml:ro
       - ./.runtime/app-password:/run/secrets/app-password:ro
+      - type: bind
+        source: ./.runtime/vapid.json
+        target: /run/secrets/vapid.json
+        read_only: true
+        bind: {create_host_path: false}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]

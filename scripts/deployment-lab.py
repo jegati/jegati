@@ -12,12 +12,13 @@ def run(out):
   root=pathlib.Path(directory)
   def command(*args, capture=False, **kw):
    return subprocess.check_output(args,stderr=log,**kw).decode().strip() if capture else subprocess.run(args,stdout=log,stderr=log,check=True,**kw)
-  for name in ['compose.production.yaml','config/gati.yaml','deploy/valkey.production.conf','scripts/init-secrets.py']:
+  for name in ['compose.production.yaml','compose.production.push.yaml','config/gati.yaml','deploy/valkey.production.conf','scripts/init-secrets.py']:
    dest=root/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,dest)
   command('python3',str(root/'scripts/init-secrets.py'))
+  command('go','run','./cmd/gati-push-keys','-directory',str(root/'.runtime'),cwd=ROOT)
   command('go','build','-trimpath','-buildvcs=false','-o',str(root/'probe'),'./scripts/deployment-probe',cwd=ROOT,env={**os.environ,'CGO_ENABLED':'0'})
   env={**os.environ,'GATI_API_ROLE':'api','GATI_API_IMAGE':'gati-api:local','GATI_WEB_IMAGE':'gati-web:local','GATI_PUBLIC_HOST':'localhost','GATI_RUNTIME_DIR':str(root/'.runtime'),'GATI_VALKEY_CONFIG':str(root/'deploy/valkey.production.conf')}
-  def compose(*args,capture=False):return command('docker-compose','-p',project,'-f',str(root/'compose.production.yaml'),'--profile','workers',*args,capture=capture,env=env,cwd=root)
+  def compose(*args,capture=False):return command('docker-compose','-p',project,'-f',str(root/'compose.production.yaml'),'-f',str(root/'compose.production.push.yaml'),'--profile','workers',*args,capture=capture,env=env,cwd=root)
   connector=project+'-connector'
   try:
    compose('up','-d','--no-build','--pull','never','--scale','api=2','--wait','--wait-timeout','240','valkey','api','worker','web')

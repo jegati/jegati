@@ -38,7 +38,7 @@ func activityHandler(c config.Config, s *store.Store) http.HandlerFunc {
 		}
 		// Never permit shared caching of a request carrying an authorization credential.
 		if r.Header.Get("Authorization") == "" {
-			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, must-revalidate", min(int64(30), (release.ExpiresAt-now)/1000)))
+			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, must-revalidate", min(int64(30), int64(c.PublicActivity.ReleaseSeconds), (release.ExpiresAt-now)/1000)))
 		}
 		etag := fmt.Sprintf("\"%x\"", sha256.Sum256(data))
 		w.Header().Set("ETag", etag)

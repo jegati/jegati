@@ -200,7 +200,8 @@ proxy test establishes Cloudflare behavior.
    an empty query string. Allowlist `/assets/*` and `/api/map/roads`; optionally
    `/api/activity/latest` with origin cache-control respected. Bypass every other
    API route, mutation, credential-bearing request and query-bearing request.
-3. Activity responses use `public, max-age=30, must-revalidate`, bounded by remaining
+3. Activity responses use `public, max-age=10, must-revalidate` with current defaults, capped by the
+   configured publication interval and remaining
    release validity; absent/expired releases use no-store. Never override that TTL,
    enable stale-if-error/Always Online for API responses, or cache 204/error responses.
    JSON needs explicit eligibility rules; do not assume default JSON caching.
@@ -229,12 +230,12 @@ python3 scripts/monitor.py --container gati-production-api-1 --socket /run/ops/g
 Use a private RAM-backed output directory in production; one bounded file per
 process, no event logs. Alert on file freshness, unavailable monitors, errors,
 worker/deadline lag and sustained released latency/failure buckets. See
-[monitoring semantics](MONITORING.md). The optional tested HTTPS alert sender and service templates are described in
-[monitoring](MONITORING.md); actual routing still needs a privately selected endpoint. Measure host
+[monitoring semantics](MONITORING.md). The optional tested email/webhook sender and service templates are described in
+[monitoring](MONITORING.md); email is selected and private SMTP credentials remain pending. Measure host
 memory pressure without reading participant memory; do not enable request logging
 to diagnose overload. Use voluntary human feedback for usability, not tracking.
 
-Push remains off by default. A release whose typed config enables it automatically
+Push transport is enabled by default (0016), with participant opt-in. A release whose typed config enables it automatically
 adds `compose.production.push.yaml`, mounts a privately provisioned VAPID key and
 gives API/worker processes an outbound network. Set the contact and key using the
 [push instructions](NOTIFICATIONS.md) before that release. Real provider/device

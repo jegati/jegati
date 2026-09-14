@@ -3,6 +3,8 @@ import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 
+// Storeless protocol smoke uses the fixed push-disabled fixture. Actual defaults
+// are exercised by the owned real-store browser/full-journey labs.
 // Ask the OS for a free port via a short-lived socket, then detect startup failure
 // explicitly; never accept responses from a preexisting service as a passing test.
 import { createServer } from 'node:net';
@@ -14,7 +16,7 @@ async function freePort() {
   return port;
 }
 const port = await freePort();
-const api = spawn('./bin/gati', ['-listen', `127.0.0.1:${port}`, '-config', 'config/gati.yaml'], { stdio: ['ignore', 'pipe', 'inherit'] });
+const api = spawn('./bin/gati', ['-listen', `127.0.0.1:${port}`, '-config', 'internal/config/testdata/default.yaml'], { stdio: ['ignore', 'pipe', 'inherit'] });
 let web;
 let startup = '';
 api.stdout.on('data', (chunk) => { startup += chunk; });

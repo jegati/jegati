@@ -26,7 +26,7 @@ func NewActivityPublisher(s *store.Store, c config.Config) *ActivityPublisher {
 	return &ActivityPublisher{Store: s, Config: c, owner: randomID()}
 }
 func (p *ActivityPublisher) Run(ctx context.Context) {
-	ticker := time.NewTicker(time.Duration(p.Config.Matching.ReconciliationSeconds) * time.Second)
+	ticker := time.NewTicker(time.Duration(min(p.Config.Matching.ReconciliationSeconds, max(1, p.Config.PublicActivity.ReleaseSeconds/10))) * time.Second)
 	defer ticker.Stop()
 	firstEpoch := int64(-1)
 	for {
@@ -40,15 +40,7 @@ func (p *ActivityPublisher) Run(ctx context.Context) {
 				if firstEpoch < 0 {
 					firstEpoch = now / interval
 				}
-				expected := (now/interval - int64(p.Config.PublicActivity.DelayEpochs) - 1) * interval
-				var release activity.Release
-				if len(data) > 0 && json.Unmarshal(data, &release) == nil {
-					lag = time.Duration(max(0, expected-release.ObservedFrom)) * time.Millisecond
-				} else if expected < firstEpoch*interval {
-					lag = 0 // No release from this process lifetime is due yet.
-				} else {
-					lag = time.Duration(interval) * time.Millisecond
-				}
+				lag = publicationLag(now, firstEpoch, interval, int64(p.Config.PublicActivity.DelayEpochs), data)
 			}
 			p.Monitor.Lag(monitor.Publisher, lag)
 		}
@@ -69,7 +61,13 @@ func (p *ActivityPublisher) Step(ctx context.Context) error {
 		return e
 	}
 	_, hash := p.Config.Canonical()
-	epoch := now / (int64(p.Config.PublicActivity.ReleaseSeconds) * 1000)
+	interval := int64(p.Config.PublicActivity.ReleaseSeconds) * 1000
+	// Leave the full capture budget before the fixed publication boundary.
+	// Never start a capture that is guaranteed to miss its zero-delay release.
+	if p.Config.PublicActivity.DelayEpochs == 0 && interval-now%interval <= int64(p.Config.PublicActivity.CaptureMaxSeconds)*1000 {
+		return nil
+	}
+	epoch := now / interval
 	exists, e := p.Store.HasActivityEpoch(ctx, hash, epoch)
 	if e != nil || exists {
 		return e
@@ -84,4 +82,18 @@ func (p *ActivityPublisher) Step(ctx context.Context) error {
 	}
 	_, e = p.Store.StageActivity(ctx, p.owner, p.Config, r, data)
 	return e
+}
+
+// Missing publication must accumulate lag even when intervals are shorter than
+// the alert threshold; a single interval would hide a permanently empty map.
+func publicationLag(now, firstEpoch, interval, delay int64, data []byte) time.Duration {
+	expected := (now/interval - delay - 1) * interval
+	var release activity.Release
+	if len(data) > 0 && json.Unmarshal(data, &release) == nil {
+		return time.Duration(max(0, expected-release.ObservedFrom)) * time.Millisecond
+	}
+	if expected < firstEpoch*interval {
+		return 0
+	}
+	return time.Duration(expected-firstEpoch*interval+interval) * time.Millisecond
 }

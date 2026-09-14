@@ -19,6 +19,7 @@
           <label>Sa kohë ke?<select id="duration" required></select></label>
           <label>Sa larg mund të shkosh?<select id="radius" required></select></label>
         </div>
+        <p class="hint">Llogarit edhe kohën për të shkuar. Rrezja tregon largësinë në hartë; rruga në këmbë mund të jetë më e gjatë.</p>
         <fieldset><legend>Ku je afërsisht?</legend>
           <p class="hint">Lejo vendndodhjen nga pajisja. Dërgohet vetëm zona e përafërt.</p>
           <p class="hint">Me JAM GATI merret vendndodhja një herë dhe dërgohet vetëm zona e përafërt.</p>
@@ -33,15 +34,18 @@
         <h2 id="active-title">JAM GATI.</h2>
         <p id="remaining"></p>
         <p id="waiting-guidance"></p>
+        <p class="hint" id="matching-guidance"></p>
+        <p class="hint">Për njoftime kur faqja është në sfond, aktivizo njoftimet më poshtë. Pa to, mbaje këtë skedë të hapur dhe kthehu për ta kontrolluar; mbyllja e saj mund të humbasë qasjen te gatishmëria.</p>
         <button id="refresh-status" type="button">Kontrollo përsëri</button>
         <section id="nearby-statistics" hidden aria-label="GATI afër teje">
           <h3>GATI afër teje</h3><p id="nearby-count"></p>
           <p class="hint" id="nearby-area-description"></p>
+          <p class="hint" id="count-guidance"></p>
         </section>
         <section id="invitation" hidden aria-label="Takimi pranë teje">
           <h3 id="collective-title">JEMI GATI.</h3>
           <p id="destination"></p>
-          <p class="hint">Në hapësirën për këmbësorë pranë kryqëzimit. Mos qëndro në rrugë.</p>
+          <p class="hint">Takohuni në hapësirën për këmbësorë pranë kryqëzimit. Shiko përreth për njerëzit e mbledhur; pika në hartë nuk cakton një cep të veçantë. Mos qëndro në rrugë.</p>
           <div id="destination-map" role="region" aria-label="Harta e pikës së takimit"></div>
           <p id="gathering-time"></p>
           <p id="going-status" role="status"></p>
@@ -80,7 +84,7 @@
       <dialog id="public-join-dialog" aria-labelledby="preview-title">
         <h2 id="preview-title">A do të shkosh?</h2>
         <p id="preview-destination"></p><div id="preview-map" role="region" aria-label="Parapamja e pikës së takimit"></div>
-        <p class="hint">Në hapësirën për këmbësorë pranë kryqëzimit. Mos qëndro në rrugë.</p>
+        <p class="hint">Takohuni në hapësirën për këmbësorë pranë kryqëzimit. Shiko përreth për njerëzit e mbledhur; pika në hartë nuk cakton një cep të veçantë. Mos qëndro në rrugë.</p>
         <p id="preview-time"></p><p id="preview-status" role="status"></p>
         <p>Parapamja nuk të regjistron dhe nuk është premtim për të shkuar.</p>
         <button id="public-join-confirm" class="primary" type="button">PO, PO SHKOJ</button>
@@ -139,7 +143,7 @@
       </section>
       <section id="komente" class="alpha-feedback" aria-labelledby="feedback-title" tabindex="-1">
         <h2 id="feedback-title">Na ndihmo ta përmirësojmë</h2>
-        <p>Ky është një version i hershëm për Tiranën. Mund të hasësh gabime ose ndërprerje. Shifrat në hartë shfaqen me vonesë; mungesa e tyre nuk do të thotë se nuk ka njerëz të gatshëm.</p>
+        <p>Ky është një version i hershëm për Tiranën. Mund të hasësh gabime ose ndërprerje. Shifrat në hartë përditësohen periodikisht; mungesa e tyre nuk do të thotë se nuk ka njerëz të gatshëm.</p>
         <p>Raportimi është krejtësisht opsional. Na trego çfarë prisje, çfarë ndodhi dhe hapat për ta përsëritur problemin, bashkë me llojin e shfletuesit dhe sistemit të pajisjes.</p>
         <p><strong>Mbro privatësinë tënde:</strong> mos dërgo vendndodhje, pika takimi, emra, kode hyrjeje ose pamje ekrani me të dhëna private. Përshkruaje problemin pa treguar pjesëmarrjen tënde.</p>
         <div class="feedback-links">

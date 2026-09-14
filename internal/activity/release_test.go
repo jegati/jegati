@@ -46,7 +46,7 @@ func TestCountSemanticsAndCellOnlySerialization(t *testing.T) {
 			t.Fatalf("public private field: %s", forbidden)
 		}
 	}
-	if r.ReleaseAt != 1200000 || r.ExpiresAt != 1500000 {
+	if r.ReleaseAt != 610000 || r.ExpiresAt != 660000 {
 		t.Fatal("wrong release/retention clock")
 	}
 	// Expiration removes willingness; declining removes gathering membership only;
@@ -169,5 +169,29 @@ func TestExpiredPresenceCannotRetainStrongerPrivateThresholdLabel(t *testing.T) 
 	}
 	if r.Gatherings[0].Here != 20 || r.Gatherings[0].State != "jemi_gati" {
 		t.Fatal("stale private state falsely retained confirmed public presence")
+	}
+}
+
+func TestFastEpochBoundariesAndTemporalInference(t *testing.T) {
+	c, v, g := fixture(t)
+	// Zero extra delay still releases fixed, shared snapshots at epoch boundaries.
+	before, _, err := Build(c, 600000, 600100, v[:19], g)
+	if err != nil {
+		t.Fatal(err)
+	}
+	after, raw, err := Build(c, 610000, 610100, v[:20], g)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if before.ReleaseAt != 610000 || after.ReleaseAt != 620000 || len(before.Areas) != 0 || after.Areas[0].Willing != 20 {
+		t.Fatal("fast release clock or suppression changed")
+	}
+	// A coalition supplying 19 inputs can infer a new contribution within ten
+	// seconds. This user-accepted loss of temporal protection is not anonymity.
+	if strings.Contains(string(raw), `"willing":19`) || strings.Contains(string(raw), `"Hash"`) {
+		t.Fatal("raw contribution leaked")
+	}
+	if _, _, err = Build(c, 609000, 610000, v, g); err == nil {
+		t.Fatal("late capture accepted")
 	}
 }

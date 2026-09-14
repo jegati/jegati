@@ -55,8 +55,8 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
 - JAM GATI is willingness, not attendance. JO TANI declines that invitation and
   keeps willingness active. Cancellation must be immediate, neutral and easy.
 - Availability starts at 30 minutes. Match continuously on changes/expiry and
-  timer deadlines, without aligned appointment slots. Delayed public publication
-  is a separate privacy mechanism, not a delay imposed on internal matching.
+  timer deadlines, without aligned appointment slots. Periodic public publication
+  is separate from internal matching; decision 0016 accepts seconds-scale releases.
 - Automatically choose the eligible mapped road intersection (crossroad) nearest the
   coarse group's center that all counted users can reach within their radii.
   Use imported map data, not a manually predefined meeting-area catalog. No shared
@@ -89,7 +89,7 @@ proposed defaults and implementation order; `docs/PROGRESS.md` records reality.
   participant backups, disk snapshots, access logs, request-body logs, tracing
   identifiers or individual admin views. Enforce supported host/store controls
   and test actual settings; do not claim configuration comments enforce privacy.
-- Public APIs expose fixed, delayed, suppressed/bucketed aggregate releases only.
+- Public APIs expose fixed, periodic, suppressed/bucketed aggregate releases only (0016).
   No individual markers, member lists, arbitrary count queries, exact counts or
   explicit complementary totals. Public gathering entries use the same aggregate
   cells as willingness, without intersection IDs/coordinates/labels. Private

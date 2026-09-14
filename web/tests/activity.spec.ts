@@ -211,7 +211,9 @@ test('ended gatherings are labeled and leave the live map without changing relea
   await expect(page.locator('.public-gathering[data-state="ended"]')).toHaveCount(2);
   await page.locator('#activity-all').click();
   await expect(async () => { await page.locator('#activity-all').click(); await canvas.click(); await expect(page.locator('#activity-selection')).toHaveText('Takimet në zonat e publikuara'); }).toPass();
-  expect(calls).toBe(1); expect(writes).toBe(0);
+  // Polling follows the ten-second cadence; expiry must not mutate the buckets
+  // even when the endpoint returns the same still-valid canonical release.
+  expect(calls).toBeGreaterThanOrEqual(2); expect(calls).toBeLessThanOrEqual(3); expect(writes).toBe(0);
   await expect(page.locator('#map')).toHaveAttribute('data-activity', release.id);
 });
 

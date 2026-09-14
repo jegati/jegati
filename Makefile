@@ -30,7 +30,7 @@ config-show:
 	go run ./cmd/gati -mode config-show -config "$(CONFIG)"
 config-check-simulation:
 	go run -tags simulation ./cmd/gati -mode config-check -config config/simulation.yaml
-dev: secrets
+dev: push-keys
 	$(COMPOSE) -f compose.yaml up --build
 dev-native:
 	bash scripts/dev-native.sh
