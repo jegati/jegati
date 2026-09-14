@@ -20,6 +20,12 @@ and explicit **JAM ENDE KËTU** renewal in the last two minutes of presence fres
 Renewal rechecks fresh coarse device location and keeps one contribution within the
 original deadlines. Willingness/gathering extension and relocation remain deferred.
 
+Accepted public-copy update (2026-09-14): add a static Albanian About section for
+peaceful Flamingo protest support, daily gathering plus nationwide aspiration,
+voluntary local coordination and auditable privacy claims. It shares the existing
+page and requires no new service, tracking, onboarding or state transition.
+Validate navigation/session preservation and mobile/enlarged-text accessibility.
+
 Status: architecture and milestone plan. Implementation has started; consult PROGRESS.md for completed functionality and validation. This document describes intended behavior, not evidence that every protection already exists.
 
 Read [AGENTS.md](../AGENTS.md) for development instructions and

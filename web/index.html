@@ -10,8 +10,8 @@
   </head>
   <body>
     <main>
-      <header><p class="brand"><span aria-hidden="true">🦩</span> GATI</p><span class="city">Tiranë</span></header>
-      <h1>A JE GATI?</h1>
+      <header><p class="brand"><span aria-hidden="true">🦩</span> GATI</p><nav aria-label="Navigimi kryesor"><span class="city">Tiranë</span><a href="#rreth-nesh">Rreth nesh</a></nav></header>
+      <h1 id="pjesemarrja" tabindex="-1">A JE GATI?</h1>
       <p class="tagline">Bëje vullnetin tënd të dukshëm.</p>
       <p class="muted">Gatishmëria nuk është premtim për të marrë pjesë.</p>
       <form id="willingness" hidden>
@@ -88,6 +88,56 @@
       </dialog>
       <p id="connection-status" role="status"></p>
       <p id="status" role="status">Po hapet GATI…</p>
+      <section id="rreth-nesh" class="about" aria-labelledby="about-title" tabindex="-1">
+        <div class="about-intro">
+          <p class="about-eyebrow"><span aria-hidden="true">🦩</span> Rreth nesh</p>
+          <h2 id="about-title">Bëje vullnetin tënd<br />të dukshëm.</h2>
+          <p class="about-lead">GATI është krijuar për të mbështetur protestat e Flamingove në Shqipëri.</p>
+          <p>Një person mund të jetë gati pa e ditur askush. Kur shumë prej nesh janë gati, lind mundësia për t’u bashkuar.</p>
+        </div>
+
+        <div class="about-body">
+          <h3>Çdo ditë te Kryeministria.<br />Edhe pranë njëri-tjetrit.</h3>
+          <p>Besojmë se është jashtëzakonisht e vlefshme dhe e rëndësishme që protesta të vazhdojë <strong>çdo ditë, në orarin e zakonshëm, përpara Kryeministrisë.</strong></p>
+          <p>Duam ta plotësojmë këtë qëndresë: të ndihmojmë që protesta të bëhet e vazhdueshme, në të gjithë Shqipërinë dhe në çdo kohë, sa herë ka njerëz pranë njëri-tjetrit që duan dhe munden të bashkohen.</p>
+          <p class="about-coverage">Ky version i GATI-t mbulon Tiranën. Synimi ynë shtrihet në të gjithë vendin.</p>
+
+          <aside class="about-peace" aria-labelledby="peace-title">
+            <h3 id="peace-title">Gjithmonë paqësisht.</h3>
+            <p>Mbështesim vetëm protestën paqësore, pa dhunë, me respekt për njerëzit dhe hapësirat e përbashkëta.</p>
+          </aside>
+
+          <h3>Nga gatishmëria te takimi</h3>
+          <p>GATI të ndihmon të bashkërendohesh me njerëz pranë teje, duke kufizuar të dhënat që ndan.</p>
+          <ol class="about-steps">
+            <li><strong>JAM GATI</strong><p>Zgjidh sa kohë ke, nga 30 minuta, dhe sa larg mund të shkosh. Lejo vendndodhjen nga pajisja. Gatishmëria nuk është premtim për të ardhur.</p></li>
+            <li><strong>JEMI GATI</strong><p>Kur ka mjaft gatishmëri të përputhshme pranë teje, merr një pikë takimi. Ti zgjedh: <b>PO, PO SHKOJ</b> ose <b>JO TANI</b>. Mund të bashkohesh edhe me një takim që ka nisur, nëse ka ende kohë.</p></li>
+            <li><strong>JAM KËTU → JEMI KËTU</strong><p>Kur mbërrin, konfirmo me një kontroll të ri të vendndodhjes. Kur konfirmimet arrijnë pragun, shfaqet JEMI KËTU.</p></li>
+          </ol>
+          <p><strong>Pas takimit, vazhdimi është në duart tuaja.</strong> Ju vendosni së bashku si ta vazhdoni protestën në mënyrë paqësore. GATI nuk cakton drejtues dhe nuk dikton hapat e mëtejshëm. Mund të tërhiqesh kur të duash, pa detyrim.</p>
+
+          <h3>Më pak të dhëna. Më shumë kontroll.</h3>
+          <div class="about-promises">
+            <div><h4>Pa regjistrim</h4><p>Pa emër, email, numër telefoni apo profil. Pa reklama dhe pa gjurmim analitik.</p></div>
+            <div><h4>Vetëm zona e përafërt</h4><p>Koordinatat e sakta përpunohen në pajisje. GATI merr vetëm zonën e përafërt, jo gjurmën e lëvizjeve të tua.</p></div>
+            <div><h4>Të dhëna të përkohshme</h4><p>Të dhënat e koordinimit skadojnë automatikisht. Nuk krijojmë historik personal pjesëmarrjeje. Gjendja aktive mbahet në kujtesë, pa kopje rezervë të pjesëmarrësve.</p></div>
+            <div><h4>Kolektivi në hartë</h4><p>Publikohen zona dhe shifra të përafërta, me vonesë, si 50+. Grupet e vogla fshihen. Nuk shfaqen individë apo pikat e sakta të takimeve në hartën publike.</p></div>
+          </div>
+          <div class="about-source">
+            <h4>Kod i hapur, i kontrollueshëm</h4>
+            <p>Projekti ka licencë AGPL-3.0 dhe përfshin kodin, testet dhe udhëzimet e verifikimit. Siguria duhet të mund të kontrollohet, jo thjesht të premtohet.</p>
+            <a href="https://github.com/jegati/jegati" target="_blank" rel="noopener noreferrer">Shiko projektin në GitHub <span aria-hidden="true">↗</span><span class="sr-only"> (hapet në skedë të re)</span></a>
+          </div>
+          <details class="about-limits">
+            <summary>Çfarë duhet të dish për privatësinë dhe sigurinë</summary>
+            <p>Koordinimi kërkon ruajtje të përkohshme të zonës dhe gjendjes së pjesëmarrjes. Kjo nuk është «zero të dhëna». Kërkesat kufizohen dhe konfirmimet mbrohen nga përsëritjet, por një sinjal nuk provon një person të veçantë dhe vendndodhja e pajisjes nuk provon praninë fizike.</p>
+            <p>Nuk premtojmë anonimitet absolut: nga koha, zona ose pika e takimit mund të nxirren përfundime. Ofruesit e rrjetit dhe infrastruktura që përcjell lidhjen mund të shohin adresën IP; një operator me kontroll të serverit mund të shohë të dhënat aktive.</p>
+            <p>Njoftimet në sfond janë opsionale dhe përdorin ofruesin e shfletuesit. Kodi i hapur dhe krahasimi i versioneve ndihmojnë verifikimin, por nuk provojnë vetë se si sillet një server. Ende nuk është kryer auditim i pavarur.</p>
+          </details>
+          <a class="about-cta" href="#pjesemarrja">A JE GATI? <span aria-hidden="true">↑</span></a>
+          <p class="about-closing">Ti zgjedh kohën. Ju krijoni mundësinë.</p>
+        </div>
+      </section>
       <footer>Pa llogari. Pa profil. Vetëm përkohësisht.</footer>
       <noscript>Kjo faqe ka nevojë për JavaScript.</noscript>
     </main>

@@ -8,6 +8,13 @@ entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
+The subsequent About-section request is implemented locally: Albanian peaceful
+Flamingo protest support, daily Kryeministria gathering plus nationwide aspiration,
+voluntary coordination and bounded privacy/security claims. The same-page section
+preserves participation and uses the public GitHub source link. Production build,
+41 Chromium tests and desktop/mobile accessibility/visual checks passed; see the
+About entry at the end of this document. No public deployment or remote push.
+
 Both auditability cleanup batches are complete. The user subsequently authorized
 three lifecycle priorities: expired gathering metadata cleanup, ended public views
 and explicit early presence renewal. They are implemented locally and the regression checks passed, with evidence
@@ -1470,3 +1477,49 @@ new capacity measurement or independent release audit occurred.
 Next: wait for the delivered VPS connection details and privately arranged access;
 prepare and audit a fresh exact release before public activation. Local work in
 this approved lifecycle batch is complete. Preserve untracked commands.txt.
+
+
+## Albanian About section — 2026-09-14
+
+Added a top-navigation “Rreth nesh” anchor and a warm cream/rose section on the
+existing page. It explicitly supports the Flamingo protests, values continuing
+every day at the usual hour in front of Kryeministria, and aims to complement that
+with continuous peaceful participation across Albania. It identifies this version
+as Tirana-only, explains the voluntary willingness/invitation/arrival flow and
+leaves subsequent peaceful protest decisions to participants. No exact protest
+hour, official organizer identity or nationwide availability was invented.
+
+Privacy cards describe no registration/identity fields, locally coarsened location,
+automatically expiring coordination data, no personal participation history,
+suppressed/delayed public cells and open-source inspection. An expandable explanation
+covers temporary retention, rate/replay controls, inference, device/Sybil limits,
+network/server-operator exposure, optional push and absence of independent audit.
+It does not claim zero retention, absolute anonymity or proof of remote behavior.
+The configured origin's public GitHub repository was verified accessible without
+authentication and linked with explicit new-tab/no-referrer behavior. No automatic
+external asset/request, tracking, dependency, runtime setting or backend changed.
+
+Validation:
+
+- Sourced `scripts/env.sh`; `bash scripts/doctor.sh` passed required tool checks;
+  optional gh remains absent. No tools needed installation.
+- `npm --prefix web run build`: TypeScript and production Vite build passed.
+  The existing large MapLibre bundle warning remains; no new dependency was added.
+- `make test-browser OUTPUT=reports/local/about-browser`: **41 Chromium tests
+  passed in 1.1 minutes**, including existing real API participation, arrival,
+  renewal, map, retry/cancellation and optional-push emulation checks.
+- New tests confirm reading/navigation creates no participation or location request,
+  preserves an active capability/deadline, supports keyboard navigation/disclosure,
+  and remains readable when the API fails. Automated WCAG A/AA scans and horizontal
+  overflow checks pass at 390 px and 200% text, including expanded privacy details.
+- Focused About accessibility/visual test rerun passed after making screenshot
+  paths relative to the test module. Desktop, mobile and full-section screenshots
+  are in ignored `reports/local/about-{desktop,mobile,section}.png`; inspected visually.
+- No backend/load/deployment audit was rerun for this static HTML/CSS change.
+  Browser GPS and push are emulated; these checks do not certify real devices or
+  a public deployment. Existing host/edge and exact-release audit gates remain.
+
+Requirements and plan now record the approved public purpose, superseding the
+purpose-copy exclusion from the earlier usability batch. README and THREAT_MODEL
+are consistent. Next: prepare a fresh audited release once VPS/access is ready;
+this About request is complete locally. Keep commands.txt untouched.

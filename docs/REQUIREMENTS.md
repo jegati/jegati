@@ -21,6 +21,27 @@ is no registration, identity form or complex onboarding. Willingness expires
 automatically and is not a commitment to attend. No response means no attendance.
 Declining/cancelling is neutral, easy and never guilt-inducing.
 
+## About and public purpose
+
+The Albanian “Rreth nesh” section explicitly supports the peaceful Flamingo
+protests in Albania. It values continuing daily at the usual hour in front of the
+Prime Minister's office and aims to complement that gathering with continuous,
+decentralized participation across the country and at different times. Do not
+invent an exact scheduled hour or imply nationwide coverage: this version covers
+Tirana. After meeting, participants choose how to continue peacefully themselves.
+
+Explain the willingness → invitation → voluntary commitment → arrival flow with
+the existing slogan. Reading About or returning to participation must not enroll,
+request device location, change an active session or pressure attendance. Keep it
+visually clear and accessible without adding onboarding or external embeds.
+
+Privacy/security claims must match the code: no registration or identity fields,
+locally coarsened device location, temporary coordination data with automatic
+expiry, suppressed/delayed public aggregates, rate/replay controls and open source
+with verification tooling. Do not say “zero data retention,” absolute anonymity,
+verified humans/location or independently audited deployment. Provide the source
+link and concise limits for inference, network/operator exposure and optional push.
+
 ## Matching, destination and joining
 
 - Participant location comes only from the device location service. No manual
@@ -144,4 +165,5 @@ an added feature makes the product less anonymous or harder to maintain.
 Implement optional background notifications, one-action willingness, private
 location-eligible destination preview before PO, PO SHKOJ, and clearer waiting,
 connection recovery and arrival-expiry guidance. Do not add sharing links/QR or
-new purpose/activity copy in this work. See USABILITY_IMPLEMENTATION_PLAN.md.
+new purpose/activity copy in that earlier work. The subsequently approved About
+section above supersedes that copy exclusion. See USABILITY_IMPLEMENTATION_PLAN.md.

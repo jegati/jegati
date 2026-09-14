@@ -30,7 +30,9 @@ work locally, including explicit joining from map entries. Public cells default 
 1 km; private matching remains 100 m. Eligible users can preview a private destination
 before committing. [Optional background push](docs/NOTIFICATIONS.md) is implemented
 with temporary opt-in/resume and remains disabled by default; real provider/device
-verification and area follows remain. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
+verification and area follows remain. The Albanian **Rreth nesh** section explains
+peaceful Flamingo protest support, voluntary coordination and bounded privacy
+claims, with a source link and no added enrollment step. Seeded isolated [Tirana simulations](docs/SIMULATION.md)
 include a 3,000-person response/journey driver, a standalone map replay,
 expiry/replay checks and smaller Sybil cases. Run `make simulate-population` using
 your current configuration, or `make simulate-suite` for a scenario comparison.

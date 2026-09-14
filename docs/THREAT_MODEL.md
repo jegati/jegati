@@ -380,3 +380,21 @@ Public ended-state rendering uses existing released deadlines and leaves bucket
 values unchanged. External historical copies remain outside deletion guarantees.
 See the lifecycle implementation report for actual regression evidence; these
 changes require a fresh exact release audit before public activation.
+
+
+### Public About copy — 2026-09-14
+
+The approved Albanian About section openly identifies GATI's support for peaceful
+Flamingo protests. It communicates the service's political purpose; visiting it
+is not evidence of willingness, commitment or attendance. The section is static
+HTML with same-page navigation: it requests no location, creates no capability,
+adds no state transition and does not interrupt an active session. The GitHub
+source link is an explicit external navigation with no referrer; no external
+asset, embed, analytics or automatic third-party request was added.
+
+Public claims distinguish temporary coordination storage from zero retention,
+Tirana coverage from nationwide aspiration, coarse claims from proof of location
+or human independence, and open-source inspection from verified remote operation.
+The expandable explanation retains inference, network/operator and optional-push
+limits and states that no independent audit has occurred. Browser navigation,
+session preservation and accessibility checks are recorded in PROGRESS.
