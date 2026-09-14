@@ -1546,3 +1546,16 @@ About navigation and no page errors; it did not enroll or request device locatio
 
 Next: user can review /#rreth-nesh in their browser. The stack remains running;
 `make down` stops it. Public release still needs VPS/access and fresh release audit.
+
+
+## Private repository identity review — 2026-09-14
+
+Reviewed the tracked tree and all 70 reachable commits through `81ddb0a`, 938
+unique historical file blobs, commit/reflog metadata, reachable PDF/compressed
+map contents and additional unreachable local objects. Compared the public remote
+state using unauthenticated requests. Findings and specific identifiers were
+reported privately in the conversation and are intentionally not copied here.
+No identity cleanup, history rewrite, remote push or deployment was performed.
+Generated runtime credentials were not opened. This was a bounded identity review,
+not an exhaustive secret-scanner certification. Next: agree any publication cleanup
+before pushing; preserve the private working history and commands.txt.
