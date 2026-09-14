@@ -14,11 +14,12 @@ mkdir -p "$run_output"
 go build -tags simulation -o bin/gati-simulation ./cmd/gati
 go build -o bin/gati-simulate ./cmd/simulate
 # Work from a validated nonsecret snapshot. Only the profile is converted; the
-# caller's file stays untouched. JSON is valid strict YAML for the application.
+# caller's file stays untouched. Outbound push must be disabled in simulations.
+# JSON is valid strict YAML for the application.
 bin/gati-simulation -mode config-show -config "$sim_config" > "$run_output/source-config.json"
 python3 - "$run_output" <<'PYCONFIG'
 import hashlib,json,pathlib,platform,subprocess,sys
-out=pathlib.Path(sys.argv[1]);c=json.loads((out/'source-config.json').read_text());c['profile']='simulation'
+out=pathlib.Path(sys.argv[1]);c=json.loads((out/'source-config.json').read_text());c['profile']='simulation';c['notifications']['push_enabled']=False
 (out/'effective-config.json').write_text(json.dumps(c,separators=(',',':'))+'\n')
 manifest={'source_revision':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'platform':platform.platform(),'machine':platform.machine(),'logical_cpus':__import__('os').cpu_count(),'hashes':{}}
 for name in ['bin/gati-simulation','bin/gati-simulate','data/tirana/intersections.json']:

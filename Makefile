@@ -181,3 +181,11 @@ format-python-check:
 .PHONY: test-planner-replay
 test-planner-replay:
 	GATI_PLANNER_REPLAY=1 go test -count=1 -timeout 10m -run '^TestTiranaPlannerReplay$$' -v ./internal/simulation
+
+# Offline behavioral study; never targets the application or a live store.
+.PHONY: study-tirana test-daystudy
+study-tirana:
+	go run ./cmd/daystudy -output $(or $(OUTPUT),reports/local/tirana-day.json)
+test-daystudy:
+	go test -race ./internal/simulation -run TestDay -count=1
+	python3 -m unittest discover -s scripts -p 'test_daystudy.py'

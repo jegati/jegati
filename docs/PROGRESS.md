@@ -1882,3 +1882,26 @@ and sanitized JSON for exact tests, load scope and accepted privacy tradeoffs.
 Next: review the new terminal overnight report, then obtain VPS/SSH and private
 SMTP settings, perform real host/Cloudflare/TLS/cache and phone/push checks, and
 rescan the exact release within 24 hours of activation. No remote push/deployment.
+
+## Outreach day-study tools — 2026-09-14
+
+User requested a short Albanian outreach pitch plus reproducible day-long Tirana
+scenarios/maps, not sending messages or deploying. Added an isolated offline
+behavioral model (`cmd/daystudy`) reusing the real matching planner, crossroad index
+and public release builder. Nine explicit audience/availability/reaction/geography
+cases, three seeds, 12-hour window; no application behavior/config changes. See
+`docs/outreach/METHOD.md` for meanings of x/y, temporal approximation, population
+assumptions and limits. Renderer exports a standalone Albanian interactive map,
+chronology and complete comparison table. Preserve the user's uncommitted About edit.
+
+Initial smoke exposed the existing simulation script's incompatibility with newly
+enabled push: simulation mode rejects outbound delivery. The script now records
+the original config and disables push only in its generated simulation copy.
+Rerun `reports/local/outreach-api-control-fixed`: 80/80 synthetic credentials
+accepted/invited/arrived, one observed gathering, 5.8s driver runtime; associated
+real-store/simulation arrival renewal, continuous admission, clock and inference
+checks passed. First attempt `outreach-api-control` failed startup and is not evidence.
+
+Next: complete focused tool checks, commit the tools, run the full matrix and
+finer-time-step sensitivity, inspect the browser artifacts, and write the pitch
+with measured outcomes (including zero-gathering cases). No remote push/deployment.

@@ -24,8 +24,10 @@ Each run includes `report.json`, `timeline.csv`, effective/source config snapsho
 binary/map hashes and local platform information. `make check-population
 REPORT=path/to/report.json` checks the funnel, expiry, geometry and config invariants.
 
-The script validates the selected application config and converts **only** its
-profile to `simulation` in the run directory. It never edits your input file.
+The script validates the selected application config, converts its profile to
+`simulation`, and disables outbound push in the run directory. Production-enabled
+push cannot run against a simulation store. All matching/publication parameters
+are retained. It never edits your input file.
 The API remains a simulation-only build in the `gati-sim:*` namespace. Current
 baseline: activation 30, arrivals 20, radii 0.1/0.5/1/3 km and 100 m cells.
 `config/simulation-population.yaml` is an explicit example of these settings;
@@ -129,8 +131,9 @@ bounded fixtures; city-wide optimal allocation is not claimed.
 Bulk actors use coarse API inputs. The real client is tested separately through
 mocked-device browser journeys on its normal clock, including denied/stale/poor
 fixes and the full gathering flow. No manual participant-location UI is added.
-Synthetic late discovery is injected from already observed gatherings; it does not
-prove public maps, area follows or push delivery, which remain unimplemented.
+Legacy synthetic late discovery is injected from already observed gatherings; it
+does not exercise the implemented public map or push delivery. Area follows remain
+unimplemented.
 No secrets are exported in reports. Source/map/config hashes identify the experiment;
 known location spoofing and colluding-input inference limitations remain.
 
@@ -174,3 +177,11 @@ creation budget. Check it with `node scripts/check-population.mjs path/to/report
 --allow-rate-limits`; rejected credentials must remain visible in its results.
 The small success control and standalone replay check are included in the CI
 workflow; a local pass does not assert that remote CI has executed.
+
+## Day-long outreach study
+
+The separate [offline day study](../docs/outreach/METHOD.md) reuses the matching
+planner and public release builder for a finite audience becoming willing across
+12 hours. It models reactive joining from released public events and compares
+multiple seeds. It is a behavioral illustration, not the API/Valkey simulator,
+a turnout prediction or human usability evidence.
