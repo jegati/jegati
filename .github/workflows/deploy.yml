@@ -1,0 +1,128 @@
+name: deploy alpha
+
+on:
+  push:
+    branches: [deploy]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gati-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, audit and activate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: production
+    env:
+      GATI_PUBLIC_HOST: jamgati.com
+      RELEASE_ROOT: reports/local/github-release-${{ github.sha }}
+      PACKAGE: reports/local/github-release-${{ github.sha }}.tar.gz
+      REMOTE_ROOT: /opt/gati/releases
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+      VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+      CLOUDFLARE_TUNNEL_TOKEN: ${{ secrets.CLOUDFLARE_TUNNEL_TOKEN }}
+    steps:
+      - name: Check out the requested revision
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+
+      - name: Install the pinned build tools
+        run: bash scripts/bootstrap.sh
+
+      - name: Run the local release gates in the GitHub runner
+        run: |
+          source scripts/env.sh
+          make audit-local COMPOSE='docker compose'
+          make security-check
+
+      - name: Prepare and audit the immutable release
+        run: |
+          source scripts/env.sh
+          python3 scripts/release.py prepare --release "$RELEASE_ROOT" --public-host "$GATI_PUBLIC_HOST"
+          python3 scripts/audit-images.py --release "$RELEASE_ROOT" --output "${RELEASE_ROOT}-audit"
+          tar --sort=name --owner=0 --group=0 --numeric-owner \
+            -czf "$PACKAGE" -C reports/local \
+            "github-release-${GITHUB_SHA}" "github-release-${GITHUB_SHA}-audit"
+          (cd "$(dirname "$PACKAGE")" && sha256sum "$(basename "$PACKAGE")") | tee "$PACKAGE.sha256"
+
+      - name: Configure verified SSH host access
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VPS_HOST" && test -n "$VPS_USER" && test -n "$VPS_SSH_PRIVATE_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+          eval "$(ssh-agent -s)"
+          printf '%s\n' "$VPS_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+
+      - name: Transfer the verified release package
+        run: |
+          set -euo pipefail
+          scp -C -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$PACKAGE" \
+            "$VPS_USER@$VPS_HOST:/tmp/github-release-${GITHUB_SHA}.tar.gz"
+          scp -C -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "$PACKAGE.sha256" \
+            "$VPS_USER@$VPS_HOST:/tmp/github-release-${GITHUB_SHA}.tar.gz.sha256"
+
+      - name: Provision the tunnel credential without exposing it in logs
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_TUNNEL_TOKEN"
+          printf '%s' "$CLOUDFLARE_TUNNEL_TOKEN" | \
+            ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
+            'umask 077; install -d -m 700 /opt/gati/releases/.gati-production-runtime; install -m 600 /dev/stdin /opt/gati/releases/.gati-production-runtime/tunnel-token'
+
+      - name: Activate and verify the release on the VPS
+        run: |
+          set -euo pipefail
+          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
+            "GATI_SHA='$GITHUB_SHA' REMOTE_ROOT='$REMOTE_ROOT' bash -s" <<'REMOTE'
+          set -euo pipefail
+          archive="/tmp/github-release-${GATI_SHA}.tar.gz"
+          checksum="${archive}.sha256"
+          staging="${REMOTE_ROOT}/.incoming-${GATI_SHA}"
+          release="${REMOTE_ROOT}/${GATI_SHA}"
+          audit="/opt/gati/audits/${GATI_SHA}"
+          test -f "$archive" && test -f "$checksum"
+          sha256sum -c "$checksum"
+          test ! -e "$release"
+          test ! -e "$staging"
+          install -d -m 700 "$REMOTE_ROOT" /opt/gati/audits
+          mkdir -m 700 "$staging"
+          tar -xzf "$archive" -C "$staging"
+          mv "$staging/github-release-${GATI_SHA}" "$release"
+          mv "$staging/github-release-${GATI_SHA}-audit" "$audit"
+          rmdir "$staging"
+          cd "$release"
+          bash scripts/bootstrap.sh
+          source scripts/env.sh
+          runtime="$REMOTE_ROOT/.gati-production-runtime"
+          if [ ! -f "$runtime/vapid.json" ]; then
+            go run ./cmd/gati-push-keys -directory "$runtime"
+          fi
+          python3 - "$release/release.json" "$GATI_SHA" <<'PY'
+          import json, sys
+          value = json.load(open(sys.argv[1]))
+          if value.get("source_revision") != sys.argv[2]:
+              raise SystemExit("release source revision does not match workflow revision")
+          PY
+          python3 scripts/release.py verify --release "$release"
+          python3 scripts/release.py up --release "$release" --edge --audit "$audit/audit.json"
+          python3 scripts/release.py verify --release "$release" --running --edge
+          rm -f "$archive" "$checksum"
+          REMOTE
+
+      - name: Print the deployed revision (no secrets)
+        run: echo "Activated $GITHUB_SHA on jamgati.com"
