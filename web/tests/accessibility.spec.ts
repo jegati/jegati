@@ -42,7 +42,8 @@ test('Albanian initial and active views meet automated WCAG AA checks at mobile 
   const scan=async()=>{
     const results=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     expect(results.violations).toEqual([]);
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+    const layout=await page.evaluate(()=>({width:window.innerWidth,scrollWidth:document.documentElement.scrollWidth,overflowing:[...document.querySelectorAll<HTMLElement>('body *')].filter(element=>{const box=element.getBoundingClientRect();return box.right>window.innerWidth+.5||box.left<-.5}).map(element=>({tag:element.tagName,id:element.id,className:element.getAttribute('class')})).slice(0,10)}));
+    expect(layout.scrollWidth,JSON.stringify(layout)).toBeLessThanOrEqual(layout.width);
   };
   await scan();
   // Keyboard action and enlarged text must preserve the core controls.

@@ -54,6 +54,15 @@ service-worker transitions, 20/20 focused copied-tab races, and a final 42/42
 CI-mode Chromium suite, all with one CPU. Workflow lint and TypeScript checks pass.
 The corrective revision still needs its own successful GitHub run.
 
+Run 34895355006 reached the isolated browser gate and its new annotations exposed
+one actual responsive-layout failure: at a 390 px viewport with 200% text, hosted
+runner font metrics could make the active page wider than the viewport. Header and
+navigation items now wrap, controls are bounded by their containers, and long text
+can break without being clipped. The reflow assertion now reports measured widths
+and candidate overflowing elements. The focused accessibility journey passed 20/20
+with `CI=true` and one CPU; the final full Chromium suite passed 42/42 in 2.2 minutes
+under the same constraint. This CSS/test correction still needs its own GitHub run.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with
