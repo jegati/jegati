@@ -52,7 +52,7 @@ test('one-shot device location sends only the coarse cell, including browser sto
   await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
 });
 
-test('lost create response reuses capability and deadline; failed cancel is not reported as successful', async ({ page }) => {
+test('lost create response reuses capability and deadline; failed cancel is not reported as successful', async ({ page, context }) => {
   await page.goto('/');
   let firstToken: string | undefined, firstDeadline: number | undefined;
   await page.route('**/api/signals', async route => {
@@ -68,10 +68,13 @@ test('lost create response reuses capability and deadline; failed cancel is not 
   const response = await retried;
   expect(response.request().headers().authorization).toBe(firstToken);
   expect((await response.json()).expires_at).toBe(firstDeadline);
-  await page.route('**/api/signal', route => route.abort('failed'), { times: 1 });
+  // Exercise a real network failure. A page route can be bypassed once the PWA's
+  // service worker controls the page, which made this assertion timing-dependent.
+  await context.setOffline(true);
   await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
   await expect(page.locator('#status')).toContainText('Mbyllja nuk u konfirmua');
   expect(await page.evaluate(() => sessionStorage.length)).toBe(1);
+  await context.setOffline(false);
   await page.getByRole('button', { name: 'Mbyll gatishmërinë' }).click();
   await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
 });

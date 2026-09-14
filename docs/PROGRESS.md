@@ -30,6 +30,16 @@ required after push became default-on. CI now uses the existing idempotent
 sets without printing them. Production deployment already generated and retained
 its VAPID key conditionally and was not affected by this CI-only omission.
 
+The next runner reached `make test-browser`. Its authenticated log was unavailable
+from the public Actions API, so the suite was reproduced under a single-CPU limit.
+That exposed a timing-dependent Playwright cancellation check: a page-level route
+could be bypassed after the installed PWA service worker took control, allowing the
+real DELETE to succeed. The check now uses browser-context offline mode to exercise
+a real failed cancellation, confirms the capability remains in session storage,
+then restores connectivity and confirms cancellation. The focused case and all 42
+Chromium journeys pass under the same single-CPU constraint. Push this correction
+and verify its exact GitHub run before creating or updating the deploy branch.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with
@@ -60,7 +70,8 @@ and explicit early presence renewal. They are implemented locally and the regres
 recorded below, while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
 OVHcloud + Cloudflare Free. Exact host sizing/OS, SSH, zone activation and private
 reporting/alert channels remain unverified. Preserve commands.txt. Do not request
-provider/identity decisions again; no remote Git push is authorized.
+provider/identity decisions again. Remote pushes to the configured project
+repository are authorized; public deployment still uses the prepared deploy workflow.
 
 ## Current implementation and evidence
 
