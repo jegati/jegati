@@ -65,6 +65,19 @@ func TestSimulatedContinuousActivationAndLateAdmission(t *testing.T) {
 		}
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, r)
+		if w.Code == 200 {
+			switch path {
+			case "/api/signals", "/api/signal", "/api/going", "/api/decline", "/api/join", "/api/arrival":
+				assertSessionContract(t, w.Body.Bytes())
+			case "/api/gathering-preview":
+				var response map[string]json.RawMessage
+				if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+					t.Fatal(err)
+				}
+				assertJSONFields(t, response, []string{"invitation", "preview_expires_at"}, nil)
+				assertInvitationContract(t, response["invitation"])
+			}
+		}
 		return w
 	}
 	newToken := func() string { b := make([]byte, 32); rand.Read(b); return base64.RawURLEncoding.EncodeToString(b) }

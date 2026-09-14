@@ -45,6 +45,10 @@ This is not strong human/Sybil verification.
 Own-session responses can include an `invitation` with a random gathering ID,
 public intersection, activation/end times, state and configuration hash. They never
 include counts, founder/member lists, pending reservations or a group center.
+The exact response allowlists are defined in `internal/httpapi/responses.go`,
+independently of storage records. `response_contract_test.go` and the fixed-clock
+gathering journey check the allowed fields, including nested private map landmarks
+and optional arrival/preview fields. Public activity has a separate cell-only type.
 
 Going/decline accept exactly `gathering_id`; join accepts the three willingness
 fields plus `gathering_id`. Reachability, cutoffs and state are revalidated. A stale

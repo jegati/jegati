@@ -14,13 +14,8 @@ import (
 	"slices"
 )
 
-type sessionView struct {
-	store.Signal
-	Invitation *store.Gathering `json:"invitation,omitempty"`
-}
-
 func (s signalAPI) respond(w http.ResponseWriter, r *http.Request, hash string, value store.Signal) {
-	view := sessionView{Signal: value.Public()}
+	view := ownSession(value)
 	if s.engine != nil {
 		now, e := s.store.Now(r.Context())
 		if e != nil {
@@ -30,7 +25,7 @@ func (s signalAPI) respond(w http.ResponseWriter, r *http.Request, hash string, 
 		if value.Gathering != "" && value.GatheringUntil > now {
 			g, e := s.store.GatheringByID(r.Context(), value.Gathering)
 			if e == nil {
-				view.Invitation = &g
+				view.Invitation = privateInvitation(g)
 			} else if e != store.ErrGone {
 				s.fail(w, e)
 				return
@@ -46,10 +41,10 @@ func (s signalAPI) respond(w http.ResponseWriter, r *http.Request, hash string, 
 			if g, ok := s.engine.Planner.Offer(now, participant, open); ok {
 				updated, e := s.store.SetIntent(r.Context(), hash, g.ID, "offer", value.Cell, value.RadiusKM, s.config.Limits.MaxDeclinesPerSignal, int64(s.config.Matching.LateJoinMinRemainingMinutes)*60000, int64(s.config.Matching.InvitationCooldownSeconds)*1000)
 				if e == nil {
-					view.Signal = updated.Public()
+					view = ownSession(updated)
 					full, e := s.store.GatheringByID(r.Context(), g.ID)
 					if e == nil {
-						view.Invitation = &full
+						view.Invitation = privateInvitation(full)
 					}
 				}
 			}

@@ -221,19 +221,6 @@ func newScript(source string) *redis.Script {
 	return redis.NewScript(strings.ReplaceAll(source, "gati:", keyPrefix))
 }
 
-// Public removes private matching bookkeeping from the own-session API contract.
-func (s Signal) Public() Signal {
-	s.PushRevision = 0
-	s.ArrivalMember = ""
-	s.InviteAfter = 0
-	s.Pending = ""
-	s.PendingUntil = 0
-	s.Gathering = ""
-	s.GatheringUntil = 0
-	s.Declined = nil
-	return s
-}
-
 // Removal updates the threshold immediately; a replacement claim cannot hide a
 // below-threshold interval between worker ticks. No public counts are returned.
 const removeArrivalLua = `

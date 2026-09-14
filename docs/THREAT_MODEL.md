@@ -48,6 +48,12 @@ anonymous to network providers or its operator.
 
 ## Evidence rules
 
+Own-session and private-preview responses use explicit HTTP-layer field allowlists
+(`internal/httpapi/responses.go`), not serialized storage records with fields
+removed afterward. Response-contract tests reject unexpected fields across the
+simulated lifecycle. This prevents accidental expansion through storage schema
+changes; it does not reduce the already documented private-invitation inference.
+
 - Test with synthetic inputs only. Do not record real IPs, capabilities, push
   endpoints, request bodies or participant records in reports.
 - Separate measured behavior, configuration inspection and architectural limits.

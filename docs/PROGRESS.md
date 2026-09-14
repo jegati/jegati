@@ -1228,3 +1228,29 @@ switches preserved store identity and session expiry, cancellation passed. Evide
 reports/local/audit-format-release/release-rehearsal.json. This validates the current
 Python helpers with prior application images, not a new audited production release.
 Baseline seeded population and additional response-contract tests are in progress.
+
+## Auditability cleanup: explicit response contracts — 2026-09-14
+
+Own-session, invitation and eligible-preview JSON now use explicit HTTP response
+structs, including an explicit nested map-landmark view. Removed Signal.Public's
+manual private-field scrubbing; storage structs no longer define these API views.
+Wire names, values, optional fields, private destinations, public cell aggregates
+and state transitions are unchanged. No new disclosure or storage lifetime.
+API/threat documentation points reviewers to the response allowlists.
+
+Validation: response allowlist assertions passed against the old implementation
+before refactoring, including the real fixed-clock activation/admission/arrival/
+preview journey (reports/local/audit-contract-baseline). Afterward, Go HTTP/store
+race tests, make test-store, and make simulate with live simulation integration
+checks passed (reports/local/audit-dto-journey). The same journey now checks exact
+allowed nested fields on successful responses; unit tests populate private sentinel
+bookkeeping and check map geometry/optional-arrival round trips. All 33 Chromium
+browser tests passed in 58.0 seconds (reports/local/browser-20260914T080916).
+
+Baseline Tirana population with seed 42 and unchanged config/gati.yaml completed:
+3,000 synthetic people/accepted credentials, 1,897 invited, 1,486 arrived, 43 observed
+gatherings, 218.5 wall seconds (reports/local/audit-baseline-population-3000).
+An earlier small success-fixture run used 80 people despite its output directory
+name audit-baseline-3000; do not mistake that directory for the 3,000-person run.
+Next: consolidate strict JSON parsing, compare malformed/valid input behavior,
+remove confirmed dead code and reconcile current audit/status documentation.

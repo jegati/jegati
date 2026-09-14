@@ -2,11 +2,9 @@ package store
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/jegati/jegati/internal/geography"
 	"github.com/jegati/jegati/internal/matching"
 	"reflect"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -28,7 +26,7 @@ func proposalTest(t *testing.T, s *Store) (matching.Proposal, geography.Grid) {
 	}
 	return p, g
 }
-func TestAtomicReservationActivationAndPrivateFields(t *testing.T) {
+func TestAtomicReservationActivationAndBookkeeping(t *testing.T) {
 	s := connectTest(t)
 	ctx := context.Background()
 	p, grid := proposalTest(t, s)
@@ -44,9 +42,8 @@ func TestAtomicReservationActivationAndPrivateFields(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	public, _ := json.Marshal(value.Public())
-	if strings.Contains(string(public), "_pending") || strings.Contains(string(public), id) {
-		t.Fatal("reservation exposed to client")
+	if value.Pending != id || value.PendingUntil != r.ExpiresAt {
+		t.Fatal("reservation bookkeeping does not match its deadline")
 	}
 	if _, e = s.Reserve(ctx, fresh(), "test-config", p, grid, 100, 10000, 1000); e != ErrConflict {
 		t.Fatal("duplicate reservation succeeded")

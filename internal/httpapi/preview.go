@@ -88,7 +88,7 @@ func (s signalAPI) preview(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(struct {
-		Invitation store.Gathering `json:"invitation"`
+		Invitation *invitationView `json:"invitation"`
 		ExpiresAt  int64           `json:"preview_expires_at"`
-	}{g, expires})
+	}{privateInvitation(g), expires})
 }
