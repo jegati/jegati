@@ -38,7 +38,7 @@ down:
 	$(COMPOSE) -f compose.yaml down
 compose-check:
 	$(COMPOSE) -f compose.yaml config --quiet
-verify-local: test build config-check config-check-simulation compose-check
+verify-local: publication-check test build config-check config-check-simulation compose-check
 	bash scripts/smoke.sh
 
 .PHONY: check-containers
@@ -90,6 +90,12 @@ dev-push: push-keys
 security-check:
 	go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
 	npm --prefix web audit --audit-level=low
+
+.PHONY: publication-check test-publication
+publication-check:
+	python3 scripts/check_publication.py
+test-publication:
+	python3 -m unittest discover -s scripts -p 'test_publication.py'
 
 .PHONY: test-fuzz test-monitor
 test-fuzz:

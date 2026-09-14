@@ -56,6 +56,7 @@ The intended MVP is entirely Albanian, requires no account, and displays collect
 ## Contributor starting points
 
 - [Audit starting point](docs/AUDIT.md): request-to-storage/test map and verification gates.
+- [Publication check](docs/PUBLICATION.md): staged-file disclosure guard and its limits.
 - [Agent instructions](AGENTS.md): workflow, autonomy, product and privacy invariants.
 - [Progress and handoff](docs/PROGRESS.md): actual implementation state, checks and next action.
 - [Agreed requirements](docs/REQUIREMENTS.md): product scope and conversation corrections.

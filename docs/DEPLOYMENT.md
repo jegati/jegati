@@ -12,12 +12,12 @@ See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
 
 ## Selected pilot target — 2026-09-14
 
-The user owns **jamgati.com** and has ordered an OVHcloud VPS, which is still
-being provisioned. Use `jamgati.com` as the canonical pilot hostname. The GATI
+The canonical pilot hostname is **jamgati.com**; the OVHcloud VPS is awaiting
+provisioning. Use `jamgati.com` when preparing the pilot release. The GATI
 product name and Albanian UI remain unchanged. The selected route is OVHcloud
 plus Cloudflare Free and a named tunnel; registrar/account activation is not yet
-verified. The user accepted the provider identity/disclosure boundary and asked
-to continue this deployment route.
+verified. This route accepts the provider visibility boundary described in
+[deployment preparation](DEPLOYMENT_PREPARATION.md).
 
 Next handoff: delivered VPS specifications, operating system, IP/SSH alias and
 username; working local SSH key access; Cloudflare zone activation and privately
@@ -134,11 +134,12 @@ provider controls or replace inspection of actual network/firewall policy.
 
 ## Host setup and activation
 
-Before provisioning: choose the VPS/domain and accept the provider visibility
-boundary in [deployment preparation](DEPLOYMENT_PREPARATION.md). Public operator
-pseudonymity is different from anonymous billing. Review Git author/contact metadata
-before publishing the source. Accounts, purchases, remote pushes, SSH access and
-public deployment still need the user's explicit authorization.
+The selected VPS/domain and provider visibility boundary are recorded above.
+Public operator pseudonymity is different from anonymous billing. Follow the
+[publication check](PUBLICATION.md) before publishing source; the project email,
+domain and hosting association are intended to be public. Remote pushes and public
+deployment still require explicit authorization. Provision SSH and provider
+credentials privately.
 
 On the authorized host: install pinned Docker/Compose prerequisites, use SSH keys
 through a restricted management path, apply updates, disable swap/hibernation and

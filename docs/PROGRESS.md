@@ -8,6 +8,13 @@ entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
+Publication preparation is complete: project email/domain/provider associations
+remain public by choice; deployment wording is neutral, commands.txt is locally
+excluded, and a tested staged-snapshot disclosure guard runs locally and in CI.
+Manual Albanian HTML edits were preserved in 93840ee. The production frontend
+build and 41 isolated Chromium tests passed; see the final entry for scope/limits.
+No history rewrite, remote push or public deployment was performed.
+
 The subsequent About-section request is implemented locally: Albanian peaceful
 Flamingo protest support, daily Kryeministria gathering plus nationwide aspiration,
 voluntary coordination and bounded privacy/security claims. The same-page section
@@ -1189,13 +1196,12 @@ no answer has arrived yet. Complete independent review and actual host/edge/devi
 checks before a capped public pilot, with explicit deployment authorization. Keep
 push optional/off until real-provider/device verification. Preserve commands.txt.
 
-## Domain purchased; VPS provisioning pending — 2026-09-14
+## Pilot domain selected; VPS provisioning pending — 2026-09-14
 
-The user reports ownership of jamgati.com (jegati.com was unavailable) and an
-OVHcloud VPS order awaiting delivery. Canonical pilot hostname: jamgati.com.
-The user accepted the hosting/registrar government-disclosure boundary and asked
-to continue with OVHcloud + Cloudflare Free toward deployment. Preserve that
-decision across handoffs; do not repeat the provider-choice/identity approval.
+Canonical pilot hostname: jamgati.com. The selected OVHcloud VPS is awaiting
+provisioning. The deployment route is OVHcloud + Cloudflare Free, with the
+documented provider visibility boundary accepted. Preserve that decision across
+handoffs; do not repeat the provider-choice/identity approval.
 Provider delivery, exact VPS sizing/OS, SSH access, Cloudflare zone activation and
 private reporting/alert contacts remain unverified. No remote Git push is authorized.
 
@@ -1559,3 +1565,44 @@ No identity cleanup, history rewrite, remote push or deployment was performed.
 Generated runtime credentials were not opened. This was a bounded identity review,
 not an exhaustive secret-scanner certification. Next: agree any publication cleanup
 before pushing; preserve the private working history and commands.txt.
+
+## Publication guard and preserved manual copy — 2026-09-14
+
+The project-specific email and domain/provider association are intentionally public.
+Replaced personal purchasing narrative in deployment notes with neutral project
+status, retaining technical choices and authorization boundaries. Added
+docs/PUBLICATION.md and a README link. Earlier wording remains in Git history;
+there was no rewrite, remote push, or public deployment.
+
+Preserved the manual web/index.html changes exactly in 93840ee, including shorter
+landing/About explanations and reduced inline privacy caveats. No participation
+logic, CSS or tests were changed. Detailed architectural limits remain in the
+requirements/threat documentation; passing UI tests does not certify privacy copy.
+
+Added the offline Python/Git index guard, make publication-check/test-publication,
+early CI execution and inclusion in verify-local. It flags common home paths,
+credential patterns/URLs and runtime/local-only filenames without printing matching
+content. Two exact synthetic rejection URLs are allowed only in their existing test
+files. Binary contents are explicitly skipped; neither arbitrary secrets nor Git
+history/metadata are exhaustively covered. Added /commands.txt to the checkout's
+.git/info/exclude; contents were preserved and force-staging it is still detected.
+
+Validation:
+
+- After sourcing scripts/env.sh, doctor found the installed pinned toolchain;
+  no installation was needed. Optional gh remains absent.
+- Frontend TypeScript/production build passed; existing MapLibre size warning remains.
+- Direct accessibility invocation against the existing development API passed the
+  static About check but failed two active-session assertions. Reran using the
+  intended owned lab with make test-browser OUTPUT=reports/local/publication-browser:
+  all 41 Chromium tests passed in 1.1 minutes, including those assertions. The
+  existing development server's runtime state was not repaired or certified here.
+- Seven publication tests passed, covering staged-secret/clean-worktree mismatch,
+  output redaction, ignored and force-staged notes, symlink non-traversal, removals,
+  exact fixture allowances, portable project identity, binary reporting and errors.
+- Full staged snapshot: 306 entries, zero findings, two binary contents skipped.
+  New Python files pass pinned Ruff formatting; staged diff whitespace check passed.
+
+Next: run the documented staged check before future commits/publication; wait for
+the VPS/access handoff and prepare a fresh audited release before pilot activation.
+This cleanup request is complete. Remote publication still needs authorization.
