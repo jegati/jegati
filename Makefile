@@ -168,13 +168,14 @@ audit-images:
 
 # Audit entry points stay sequential: their labs/builds may share local outputs.
 .PHONY: audit-local audit-journeys format-python-check
+AUDIT_JOURNEYS_OUTPUT ?= reports/local/audit-journeys-$(shell date -u +%Y%m%dT%H%M%S)
 audit-local: verify-local
 	python3 -m unittest discover -s scripts -p 'test_*.py'
 	$(MAKE) test-store
 audit-journeys:
-	$(MAKE) test-browser
-	$(MAKE) test-full-journey
-	$(MAKE) test-deployment
+	$(MAKE) test-browser OUTPUT="$(if $(OUTPUT),$(OUTPUT),$(AUDIT_JOURNEYS_OUTPUT))/browser"
+	$(MAKE) test-full-journey OUTPUT="$(if $(OUTPUT),$(OUTPUT),$(AUDIT_JOURNEYS_OUTPUT))/full-journey"
+	$(MAKE) test-deployment OUTPUT="$(if $(OUTPUT),$(OUTPUT),$(AUDIT_JOURNEYS_OUTPUT))/deployment"
 format-python-check:
 	$(RUFF) format --check
 

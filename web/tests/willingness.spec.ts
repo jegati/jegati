@@ -118,7 +118,10 @@ test('real collective invitation, arrival retry, retraction and decline', async 
     await test.step('wait for the real invitation', async () => {
       await page.goto('/');
       await page.getByRole('button', { name: 'JAM GATI', exact: true }).click();
-      await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
+      // The public map can independently contain a JEMI GATI card. Wait for the
+      // authenticated invitation heading so release timing cannot make this
+      // journey selector ambiguous.
+      await expect(page.locator('#collective-title')).toBeVisible({ timeout: 45_000 });
     });
     await expect(page.locator('#destination-map')).toHaveAttribute('data-ready', 'true');
     await expect(page.locator('#destination-map canvas')).toHaveAttribute('aria-label', 'Pika e takimit pranë kryqëzimit');
