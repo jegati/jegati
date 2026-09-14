@@ -1323,3 +1323,16 @@ This completes the first cleanup batch. Deeper Lua/controller reorganization is
 still a separate unimplemented follow-up, with atomic transitions, cancellation
 races and startup-failure expiry to preserve. Actual hosting checks await the
 previously requested VPS/SSH/Cloudflare handoff; provider identity decisions stand.
+
+## September 14 — behavior-preserving cleanup, second batch (in progress)
+
+The user approved the follow-ups only if functionality/usability stay unchanged.
+Added three Chromium regressions before production edits: startup-failure expiry,
+cancellation during a delayed arrival challenge, and participation without WebGL;
+also pinned destination/preview accessibility and map removal. Baseline: 36 passed
+(`reports/local/cleanup2-browser-baseline`). Private-map creation/decoration now
+share a helper; public cell maps retain their separate renderer. Initial map run:
+35 passed, one existing injected service-worker push test timed out; three focused
+repeats passed, followed by 36/36 in the full repeat
+(`reports/local/cleanup2-map-confirm`). TypeScript and diff checks passed.
+Controller/Lua work remains in progress. No remote push or deployment occurred.

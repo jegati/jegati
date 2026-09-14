@@ -8,6 +8,7 @@ import { polygon, type Grid } from './area';
 import * as sessions from './session';
 import { locateCell } from './location';
 import { PushController } from './push';
+import { createDestinationMap, decorateDestinationMap } from './destination-map';
 
 const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const form = el<HTMLFormElement>('willingness'), active = el('active'), status = el('status');
@@ -52,16 +53,9 @@ function invitationView() {
   if (renderedDestination === invitation.id) return;
   destinationMap?.remove(); renderedDestination = invitation.id; el('destination-map').removeAttribute('data-ready');
   try {
-    destinationMap = new maplibregl.Map({ container: 'destination-map', center: invitation.intersection.point, zoom: 15,
-      attributionControl: false, locale: { 'Map.Title': 'Harta e pikës së takimit' },
-      style: { version: 8, sources: { roads: { type: 'geojson', data: '/api/map/roads' } }, layers: [
-        { id: 'background', type: 'background', paint: { 'background-color': '#f0eee6' } },
-        { id: 'roads', type: 'line', source: 'roads', paint: { 'line-color': '#bec3b8', 'line-width': 3 } }] } });
+    destinationMap = createDestinationMap('destination-map', invitation.intersection.point, 'Harta e pikës së takimit');
     destinationMap.on('idle', () => { el('destination-map').setAttribute('data-ready', 'true'); });
-    // This marker is the shared mapped destination, never a person's position.
-    const marker = document.createElement('span'); marker.className = 'destination-marker'; marker.textContent = '🦩'; marker.setAttribute('role', 'img'); marker.setAttribute('aria-label', 'Pika e takimit');
-    new maplibregl.Marker({ element: marker }).setLngLat(invitation.intersection.point).addTo(destinationMap);
-    destinationMap.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '© OpenStreetMap · ODbL' }));
+    decorateDestinationMap(destinationMap, invitation.intersection.point, true);
     destinationMap.getCanvas().setAttribute('aria-label', 'Pika e takimit pranë kryqëzimit');
   } catch { el('destination-map').textContent = 'Harta nuk mund të hapet në këtë pajisje.'; }
 }
@@ -179,10 +173,8 @@ async function loadPreview(id: string, candidate: sessions.Session, expires: num
     el<HTMLButtonElement>('public-join-confirm').disabled = false;
     el<HTMLDialogElement>('public-join-dialog').showModal();
     try {
-      previewMap = new maplibregl.Map({ container: 'preview-map', center: preview.invitation.intersection.point, zoom: 15, attributionControl: false, locale: { 'Map.Title': 'Parapamja e takimit' }, style: { version: 8, sources: { roads: { type: 'geojson', data: '/api/map/roads' } }, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#f0eee6' } }, { id: 'roads', type: 'line', source: 'roads', paint: { 'line-color': '#bec3b8', 'line-width': 3 } }] } });
-      const marker = document.createElement('span'); marker.className = 'destination-marker'; marker.textContent = '🦩'; marker.setAttribute('aria-label', 'Pika e takimit');
-      new maplibregl.Marker({ element: marker }).setLngLat(preview.invitation.intersection.point).addTo(previewMap);
-      previewMap.addControl(new maplibregl.AttributionControl({ compact: false, customAttribution: '© OpenStreetMap · ODbL' }));
+      previewMap = createDestinationMap('preview-map', preview.invitation.intersection.point, 'Parapamja e takimit');
+      decorateDestinationMap(previewMap, preview.invitation.intersection.point);
     } catch { el('preview-map').textContent = 'Harta nuk mund të hapet në këtë pajisje.'; }
   } catch (error) { message(error instanceof Error ? error.message : 'Parapamja nuk u hap. Provo përsëri.'); }
   finally { finish(); }

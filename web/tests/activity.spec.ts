@@ -158,11 +158,15 @@ for (const existing of [false, true]) test(`private preview cancellation, offlin
     if (!existing) await page.locator('#ready').click();
     await expect(page.locator('#public-join-dialog')).toBeVisible();
     await expect(page.locator('#preview-destination')).toHaveText('Kryqëzim për provë');
+    await expect(page.locator('#preview-map canvas')).toHaveCount(1);
+    await expect(page.locator('#preview-map .destination-marker')).toHaveAttribute('aria-label', 'Pika e takimit');
+    expect(await page.locator('#preview-map .destination-marker').getAttribute('role')).toBeNull();
     expect(await page.evaluate(() => sessionStorage.getItem('gati-session-v2'))).toBe(initial);
   };
   await open(); await page.locator('#public-join-cancel').click();
   await expect(page.locator('#public-join-dialog')).not.toBeVisible();
   await expect(page.locator('#preview-destination')).toBeEmpty();
+  await expect(page.locator('#preview-map canvas')).toHaveCount(0);
   await open();
   await context.setOffline(true);
   await expect(page.locator('#public-join-confirm')).toBeDisabled();

@@ -119,6 +119,8 @@ test('real collective invitation, arrival retry, retraction and decline', async 
       await expect(page.getByRole('heading', { name: 'JEMI GATI.', exact: true })).toBeVisible({ timeout: 45_000 });
     });
     await expect(page.locator('#destination-map')).toHaveAttribute('data-ready', 'true');
+    await expect(page.locator('#destination-map canvas')).toHaveAttribute('aria-label', 'Pika e takimit pranë kryqëzimit');
+    await expect(page.locator('#destination-map .destination-marker')).toHaveAttribute('role', 'img');
     await page.screenshot({ path: '../reports/local/invitation.png', fullPage: true });
     const destination = await page.locator('#destination').textContent();
     await page.getByRole('button', { name: 'PO, PO SHKOJ', exact: true }).click();
