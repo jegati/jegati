@@ -131,6 +131,10 @@ test-browser-matrix:
 	GATI_BROWSER=firefox python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/matrix-$(shell date -u +%Y%m%dT%H%M%S))/firefox" -- npm --prefix web exec -- playwright test --config web/playwright.matrix.config.ts
 	GATI_BROWSER=webkit python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/matrix-$(shell date -u +%Y%m%dT%H%M%S))/webkit" -- npm --prefix web exec -- playwright test --config web/playwright.matrix.config.ts
 
+.PHONY: test-devices
+test-devices:
+	python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/devices-$(shell date -u +%Y%m%dT%H%M%S))" -- npm --prefix web exec -- playwright test --config web/playwright.devices.config.ts
+
 .PHONY: check-load reproduce-build
 check-load:
 	python3 scripts/check-load.py "$(REPORT)"

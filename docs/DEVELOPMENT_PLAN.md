@@ -1,5 +1,11 @@
 # GATI 🦩 — development and verification plan
 
+Launch-sequencing update (2026-09-14): [decision 0015](decisions/0015-public-alpha-and-device-emulation.md)
+replaces the separate volunteer pilot with a direct public alpha and optional,
+privacy-preserving feedback. Older volunteer-stage references below are historical.
+Device presets plus refreshed desktop engines and release audit/reproduction/rollback
+precede host activation; real-device and independent-review limits remain disclosed.
+
 Implemented refinement: [decision 0011](decisions/0011-incremental-matching-working-set.md) uses atomic take-before-read batches with cache invalidation and bounded full reconciliation instead of versioned acknowledgements while matching has one owner. Parallel geographic ownership remains a separate future change.
 
 The current deployment/scaling proposal is in

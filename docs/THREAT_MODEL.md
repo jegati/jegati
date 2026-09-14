@@ -9,6 +9,12 @@ these controls to source and tests. See [PROGRESS](PROGRESS.md) for current evid
 older milestone sections below record the implementation as it stood at that time.
 Known inference, spoofed presence/Sybils and privileged-operator risks remain.
 
+Launch sequencing now follows decision 0015: direct public alpha without a separate
+volunteer stage. Browser-device presets add regression evidence, not real OS/GPS,
+physical-presence or external-push attestation. Alpha feedback uses optional sanitized
+reports and existing bounded private health metrics, never individual journey
+tracking. Independent review and actual provider/device gaps remain disclosed.
+
 ## Assets and trust boundaries
 
 The production boundary is described in [DEPLOYMENT](DEPLOYMENT.md) and

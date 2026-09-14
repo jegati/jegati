@@ -1,5 +1,10 @@
 # Deployment preparation and scaling priorities
 
+Latest sequencing: [decision 0015](decisions/0015-public-alpha-and-device-emulation.md)
+selects a direct public alpha with optional sanitized feedback, superseding the
+separate volunteer/pilot stage below. Actual host/edge and exact-release checks
+remain necessary; unperformed independent and real-device checks remain disclosed.
+
 Date: 2026-09-13; implementation update 2026-09-14. **No public deployment.**
 The original priorities below remain the design rationale. Implemented locally:
 bounded rank-cursor snapshots, changed-cell refresh with periodic reconciliation,

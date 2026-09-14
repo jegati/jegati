@@ -8,6 +8,10 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
+The first public release is planned as a **direct public alpha**, without a separate
+volunteer stage. Updates will use optional sanitized feedback and private operational
+monitoring. See [alpha scope and device-test limits](docs/decisions/0015-public-alpha-and-device-emulation.md).
+
 **The [runtime remediation](docs/reports/runtime-remediation-2026-09-14.md) is locally validated:**
 pinned source builds and exact-image audits address the review blockers, with two
 scoped unused-code exceptions. Public launch still needs independent review and

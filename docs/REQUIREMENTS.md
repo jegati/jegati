@@ -155,6 +155,12 @@ mobile apps are not required for the initial browser/PWA implementation.
 
 ## Before claiming completion
 
+Launch sequencing: the first public version is a direct public alpha, without a
+separate volunteer stage (decision 0015). Improve it from optional sanitized reports
+and bounded private operational monitoring, without participant tracking. Device
+emulation is not real-phone, GPS, installed-PWA or external-push evidence. Actual
+deployment controls and honest disclosure of untested behavior remain necessary.
+
 Explain and provide evidence for anonymous willingness, coarse matching, expiration,
 JEMI GATI, arrival confirmation, aggregate privacy, hostile-use controls, 100k scale,
 maintainability and independent verification. Prefer a simpler implementation when

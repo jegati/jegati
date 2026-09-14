@@ -1,5 +1,9 @@
 # Functionality and test coverage
 
+Launch sequencing now follows [decision 0015](decisions/0015-public-alpha-and-device-emulation.md):
+direct public alpha, no separate volunteer stage. Browser presets extend automation;
+real-device/host coverage and independent review must still be described honestly.
+
 Current summary reconciled 2026-09-14 against REQUIREMENTS.md, the current API routes/client, configuration,
 test sources and locally executed evidence. Optional future availability is excluded.
 “Tested” means the checks below cover the stated behavior; it does not certify all

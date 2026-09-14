@@ -6,8 +6,12 @@ account access and domain activation have not been verified. The [runtime remedi
 addresses the final review's dependency blockers with pinned source builds and a
 passing image audit, subject to explicit unused-code exceptions. Use the new release
 and a fresh audit; previous vulnerable bundles are not cleared by this evidence.
-Start with a capped, monitored pilot after independent and actual host/edge/device
-checks. Neither laptop benchmarks nor two API replicas certify 1M capacity.
+The first public release is a monitored **alpha**, without a separate volunteer
+stage ([decision 0015](decisions/0015-public-alpha-and-device-emulation.md)). Complete
+actual host/edge controls and fresh exact-release checks before activation. Record
+outstanding independent review and real-device coverage honestly. Neither laptop
+benchmarks nor two API replicas certify 1M capacity. Earlier pilot hostname/release
+references below mean the selected alpha deployment target.
 See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
 
 ## Selected pilot target — 2026-09-14

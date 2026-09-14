@@ -1,5 +1,9 @@
 # Additional testing before deployment
 
+Launch-sequencing correction: [decision 0015](decisions/0015-public-alpha-and-device-emulation.md)
+replaces the volunteer stage below with direct public alpha use and optional
+sanitized feedback. Device presets are automated browser checks, not real phones.
+
 2026-09-13 review. The table below is the original scope. See [automated testing](AUTOMATED_TESTING.md) and PROGRESS.md for implemented checks, passing evidence and remaining gaps. The current
 baseline is [the selected usability report](reports/usability-final.md): 28 browser
 checks, real-store/race tests and a checked 3,000-person accelerated simulation.

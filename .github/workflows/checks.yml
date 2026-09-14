@@ -35,8 +35,10 @@ jobs:
           curl --fail http://127.0.0.1:5173/
           curl --fail http://127.0.0.1:5173/api/config
           make check-containers COMPOSE='docker compose'
-      - run: cd web && npx playwright install --with-deps chromium
+      - run: cd web && npx playwright install --with-deps chromium firefox webkit
       - run: make test-browser
+      - run: make test-browser-matrix
+      - run: make test-devices
       - run: make test-recovery
       - run: make test-pressure
       - run: cd web && npx playwright test --config=playwright.replay.config.ts

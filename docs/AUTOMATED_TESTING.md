@@ -18,6 +18,7 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 | `make test-fuzz` | Five native fuzz targets, including strict request round trips, 30 seconds each by default |
 | `make test-browser` | Chromium journeys, optional push fixtures, accessibility and resilience; about one minute |
 | `make test-browser-matrix` | Core, accessibility and resilience in Firefox then WebKit; separate stores, a few minutes |
+| `make test-devices` | Pixel 7/Chromium, iPhone 13/WebKit and iPad Mini/WebKit presets; core/map/arrival/resilience/accessibility plus touch, rotation, offline cancellation and resume-after-expiry; a few minutes |
 | `make test-full-journey` | Actual production matching, arrival and delayed publisher, public map, private preview, late join; up to 20 minutes |
 | `make test-recovery` | Two API replicas, paused leader, arrival replay, killed API, disconnected/restarted store, disabled monitoring; about two minutes |
 | `make test-pressure` | Owned 8-MiB no-eviction saturation, fail-closed writes and recovery; about one minute |
@@ -69,6 +70,7 @@ An optional Ubuntu 24.04 amd64 fallback avoids administrator access:
 source scripts/env.sh
 python3 scripts/browser-local.py
 GATI_WEBKIT_EXECUTABLE="$PWD/.runtime/browser-deps/webkit-local" make test-browser-matrix
+GATI_WEBKIT_EXECUTABLE="$PWD/.runtime/browser-deps/webkit-local" make test-devices
 ```
 
 This verifies pinned Debian-package hashes, extracts libraries locally, and creates
@@ -105,3 +107,17 @@ generator, actual edge/network DoS protection, independent human audit, real dev
 volunteer usability, public-map pedestrian suitability, actual-host deployment/rollback and
 remote served-artifact verification. Clean builds on this PC demonstrate local byte
 reproducibility, not another operator's honesty. No public deployment is performed.
+
+## Device presets and public alpha
+
+The device suite runs browser presets, not Android/iOS virtual machines. Presets
+supply viewport, touch, pixel density and user agent. It reuses the full core suites
+and their known fixture distinctions; new touch/offline flows use the owned real
+API, while suspended-page expiry uses a synthetic session, response and wall-clock
+jump. No real participant credentials or location are used. Permission prompts,
+OS sleep/process eviction, radio handover, installed-PWA and external push behavior
+remain real-device work. Retained diagnostics stay in ignored local reports.
+
+Decision 0015 supersedes earlier volunteer-stage sequencing: the first public use
+is an alpha, followed by optional sanitized feedback and synthetic regression tests.
+The realistic maximum-lifetime overnight scenario remains outside this batch.

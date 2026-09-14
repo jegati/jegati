@@ -8,6 +8,12 @@ entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
+Latest launch direction: direct public alpha, no separate volunteer stage, with
+later improvements based on optional sanitized feedback and private health metrics
+(decision 0015). Device presets (105 checks) and refreshed Firefox/WebKit checks (32 each) passed;
+next is a clean exact-release audit/reproduction/rollback refresh.
+Actual hosting/edge access is still pending. No participant tracking is authorized.
+
 Publication preparation is complete: project email/domain/provider associations
 remain public by choice; deployment wording is neutral, commands.txt is locally
 excluded, and a tested staged-snapshot disclosure guard runs locally and in CI.
@@ -1606,3 +1612,43 @@ Validation:
 Next: run the documented staged check before future commits/publication; wait for
 the VPS/access handoff and prepare a fresh audited release before pilot activation.
 This cleanup request is complete. Remote publication still needs authorization.
+
+
+## Device emulation and direct public alpha — 2026-09-14
+
+Decision 0015 replaces volunteer-stage sequencing with direct public alpha and
+later optional sanitized feedback. Updated requirements, plans, deployment,
+functionality/threat summaries and README. No tracking, UI copy, matching setting,
+participant state transition or production runtime changed. Alpha labeling/feedback
+instructions and private alert routing remain pre-activation preparation.
+
+Added make test-devices and Pixel 7/Chromium, iPhone 13/WebKit and iPad Mini/WebKit
+presets, running 32 existing journeys plus three device-specific checks per preset.
+New checks cover actual injected touch events, landscape viewport resize, no
+implicit willingness/location, coarse-only payloads, offline cancellation uncertainty,
+same-session recovery and resume after expiry without sending expired credentials.
+The resume test uses a synthetic session and wall-clock jump, not OS suspension.
+CI now installs all three engines and runs desktop matrix and device targets.
+
+Validation:
+
+- Existing pinned tools and local WebKit launcher worked; no installation needed.
+- Desktop matrix: Firefox 32/32 in 1.2m and WebKit 32/32 in 1.3m, owned separate labs,
+  reports/local/alpha-browser-matrix. These do not exercise external push delivery.
+- Initial device run: 102/105. Linux WebKit reported zero maxTouchPoints despite
+  injected-touch support; test now observes touchstart events. Chromium's runner
+  observed a still-valid startup request late; expiry test now counts requests in
+  the page at creation time against the deadline. No application fixes were needed.
+- Final full device suite: 105/105 in 2.6m, reports/local/alpha-devices-final. All
+  synthetic suites keep credentials in disposable state; known response/GPS mocks
+  remain labeled. Neither suite certifies actual Android/iOS or pedestrian suitability.
+- make test passed (Go race/simulation/vet and frontend type checks; environment-gated
+  integrations are not silently credited). All 32 Python guard tests passed.
+- make security-check: no called Go vulnerabilities and zero npm findings; one
+  unused-module advisory remains. Exact image inventory is the next separate check.
+- make production-build passed. Staged publication guard and whitespace checks passed.
+
+Next in this authorized batch: commit source, export a localhost rehearsal release,
+scan all exact images, reproduce clean builds and exercise compatible rollback.
+Realistic maximum-lifetime overnight churn is outside this requested batch and
+remains untested. No remote push, DNS change, deployment or volunteer recruitment.
