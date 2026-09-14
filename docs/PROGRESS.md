@@ -1949,3 +1949,26 @@ lifecycle labs were still running when inspected; this study does not certify th
 completion. Next: user can review/share outreach files; publishing current source,
 public alpha deployment, real-phone verification and any gathering-lifetime product
 decision remain separate work. No remote push, deployment or messages sent.
+
+## Final designed pitch PDF — 2026-09-14
+
+Created `reports/local/gati-pitch-final/GATI-Pitch-dhe-Simulime.pdf`: five Albanian
+A4 pages, approximately2.4MB. Includes the prelaunch pitch/peaceful Flamingo protest
+mission, usability/privacy claims, three day-spanning scenarios with maps and
+five-minute timelines, and an assumptions/limitations page with negative cases.
+Featured cases: clustered10k/3% +10% reaction; uniform30k/5% +10% reaction; uniform
+30k/5% +25% reaction. All headline/maps use seed42 with three-seed ranges, avoiding
+mixing a median headline and another seed's map. Headline hours are10.8/11.1/11.5;
+mean total active and short invitation lifetimes are explicitly disclosed.
+
+New print builder/template and exporter are reproducible from existing raw reports;
+see docs/outreach/METHOD.md. No new simulations or application changes. Five printed
+pages visually inspected; final export passes content/footer/margin checks with no
+browser errors or external requests. PDF text extraction verifies five pages,
+Albanian copy, scenario values and OSM attribution. Tagged PDF, no embedded JavaScript,
+no author metadata or local filesystem paths in extracted text; SHA256 is recorded
+in the generated manifest. Initial methods-page overflow was fixed before export.
+
+User's manual web/index.html edit is preserved. Next: user may share the final PDF;
+actual source publication/alpha deployment remain separate. No messages or public
+uploads were performed.

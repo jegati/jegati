@@ -109,3 +109,26 @@ empirically calibrated probabilities. Display a representative seed explicitly;
 never select a flattering seed and call it typical without checking all results.
 No political turnout, attention, attendance, renewal or safety assumption here has
 been measured. No claim of causal real-world protest impact follows from the model.
+
+## Final pitch PDF
+
+The five-page Albanian handout adds the product pitch to three sustained-activity
+scenarios: clustered 10k/3% with 10% reaction, uniform 30k/5% with 10% reaction, and
+uniform 30k/5% with 25% reaction. All three maps/headlines use seed42; the intervals
+include seeds42/43/44. Shared color bins show accumulated confirmed gathering-minutes,
+not people or uninterrupted occupancy. Negative cases and limitations remain on
+page5. It is a prelaunch pitch, not a claim that jamgati.com is already serving users.
+
+After generating the reports above:
+
+```sh
+python3 scripts/build-pitch.py reports/local/final-pitch --main reports/local/tirana-day.json --reaction reports/local/tirana-reaction.json
+node scripts/export-pitch.mjs reports/local/final-pitch
+```
+
+Output: `GATI-Pitch-dhe-Simulime.pdf`, HTML, five page previews and a provenance/hash
+manifest. The builder rejects changed featured assumptions pending copy review;
+the exporter refuses to overwrite a PDF and checks page count, margins/footer
+collisions and external requests. Browser/fonts/creation metadata can affect PDF
+bytes; its checksum identifies the artifact, not a reproducible-build guarantee.
+The current reviewed final copy is under `reports/local/gati-pitch-final/`.
