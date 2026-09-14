@@ -8,8 +8,8 @@ entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
-The user authorized auditability cleanup, tests and incremental local commits while
-OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
+Both authorized auditability cleanup batches are complete locally, with tests and
+incremental commits, while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
 OVHcloud + Cloudflare Free. Exact host sizing/OS, SSH, zone activation and private
 reporting/alert channels remain unverified. Preserve commands.txt. Do not request
 provider/identity decisions again; no remote Git push is authorized.
@@ -48,9 +48,17 @@ by formatting/refactoring tests.
 - 3d3015c: removed unused bookkeeping/wrapper, labeled reserved settings, added
   audit entry points and reconciled stale status documents. First batch complete;
   final evidence is in reports/auditability-2026-09-14.md.
-- Separate follow-ups: deeper Lua layout/transition catalog and browser-state
-  controller refactoring. Preserve atomic checks, cancellation races and cleanup
-  during startup failure; do not treat these refactors as already implemented.
+- fe8a5ea / 36616d6: shared private-map helpers, browser session controller and
+  startup/cancellation/WebGL/map regressions. Final Chromium suite: 36 passed.
+- f600502: readable Lua transaction layout and docs/TRANSACTIONS.md. All 34 script
+  fragments passed syntax/token comparisons; real-store race and fixed-clock
+  journey checks passed without changing atomic checks or deadlines.
+- 05b2b68: test-only deterministic 3,000-participant planner replay with the full
+  Tirana map/current 100 m config; CI target added. Runtime randomness unchanged.
+- Final evidence: [follow-up report](reports/auditability-followup-2026-09-14.md).
+  Full 3,000-person API scenario/checker, normal-clock public-map/late-join journey,
+  two-API production rehearsal and byte-identical clean builds passed. One earlier
+  injected-push test timeout is documented; focused repeats and full suites passed.
 
 ## Working commands and next action
 
@@ -61,10 +69,13 @@ production-image rehearsal sequentially. `make simulate-population` uses current
 settings; `make load` and monitored component benchmarks also exist. All are local
 synthetic checks, not remote deployment or external push evidence.
 
-The first cleanup batch is complete. Next code-cleanup scope is the separate
-browser-state and Lua refactors listed above; no product behavior changes are
-authorized by a formatting refactor. Hosting work still needs the delivered
-server's nonsecret connection details and privately arranged SSH/Cloudflare access. Keep optional push off until provider/device verification.
+Both cleanup batches are complete; no product behavior/defaults were changed.
+`make test-planner-replay` adds an exact planner regression without issuing
+credentials or changing ordinary simulation behavior. Hosting work still needs
+the delivered server's nonsecret connection details and privately arranged
+SSH/Cloudflare access. Prepare and audit a fresh exact release before activation;
+the older runtime audit does not cover the new source. Keep optional push off
+until provider/device verification.
 Historical entries follow; their old next-action lists are superseded by this one.
 
 ## Milestone 04 evidence
@@ -1324,7 +1335,7 @@ still a separate unimplemented follow-up, with atomic transitions, cancellation
 races and startup-failure expiry to preserve. Actual hosting checks await the
 previously requested VPS/SSH/Cloudflare handoff; provider identity decisions stand.
 
-## September 14 — behavior-preserving cleanup, second batch (in progress)
+## September 14 — behavior-preserving cleanup, second batch
 
 The user approved the follow-ups only if functionality/usability stay unchanged.
 Added three Chromium regressions before production edits: startup-failure expiry,
@@ -1361,3 +1372,16 @@ exist only in the test file; production and normal simulation randomness remain
 unchanged. This is planner regression evidence, not a deterministic full API
 simulation or a new capacity claim. Python guards: 25 passed; formatting check:
 5 files unchanged. The normal-clock full browser journey is still running.
+
+Second batch completed: the normal-clock browser journey passed in 15.2 minutes,
+including real publication, cell-only map, private preview and late joining.
+Private monitoring recorded no alerts. The 3,000-person API population run and
+checker passed: 3,000 accepted, 1,923 invited, 1,718 chose to go, 1,119 distinct
+credentials arrived; 456 cancelled and 2,544 verified expired. The local
+production-image rehearsal passed in 85.16 seconds with two API replicas, one
+worker and zero transient proxy failures. Two clean builds of 05b2b68 matched all
+compared bytes. Four code/test commits plus this evidence document complete the
+conditional cleanup scope. Details and the isolated push-test failure are in
+reports/auditability-followup-2026-09-14.md. No public deployment, remote Git push,
+new product decision, new capacity claim or fresh exact-release security audit.
+Next action is the pending VPS/access preparation described in the summary above.

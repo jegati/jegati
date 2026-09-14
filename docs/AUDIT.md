@@ -5,7 +5,8 @@ in [PROGRESS](PROGRESS.md). Older milestone entries are historical evidence, not
 current implementation contract. [REQUIREMENTS](REQUIREMENTS.md) describes agreed
 behavior; [API](API.md), [STORAGE](STORAGE.md) and [THREAT_MODEL](THREAT_MODEL.md)
 describe the observable surfaces, data lifetimes and remaining limitations.
-The [first cleanup report](reports/auditability-2026-09-14.md) records the refactors
+The [first cleanup report](reports/auditability-2026-09-14.md) and
+[follow-up report](reports/auditability-followup-2026-09-14.md) record the refactors
 and exact scope of their local regression evidence.
 
 ## Follow a request through the code

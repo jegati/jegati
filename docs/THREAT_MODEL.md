@@ -348,3 +348,16 @@ and browser bytes in the new images. Cloudflare/account rules, provider visibili
 real tunnel connectivity, real device/push behavior and independent review remain
 separate gates. No new participant data, logging, tracking or public endpoint was
 introduced. See decision 0013 and RUNTIME_SECURITY.md for source and audit details.
+
+
+## Behavior-preserving cleanup evidence — 2026-09-14
+
+The [follow-up report](reports/auditability-followup-2026-09-14.md) records readable
+Lua layout, browser controller/map extraction, cancellation/startup regressions,
+real-store race/clock checks and normal-delay map/admission verification. Fixed
+replay labels exist only in a test file; runtime credentials, gathering IDs and
+privacy/abuse settings are unchanged. The 3,000-person scenario and local
+production-stack rehearsal passed, with no monitoring alerts in the full browser
+journey. This evidence does not change the threat assumptions or renew the older
+exact-release audit. An isolated injected-push browser timeout and successful
+repeats are documented; actual device/provider delivery remains a separate gate.
