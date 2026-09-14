@@ -40,6 +40,20 @@ then restores connectivity and confirms cancellation. The focused case and all 4
 Chromium journeys pass under the same single-CPU constraint. Push this correction
 and verify its exact GitHub run before creating or updating the deploy branch.
 
+Run 34891335158 still failed at `make test-browser`; GitHub's unauthenticated job
+API exposed the failed step and duration but withheld its log. Reproducing with
+`CI=true` and one CPU produced the remaining failure: the copied-tab journey tried
+to click its refresh button after the normal foreground poll had already observed
+the cancellation and hidden it. The test now accepts either valid convergence path
+and asserts cleared storage and zero enrollment. A second service-worker test now
+uses context routing because its page can become worker-controlled mid-request.
+The workflow stops its no-longer-needed Compose smoke stack before isolated labs,
+installs Chromium before the Chromium gate, and emits GitHub check annotations for
+future exact failures. Evidence: 126/126 pre-fix stress journeys, 20/20 focused
+service-worker transitions, 20/20 focused copied-tab races, and a final 42/42
+CI-mode Chromium suite, all with one CPU. Workflow lint and TypeScript checks pass.
+The corrective revision still needs its own successful GitHub run.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with

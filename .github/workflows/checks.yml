@@ -35,8 +35,12 @@ jobs:
           curl --fail http://127.0.0.1:5173/
           curl --fail http://127.0.0.1:5173/api/config
           make check-containers COMPOSE='docker compose'
-      - run: cd web && npx playwright install --with-deps chromium firefox webkit
+      # The remaining checks create isolated API/store labs. Stop the Compose
+      # smoke stack so it cannot compete with browsers on a small hosted runner.
+      - run: docker compose down
+      - run: cd web && npx playwright install --with-deps chromium
       - run: make test-browser
+      - run: cd web && npx playwright install --with-deps firefox webkit
       - run: make test-browser-matrix
       - run: make test-devices
       - run: make test-recovery

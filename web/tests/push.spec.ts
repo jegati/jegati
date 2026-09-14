@@ -155,7 +155,9 @@ test('real service worker handles injected push with the app closed, without pri
 test('cancellation while registration is in flight cannot restore notification storage', async ({ page, context }) => {
   await fixture(context); await willing(page);
   let release!: () => void; const delayed = new Promise<void>(resolve => { release = resolve; }); let started = false;
-  await page.route('**/api/push', async route => {
+  // The PWA can claim this page while registration is in flight. Context routing
+  // continues to observe requests after that service-worker transition.
+  await context.route('**/api/push', async route => {
     if (route.request().method() !== 'POST') return route.fallback();
     started = true; await delayed; await route.fulfill({ json: { expires_at: route.request().postDataJSON().expires_at } });
   });

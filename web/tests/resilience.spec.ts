@@ -15,7 +15,13 @@ test('a copied tab cannot resurrect a credential cancelled from the first tab',a
  let enrollments=0;second.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/api/signals'))enrollments++});
  await second.goto('/');await expect(second.locator('#active-title')).toHaveText('JAM GATI.');
  await page.locator('#cancel').click();await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
- await second.locator('#refresh-status').click();await expect(second.locator('#active')).toBeHidden();
+ const refresh=second.locator('#refresh-status'),active=second.locator('#active');
+ // The regular poll may observe the cancellation before this tab can request an
+ // explicit refresh. Both paths must converge on the same cleared local state.
+ await expect(async()=>{
+  if(await refresh.isVisible())await refresh.click({timeout:500});
+  await expect(active).toBeHidden({timeout:500});
+ }).toPass({timeout:10000});
  expect(await second.evaluate(()=>sessionStorage.length)).toBe(0);expect(enrollments).toBe(0);
  await second.close();
 });
