@@ -1698,3 +1698,31 @@ known MapLibre size warning. No real-device or public deployment claim.
 The other authorized preparations (alert routing, hostname package and real-lifetime
 run) are in progress. Alert destination preference was requested without credentials;
 no external notification has been sent. Keep all secrets outside chat and Git.
+
+
+## Operational alerts and real-lifetime harness — 2026-09-14
+
+Prepared an optional HTTPS webhook sender with private credentials-file checks,
+fixed health-only labels, debounce, bounded retry/reminders and recovery delivery.
+Collector/sender systemd templates are ready for host review; none were installed
+and no external receiver was selected or contacted. Same-host monitoring cannot
+report a complete host/network outage; independent availability remains host work.
+
+Added an owned local real-clock lifecycle runner using unchanged production config
+and an API built from its recorded committed source. Full mode requires 8–24 hours;
+smoke mode is explicitly separate. It exercises normal 30/60/90/120-minute lifetimes,
+activation, explicit arrival/replay/retraction, late joins, renewal, cancellation,
+physical key/index expiry and RSS drift. Reports contain synthetic totals only.
+
+Validation: all 40 Python guard tests passed, including four alert and four lifecycle
+tests. The alert test uses a local TLS receiver with failure/retry/recovery and
+redirect rejection. Both systemd units passed systemd-analyze verify. Final smoke
+reports/local/alpha-lifecycle-smoke-final passed: 39 created, 32 going, 33 arrivals,
+33 replays, one retraction, one late join, one decline and one cancellation. An
+initial smoke exposed missing invited-state handling in the driver; fixed and
+covered by regression. A 90-second smoke does not prove expiry or renewal.
+
+Next: launch the full eight-hour run from this committed tooling, with a temporary
+process-owned sleep inhibitor, and prepare/audit/rehearse the jamgati.com package.
+Only an eventual passed report is overnight evidence. Alert channel choice remains
+pending; no remote push, DNS modification or public deployment is authorized here.

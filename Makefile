@@ -126,6 +126,14 @@ test-soak: secrets
 	mkdir -p "$(or $(OUTPUT),reports/local/soak)"
 	GATI_SOAK_SECONDS="$(or $(SOAK_SECONDS),900)" GATI_SOAK_REPORT="$(abspath $(or $(OUTPUT),reports/local/soak))/soak.json" bash scripts/test-store.sh
 
+.PHONY: test-lifecycle-smoke test-lifecycle-overnight test-ops-alerts
+test-lifecycle-smoke:
+	python3 scripts/lifecycle_run.py --smoke --output "$(or $(OUTPUT),reports/local/lifecycle-smoke-$(shell date -u +%Y%m%dT%H%M%S))"
+test-lifecycle-overnight:
+	python3 scripts/lifecycle_run.py --hours "$(or $(HOURS),8)" --output "$(or $(OUTPUT),reports/local/lifecycle-overnight-$(shell date -u +%Y%m%dT%H%M%S))"
+test-ops-alerts:
+	python3 -m unittest discover -s scripts -p 'test_ops_alerts.py'
+
 .PHONY: test-browser-matrix
 test-browser-matrix:
 	GATI_BROWSER=firefox python3 scripts/lab.py --output "$(or $(OUTPUT),reports/local/matrix-$(shell date -u +%Y%m%dT%H%M%S))/firefox" -- npm --prefix web exec -- playwright test --config web/playwright.matrix.config.ts

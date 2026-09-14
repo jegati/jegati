@@ -1,0 +1,23 @@
+[Unit]
+Description=GATI optional private operational alert delivery
+After=network-online.target gati-monitor.service
+Wants=network-online.target gati-monitor.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/gati/current
+ExecStart=/usr/bin/python3 /opt/gati/current/scripts/ops_alerts.py --monitor-file /run/gati-monitor/api.json --webhook-file /etc/gati/alerts.json
+Restart=on-failure
+RestartSec=30
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

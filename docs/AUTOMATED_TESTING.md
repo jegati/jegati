@@ -23,6 +23,9 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 | `make test-recovery` | Two API replicas, paused leader, arrival replay, killed API, disconnected/restarted store, disabled monitoring; about two minutes |
 | `make test-pressure` | Owned 8-MiB no-eviction saturation, fail-closed writes and recovery; about one minute |
 | `make test-soak SOAK_SECONDS=900 OUTPUT=reports/local/my-soak` | 15-minute real-clock storage churn with deliberately short synthetic TTLs |
+| `make test-lifecycle-smoke` | 90-second harness validation using real production lifetimes; checks activation/arrivals/late joining, then destroys the synthetic lab; not expiry/renewal proof |
+| `make test-lifecycle-overnight HOURS=8` | Real-clock 30/60/90/120-minute API lifetimes, repeated cohorts, renewal/replay/late joining and deadline/index checks with private memory/health monitoring |
+| `make test-ops-alerts` | Synthetic local TLS receiver, failure/retry/recovery, payload allowlist and private webhook configuration checks |
 | `make load SIZES=1000,10000,100000 BURST=1 OUTPUT=reports/local/my-uniform` | Real-clock synthetic client ramp and write burst with monitoring; about 9 minutes |
 | `make load SIZES=1000,10000,100000 DISTRIBUTION=hotspot BURST=1 OUTPUT=reports/local/my-hotspot` | Same measurements with all willingness in one coarse cell |
 | `make check-load REPORT=reports/local/my-uniform/load.json` | Reject incomplete/slow/rejection-masked client evidence |
@@ -121,3 +124,29 @@ remain real-device work. Retained diagnostics stay in ignored local reports.
 Decision 0015 supersedes earlier volunteer-stage sequencing: the first public use
 is an alpha, followed by optional sanitized feedback and synthetic regression tests.
 The realistic maximum-lifetime overnight scenario remains outside this batch.
+
+## Real-lifetime overnight run
+
+The subsequent alpha-preparation batch adds scripts/lifecycle_run.py. It owns a
+disposable API/Valkey and accepts no target URL; the API is built from the recorded
+HEAD export. Commit the driver before starting so its recorded hash/revision are
+reviewable. Production clocks/settings stay unchanged, push stays off, and synthetic
+capabilities remain in driver memory. The report records only totals and bounded
+minute samples; monitoring retains its existing one-hour rolling window.
+
+At eight hours the driver creates three cohorts two hours apart, each with 120-minute
+founders and below-threshold 30/60/90/120-minute keepers. The final interval drains
+and observes baseline. It checks frozen destinations/deadlines, explicit arrivals,
+idempotent retries, repeated renewal, joining after JEMI KËTU, decline/cancellation,
+expired HTTP access and known participant keys/index entries. Final expiry/gathering/
+push indexes must be empty; conservative RSS drift limits are 256 MiB API/64 MiB
+Valkey. This is a small-cohort leak check, not scale proof or complete forensic/store
+inventory. No privileged production monitoring endpoint is added.
+
+The computer must stay awake. A wall-clock/suspension discrepancy over 30 seconds
+fails the run. The private output's lifecycle.json says running, passed, failed or
+interrupted and includes its expected completion time; never count running as passed.
+SIGTERM to the recorded driver PID exits the owned lab and removes its test store.
+An unclean host crash can leave an orphan lab; inspect recorded ownership before
+removing it. Do not stop the regular development stack to clean a synthetic run.
+The 90-second smoke has a distinct smoke_passed result and does not shorten TTLs.

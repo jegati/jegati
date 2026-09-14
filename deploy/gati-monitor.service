@@ -1,0 +1,24 @@
+[Unit]
+Description=GATI private bounded health collector
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/gati/current
+ExecStart=/usr/bin/python3 /opt/gati/current/scripts/monitor.py --container gati-production-api-1 --socket /run/ops/gati.sock --output /run/gati-monitor/api.json
+Restart=on-failure
+RestartSec=10
+RuntimeDirectory=gati-monitor
+RuntimeDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/run/gati-monitor
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

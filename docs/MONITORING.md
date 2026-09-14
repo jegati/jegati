@@ -77,3 +77,44 @@ output and honor expires_at. API-only replicas expose the fixed view worker; mon
 each expected process. The collector records local alerts but does not send messages.
 Real tunnel/certificate/provider checks and an operator-selected alert destination
 remain deployment tasks. See [production wiring](DEPLOYMENT.md).
+
+
+## Optional outbound operational alerts
+
+scripts/ops_alerts.py reads the collector's bounded local file and sends only
+service=gati, state=alert/recovered and fixed alert labels to a configured HTTPS
+webhook. It never forwards monitoring JSON, counts, locations, capabilities, IPs,
+request bodies, error text or resource measurements. The endpoint receives normal
+network/provider metadata. No endpoint is selected or contacted automatically.
+
+Two consistent samples debounce changes; successful sends are at least 60 seconds
+apart. Persistent problems remind at most every 30 minutes. Failed sends back off
+from 60 to 300 seconds; only the latest state is kept in memory, without a durable
+queue. Recovery is sent only after a delivered alert. Restart loses delivery state
+and may repeat a continuing alert. Delivery has a five-second timeout, verified TLS
+and no redirect following or environment proxy. Sender failure cannot block GATI.
+
+Privately create /etc/gati/alerts.json, owned by the sender user, mode 0600, with
+exactly url (HTTPS endpoint) and authorization (header value, or an empty string).
+Do not paste either value in chat, Git, shell arguments or environment variables.
+This is a generic JSON receiver contract, not a built-in Slack/Telegram/SMTP client.
+Review the chosen receiver/provider and retention before enabling it. Keep endpoint
+URL/query secrets private even if a receiver uses no Authorization header.
+
+Prepared service files are deploy/gati-monitor.service and deploy/gati-alerts.service.
+They assume the current immutable release is linked at /opt/gati/current and the
+combined process container is gati-production-api-1. The collector writes to a
+0700 /run/gati-monitor directory with 0600 files; sender state remains in RAM. The
+host root/Docker operator is trusted, as with existing release administration. A
+separate worker/replica topology needs additional collectors, not a silent reuse
+of this single-process template. Review/install services on the actual host; they
+are not installed on the workstation by this change.
+
+Run make test-ops-alerts for a local TLS receiver exercising failure/retry/recovery,
+redirection rejection, fixed payloads and credentials-file permissions. Tests make
+no external requests and use an ephemeral certificate. OpenSSL is the test-only
+certificate prerequisite. The notification destination and actual delivery remain
+pending operator selection/private credentials. Missing/stale collector files alert
+as monitor_unavailable; the sender's own process health also needs host supervision.
+A complete VPS/network outage cannot be reported by a process on that VPS: configure
+an independently observed availability check when hosting and alert channels exist.

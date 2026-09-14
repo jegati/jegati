@@ -173,3 +173,12 @@ location-eligible destination preview before PO, PO SHKOJ, and clearer waiting,
 connection recovery and arrival-expiry guidance. Do not add sharing links/QR or
 new purpose/activity copy in that earlier work. The subsequently approved About
 section above supersedes that copy exclusion. See USABILITY_IMPLEMENTATION_PLAN.md.
+
+
+## Alpha preparation
+
+A visible Albanian alpha notice and optional feedback instructions must not enroll,
+request location, collect reports in the app or attach session data to external
+links. Project email and optional public GitHub reports disclose their external
+identity/retention boundaries. Monitoring delivery is optional operator tooling,
+uses fixed health labels only, and requires a privately chosen destination.
