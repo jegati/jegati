@@ -1179,3 +1179,23 @@ question requested the nonsecret hostname/provider/budget/SSH-alias information;
 no answer has arrived yet. Complete independent review and actual host/edge/device
 checks before a capped public pilot, with explicit deployment authorization. Keep
 push optional/off until real-provider/device verification. Preserve commands.txt.
+
+## Domain purchased; VPS provisioning pending — 2026-09-14
+
+The user reports ownership of jamgati.com (jegati.com was unavailable) and an
+OVHcloud VPS order awaiting delivery. Canonical pilot hostname: jamgati.com.
+The user accepted the hosting/registrar government-disclosure boundary and asked
+to continue with OVHcloud + Cloudflare Free toward deployment. Preserve that
+decision across handoffs; do not repeat the provider-choice/identity approval.
+Provider delivery, exact VPS sizing/OS, SSH access, Cloudflare zone activation and
+private reporting/alert contacts remain unverified. No remote Git push is authorized.
+
+Updated DEPLOYMENT.md with the selected hostname and remaining handoff. This is
+documentation-only preparation: no application settings, DNS, accounts or server
+services changed, no new release built, and no runtime tests repeated. Validation:
+reviewed the runbook against release.py's --public-host argument and checked the
+documentation diff with git diff --check. Existing localhost artifacts remain
+rehearsal evidence; the real hostname needs a new release and a fresh audit before
+activation. Next: obtain the delivered server's nonsecret connection details,
+arrange local SSH key access, then proceed through actual host/edge/pilot checks.
+Keep commands.txt untouched and credentials outside chat/tracked files.

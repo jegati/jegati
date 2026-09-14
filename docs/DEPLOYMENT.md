@@ -1,14 +1,34 @@
 # Production preparation and operator runbook
 
 The production images, private container networks, Caddy proxy, process roles and
-local rehearsal are implemented. No public deployment or Cloudflare account has
-been created. The [runtime remediation](reports/runtime-remediation-2026-09-14.md)
+local rehearsal are implemented. No public deployment has occurred; Cloudflare
+account access and domain activation have not been verified. The [runtime remediation](reports/runtime-remediation-2026-09-14.md)
 addresses the final review's dependency blockers with pinned source builds and a
 passing image audit, subject to explicit unused-code exceptions. Use the new release
 and a fresh audit; previous vulnerable bundles are not cleared by this evidence.
 Start with a capped, monitored pilot after independent and actual host/edge/device
 checks. Neither laptop benchmarks nor two API replicas certify 1M capacity.
 See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
+
+## Selected pilot target — 2026-09-14
+
+The user owns **jamgati.com** and has ordered an OVHcloud VPS, which is still
+being provisioned. Use `jamgati.com` as the canonical pilot hostname. The GATI
+product name and Albanian UI remain unchanged. The selected route is OVHcloud
+plus Cloudflare Free and a named tunnel; registrar/account activation is not yet
+verified. The user accepted the provider identity/disclosure boundary and asked
+to continue this deployment route.
+
+Next handoff: delivered VPS specifications, operating system, IP/SSH alias and
+username; working local SSH key access; Cloudflare zone activation and privately
+provisioned tunnel credentials. Keep these credentials outside tracked files and
+chat. Review host settings, included backups and actual edge/device behavior
+before opening the pilot. Remote Git publication is not part of this handoff.
+
+When preparing the pilot release, pass `--public-host jamgati.com` to the release
+command below. The existing localhost rehearsal bundle is not a public release.
+Prepare a fresh exact-release audit close to activation (maximum age 24 hours).
+No DNS records, Cloudflare tunnel or server services have been changed yet.
 
 ## Topology and local verification
 
