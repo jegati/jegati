@@ -315,3 +315,29 @@ address accidental configuration drift, not malicious administrators or a dishon
 Docker API. Account-managed tunnel rules and host network definitions still need
 separate review. CI now runs both Go and npm dependency audits; full production-image
 scanning remains a separate release gate.
+
+
+## Runtime remediation evidence — 2026-09-14
+
+[Runtime remediation](reports/runtime-remediation-2026-09-14.md) supersedes the
+unresolved-runtime status above for source 06fa798. Caddy and cloudflared are now
+locked source builds using patched Go dependencies in scratch images. The tunnel's
+four upstream Sentry initialization sites are disabled, with tests establishing no
+client or captured event even when a DSN is configured. A build-time source check
+rejects changed initializer counts/locations. This patch closes an outbound crash
+reporting path that discarding container logs alone did not close.
+
+All three exact Go executables retain symbols and pass binary vulnerability scans.
+The remaining OpenPGP and CEL package findings are unused-code exceptions, tied to
+specific versions/services and expiring 2026-10-14. Their existence is visible in
+raw scans and the audit summary. Failed binary scans are never waived. Public
+activation/rollback requires a passing audit for the exact release, no older than
+24 hours. This guard checks local evidence; it cannot prevent a dishonest operator
+from forging files or modifying the host.
+
+Browser, two-API failover, arrival replay, network budgets, private monitoring and
+release verification are rehearsed locally. Two clean builds match all executable
+and browser bytes in the new images. Cloudflare/account rules, provider visibility,
+real tunnel connectivity, real device/push behavior and independent review remain
+separate gates. No new participant data, logging, tracking or public endpoint was
+introduced. See decision 0013 and RUNTIME_SECURITY.md for source and audit details.

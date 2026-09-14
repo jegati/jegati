@@ -2,12 +2,12 @@
 
 The production images, private container networks, Caddy proxy, process roles and
 local rehearsal are implemented. No public deployment or Cloudflare account has
-been created. **The 2026-09-14 security review places public launch on hold:** the
-pinned Caddy runtime has unresolved dependency advisories. Review the
-[findings and ordered deployment gates](reports/security-2026-09-14.md) before
-using an existing release bundle. Passing the local rehearsal is not a vulnerability
-clearance. Start with a capped, monitored pilot after the dependency and host/edge
-checks; neither the laptop benchmarks nor two API replicas certify 1M capacity.
+been created. The [runtime remediation](reports/runtime-remediation-2026-09-14.md)
+addresses the final review's dependency blockers with pinned source builds and a
+passing image audit, subject to explicit unused-code exceptions. Use the new release
+and a fresh audit; previous vulnerable bundles are not cleared by this evidence.
+Start with a capped, monitored pilot after independent and actual host/edge/device
+checks. Neither laptop benchmarks nor two API replicas certify 1M capacity.
 See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
 
 ## Topology and local verification
@@ -61,11 +61,13 @@ containers, extra public tunnel routes or unreviewed Workers to it.
 
 Container controls: unprivileged users, read-only roots, all capabilities dropped,
 no-new-privileges, no container logs/core dumps/swap, private RAM-backed temporary
-paths and bounded CPU/memory. Caddy's unnecessary executable file capability is
-removed during build. Production Valkey uses 512 MiB maxmemory/noeviction inside a
+paths and bounded CPU/memory. The source-built Caddy executable requires no file
+capabilities. Production Valkey uses 512 MiB maxmemory/noeviction inside a
 768 MiB container; each Go process has a 1.5 GiB hard limit and 1 GiB GC target.
-These are initial resource bounds, not promised capacity. Live participant data
-is lost on store restart, by design.
+Proxy/tunnel scratch images contain no shell or unused OS packages; all Go images
+retain symbols for binary auditing. The cloudflared source patch disables Sentry
+initialization. These are initial resource bounds, not promised capacity. Live
+participant data is lost on store restart, by design.
 
 ## Prepare one verifiable release
 

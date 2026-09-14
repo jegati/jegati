@@ -1135,3 +1135,47 @@ proxy errors and does not mistake one successful request for complete DNS recove
 Application tests/audits, fresh store race integrations and 25 Python tests pass.
 Next is the exact committed artifact audit/reproduction; local pre-export scans
 have only the scoped CEL/OpenPGP package findings and no affected binary symbols.
+
+
+## Runtime remediation complete locally — 2026-09-14
+
+Committed implementation 06fa798c409c491f078d36dec155694a67c52fd8 now has a new exact
+release at reports/local/release-runtime-06fa798. Manifest SHA256:
+ef9b61e9db5e4dfa0597e9f5d2ec2b85fb7a38d67fbdc749c21fefed3bc3ae87.
+It uses localhost for rehearsal and must be prepared for the eventual public host.
+All four final image audits pass: zero unresolved and zero high/critical package
+findings. Four package matches are accepted by two exact unused-code exception
+rules (OpenPGP and CEL), expiring 2026-10-14. All three symbol-retaining Go binaries
+pass govulncheck; no package exception can override that result. Raw scans and four
+CycloneDX SBOMs are retained at reports/local/runtime-remediation/release-audit.
+
+Two clean exports with separate compilation caches produced identical API, Caddy,
+cloudflared and browser bytes, and all matched the executable/assets extracted from
+the release images. This is same-host/toolchain reproduction, not an independent
+reviewer or remote attestation. The exact audit passed the public-audit validator
+without running public activation. Actual host preflight still fails on workstation
+swap; no workstation swap/hibernation controls were changed.
+
+Final validation: application race/simulation/vet/TypeScript and Go/npm audits,
+fresh live Valkey race integrations, 25 Python guard tests, source-patch tests,
+patched access/tunnel Sentry no-client/no-event tests, Caddy health tests and source
+vulnerability scans passed. Production browser/two-API rehearsal passed in 71.88s
+with two explicitly observed transient 5xx during deliberate replica loss and
+successful bounded retry/cancellation. The final exact-release/rollback rehearsal
+passed in 134.26s, rejecting an added network and preserving store identity/session
+expiry through two compatible switches. All owned rehearsal containers/networks
+were removed. No scale tests were repeated and no new capacity claim is made.
+
+See [runtime remediation report](reports/runtime-remediation-2026-09-14.md),
+[sanitized evidence](reports/runtime-remediation-2026-09-14.json) and
+[RUNTIME_SECURITY.md](RUNTIME_SECURITY.md). README, security status, threat model,
+plan and deployment runbook now distinguish this resolved local runtime work from
+the historical review blockers. Existing old bundles remain uncleared; no source
+was pushed and no remote/public deployment or account operation was performed.
+
+Next action needs the user's domain and VPS/hosting budget, then privately arranged
+SSH/Cloudflare access and private reporting/alert channels. A concise asynchronous
+question requested the nonsecret hostname/provider/budget/SSH-alias information;
+no answer has arrived yet. Complete independent review and actual host/edge/device
+checks before a capped public pilot, with explicit deployment authorization. Keep
+push optional/off until real-provider/device verification. Preserve commands.txt.

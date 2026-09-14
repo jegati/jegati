@@ -380,12 +380,12 @@ Local automated hardening commands and their exact scope are now documented in [
 
 ## Deployment preparation implementation — 2026-09-14
 
-Security gate update: the [final local security review](reports/security-2026-09-14.md)
-found unresolved advisories in the pinned web runtime and additional tunnel package
-findings. Public launch remains on hold pending runtime remediation/triage, fresh
-image scans, rebuilt release verification and the existing independent/host/edge
-gates. The ordered remediation-to-pilot plan is in that report; prior local scale
-and deployment rehearsal passes are not dependency vulnerability clearance.
+Security gate update: [runtime remediation](reports/runtime-remediation-2026-09-14.md)
+addresses the [final review](reports/security-2026-09-14.md) with pinned source builds,
+a disabled cloudflared Sentry client and a fresh exact-image audit. Two unused-code
+exceptions are dated and narrowly scoped. Public activation requires a passing audit
+no older than 24 hours; independent and actual host/edge/device gates still apply.
+See RUNTIME_SECURITY.md for commands and decision 0013 for the build tradeoffs.
 
 Implemented measured rank-cursor/cell-refresh/reachability optimizations, direct
 worker deadline monitoring, API-only and worker roles, two-replica Caddy rehearsal,

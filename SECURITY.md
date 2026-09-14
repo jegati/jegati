@@ -4,10 +4,12 @@ GATI is under development and has no supported public production release. Read
 [THREAT_MODEL.md](docs/THREAT_MODEL.md) for planned controls and unresolved risks.
 No anonymity, independent-human or deployment-honesty guarantee is claimed.
 
-The [2026-09-14 review](docs/reports/security-2026-09-14.md) holds public deployment
-pending production runtime dependency remediation. Local functional test success
-does not clear those findings. Run `make security-check` for Go/npm audits and scan
-all exact release images as described in the review before publishing a release.
+The [2026-09-14 review](docs/reports/security-2026-09-14.md) identified runtime
+issues addressed by [pinned source builds and fresh image evidence](docs/reports/runtime-remediation-2026-09-14.md).
+Two unused-code package exceptions expire 2026-10-14. Run `make security-check`,
+`make test-runtimes` and `make audit-images` before releasing; public activation
+requires a passing audit no older than 24 hours. Independent/host/edge checks remain
+separate gates. See [runtime security](docs/RUNTIME_SECURITY.md).
 
 A private reporting channel has not yet been configured. Do not submit credentials,
 real participant records or exploitable details about a live deployment in a public

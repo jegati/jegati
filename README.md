@@ -8,9 +8,10 @@ An anonymous, temporary expression of willingness to join collective real-world 
 
 ## Project status
 
-**Public launch is on hold after the [2026-09-14 security review](docs/reports/security-2026-09-14.md):**
-application checks pass, but production runtime dependencies need remediation and
-triage. The report contains the findings, verification fixes and deployment steps.
+**The [runtime remediation](docs/reports/runtime-remediation-2026-09-14.md) is locally validated:**
+pinned source builds and exact-image audits address the review blockers, with two
+scoped unused-code exceptions. Public launch still needs independent review and
+the actual host, Cloudflare and device checks. See [runtime auditing](docs/RUNTIME_SECURITY.md).
 
 See the [functionality and test-coverage audit](docs/FUNCTIONALITY_STATUS.md).
 The operating default is 100 m cells with a 50 m maximum reported device error.
