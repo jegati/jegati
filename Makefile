@@ -5,6 +5,11 @@ GATI_TOOLS_DIR ?= $(HOME)/.local/share/gati/tools
 export PATH := $(GATI_TOOLS_DIR)/go-$(GATI_GO_VERSION)/bin:$(GATI_TOOLS_DIR)/node-$(GATI_NODE_VERSION)/bin:$(GATI_TOOLS_DIR)/compose-$(GATI_COMPOSE_VERSION):$(PATH)
 CONFIG ?= config/gati.yaml
 COMPOSE ?= docker-compose
+RUFF ?= .runtime/format-tools/bin/ruff
+
+.PHONY: format-python-check
+format-python-check:
+	$(RUFF) format --check
 
 .PHONY: bootstrap doctor deps test build config-check config-show config-check-simulation dev dev-native down compose-check verify-local
 bootstrap:

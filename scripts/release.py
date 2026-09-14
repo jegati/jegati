@@ -4,206 +4,630 @@
 Never uploads source, creates accounts, opens host ports or handles remote login.
 The operator chooses the machine; --edge is the explicit public-tunnel action.
 """
+
 import argparse, datetime, hashlib, io, json, os, pathlib, re, subprocess, tarfile, tempfile
-ROOT=pathlib.Path(__file__).resolve().parent.parent
 
-def run(*args,**kw):return subprocess.check_output(args,**kw).decode().strip()
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+
+def run(*args, **kw):
+    return subprocess.check_output(args, **kw).decode().strip()
+
+
 def digest(path):
- h=hashlib.sha256()
- with path.open('rb') as f:
-  for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
- return h.hexdigest()
-def runtime_dir(root,project):return root.parent/('.'+project+'-runtime')
-def compose(root,project,*args,replicas=1,edge=False):
- runtime=runtime_dir(root,project)
- settings=dict(line.split('=',1) for line in (root/'deployment.env').read_text().splitlines() if line)
- env={**os.environ,**settings,'GATI_API_ROLE':'combined' if replicas==1 else 'api','GATI_RUNTIME_DIR':str(runtime),'GATI_VALKEY_CONFIG':str(runtime/'valkey.conf')}
- push=json.loads((root/'release.json').read_text()).get('push_enabled',False)
- return run('docker-compose','--env-file',str(root/'deployment.env'),'-p',project,'-f',str(root/'compose.production.yaml'),*(['-f',str(root/'compose.production.push.yaml')] if push else []),*(['--profile','workers'] if replicas>1 else []),*(['--profile','edge'] if edge else []),*args,cwd=root,env=env)
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(block)
+    return h.hexdigest()
 
-def prepare(root,host):
- if root.exists():raise ValueError('release output must be a new directory')
- if not re.fullmatch(r'[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?',host) or '..' in host:raise ValueError('use a lowercase ASCII hostname without a port')
- if run('git','status','--porcelain','--untracked-files=no',cwd=ROOT):raise ValueError('commit tracked changes before preparing a release')
- revision=run('git','rev-parse','HEAD',cwd=ROOT);archive=subprocess.check_output(['git','archive',revision],cwd=ROOT)
- root.mkdir(parents=True)
- with tarfile.open(fileobj=io.BytesIO(archive)) as tar:tar.extractall(root,filter='data')
- (root/'source.tar').write_bytes(archive)
- refs={name:'gati-'+name+':release-'+revision[:12] for name in ['api','web','tunnel']}
- (root/'deployment.env').write_text(f'GATI_API_IMAGE={refs["api"]}\nGATI_WEB_IMAGE={refs["web"]}\nGATI_TUNNEL_IMAGE={refs["tunnel"]}\nGATI_PUBLIC_HOST={host}\n')
- with (root/'build.log').open('wb') as log:
-  subprocess.run(['docker-compose','--env-file',str(root/'deployment.env'),'-f',str(root/'compose.production.yaml'),'build','api','web','tunnel'],cwd=root,env={**os.environ,'GATI_API_IMAGE':refs['api'],'GATI_WEB_IMAGE':refs['web'],'GATI_TUNNEL_IMAGE':refs['tunnel'],'GATI_PUBLIC_HOST':host},stdout=log,stderr=log,check=True)
- images={k:{'reference':ref,'image_id':run('docker','image','inspect','--format','{{.Id}}',ref)} for k,ref in refs.items()}
- upstream=dict(line.split('=',1) for line in (root/'deploy/images.env').read_text().splitlines() if line and not line.startswith('#'))
- for service,key in [('valkey','GATI_VALKEY_IMAGE')]:
-  ref=upstream[key]
-  try:identity=run('docker','image','inspect','--format','{{.Id}}',ref)
-  except subprocess.CalledProcessError:
-   run('docker','pull',ref);identity=run('docker','image','inspect','--format','{{.Id}}',ref)
-  images[service]={'reference':ref,'image_id':identity}
- effective_raw=run('docker','run','--rm','--network','none',refs['api'],'-mode','config-show','-config','/config/gati.yaml')
- effective=json.loads(effective_raw)
- with tempfile.TemporaryDirectory(prefix='gati-release-assets-') as d:
-  container=run('docker','create','--network','none',refs['web'])
-  try:run('docker','cp',container+':/srv/.',d)
-  finally:run('docker','rm',container)
-  assets={str(p.relative_to(d)):digest(p) for p in sorted(pathlib.Path(d).rglob('*')) if p.is_file()}
-  container=run('docker','create','--network','none',refs['api'])
-  try:run('docker','cp',container+':/gati',str(pathlib.Path(d)/'gati-container'))
-  finally:run('docker','rm',container)
-  api_binary_hash=digest(pathlib.Path(d)/'gati-container')
-  binary_hashes={'api':api_binary_hash}
-  for name,path in [('web','/usr/bin/caddy'),('tunnel','/usr/local/bin/cloudflared')]:
-   container=run('docker','create','--network','none',refs[name])
-   try:run('docker','cp',container+':'+path,str(pathlib.Path(d)/name))
-   finally:run('docker','rm',container)
-   binary_hashes[name]=digest(pathlib.Path(d)/name)
- run('docker','save','-o',str(root/'images.tar'),*[image['reference'] for image in images.values()])
- immutable={str(p.relative_to(root)):digest(p) for p in sorted(root.rglob('*')) if p.is_file() and p.name!='build.log'}
- manifest={'version':1,'source_revision':revision,'config_sha256':digest(root/'config/gati.yaml'),'effective_config_sha256':hashlib.sha256(effective_raw.encode()).hexdigest(),'push_enabled':effective['notifications']['push_enabled'],'api_binary_sha256':api_binary_hash,'runtime_binary_sha256':binary_hashes,'images':images,'browser_assets':assets,'files':immutable,'scope':'source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation'}
- (root/'release.json').write_text(json.dumps(manifest,indent=2)+'\n')
- (root/'release.sha256').write_text(digest(root/'release.json')+'  release.json\n')
- print('Prepared local release',revision,'manifest SHA256',digest(root/'release.json'))
+
+def runtime_dir(root, project):
+    return root.parent / ("." + project + "-runtime")
+
+
+def compose(root, project, *args, replicas=1, edge=False):
+    runtime = runtime_dir(root, project)
+    settings = dict(
+        line.split("=", 1)
+        for line in (root / "deployment.env").read_text().splitlines()
+        if line
+    )
+    env = {
+        **os.environ,
+        **settings,
+        "GATI_API_ROLE": "combined" if replicas == 1 else "api",
+        "GATI_RUNTIME_DIR": str(runtime),
+        "GATI_VALKEY_CONFIG": str(runtime / "valkey.conf"),
+    }
+    push = json.loads((root / "release.json").read_text()).get("push_enabled", False)
+    return run(
+        "docker-compose",
+        "--env-file",
+        str(root / "deployment.env"),
+        "-p",
+        project,
+        "-f",
+        str(root / "compose.production.yaml"),
+        *(["-f", str(root / "compose.production.push.yaml")] if push else []),
+        *(["--profile", "workers"] if replicas > 1 else []),
+        *(["--profile", "edge"] if edge else []),
+        *args,
+        cwd=root,
+        env=env,
+    )
+
+
+def prepare(root, host):
+    if root.exists():
+        raise ValueError("release output must be a new directory")
+    if (
+        not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?", host)
+        or ".." in host
+    ):
+        raise ValueError("use a lowercase ASCII hostname without a port")
+    if run("git", "status", "--porcelain", "--untracked-files=no", cwd=ROOT):
+        raise ValueError("commit tracked changes before preparing a release")
+    revision = run("git", "rev-parse", "HEAD", cwd=ROOT)
+    archive = subprocess.check_output(["git", "archive", revision], cwd=ROOT)
+    root.mkdir(parents=True)
+    with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
+        tar.extractall(root, filter="data")
+    (root / "source.tar").write_bytes(archive)
+    refs = {
+        name: "gati-" + name + ":release-" + revision[:12]
+        for name in ["api", "web", "tunnel"]
+    }
+    (root / "deployment.env").write_text(
+        f"GATI_API_IMAGE={refs['api']}\nGATI_WEB_IMAGE={refs['web']}\nGATI_TUNNEL_IMAGE={refs['tunnel']}\nGATI_PUBLIC_HOST={host}\n"
+    )
+    with (root / "build.log").open("wb") as log:
+        subprocess.run(
+            [
+                "docker-compose",
+                "--env-file",
+                str(root / "deployment.env"),
+                "-f",
+                str(root / "compose.production.yaml"),
+                "build",
+                "api",
+                "web",
+                "tunnel",
+            ],
+            cwd=root,
+            env={
+                **os.environ,
+                "GATI_API_IMAGE": refs["api"],
+                "GATI_WEB_IMAGE": refs["web"],
+                "GATI_TUNNEL_IMAGE": refs["tunnel"],
+                "GATI_PUBLIC_HOST": host,
+            },
+            stdout=log,
+            stderr=log,
+            check=True,
+        )
+    images = {
+        k: {
+            "reference": ref,
+            "image_id": run("docker", "image", "inspect", "--format", "{{.Id}}", ref),
+        }
+        for k, ref in refs.items()
+    }
+    upstream = dict(
+        line.split("=", 1)
+        for line in (root / "deploy/images.env").read_text().splitlines()
+        if line and not line.startswith("#")
+    )
+    for service, key in [("valkey", "GATI_VALKEY_IMAGE")]:
+        ref = upstream[key]
+        try:
+            identity = run("docker", "image", "inspect", "--format", "{{.Id}}", ref)
+        except subprocess.CalledProcessError:
+            run("docker", "pull", ref)
+            identity = run("docker", "image", "inspect", "--format", "{{.Id}}", ref)
+        images[service] = {"reference": ref, "image_id": identity}
+    effective_raw = run(
+        "docker",
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        refs["api"],
+        "-mode",
+        "config-show",
+        "-config",
+        "/config/gati.yaml",
+    )
+    effective = json.loads(effective_raw)
+    with tempfile.TemporaryDirectory(prefix="gati-release-assets-") as d:
+        container = run("docker", "create", "--network", "none", refs["web"])
+        try:
+            run("docker", "cp", container + ":/srv/.", d)
+        finally:
+            run("docker", "rm", container)
+        assets = {
+            str(p.relative_to(d)): digest(p)
+            for p in sorted(pathlib.Path(d).rglob("*"))
+            if p.is_file()
+        }
+        container = run("docker", "create", "--network", "none", refs["api"])
+        try:
+            run(
+                "docker",
+                "cp",
+                container + ":/gati",
+                str(pathlib.Path(d) / "gati-container"),
+            )
+        finally:
+            run("docker", "rm", container)
+        api_binary_hash = digest(pathlib.Path(d) / "gati-container")
+        binary_hashes = {"api": api_binary_hash}
+        for name, path in [
+            ("web", "/usr/bin/caddy"),
+            ("tunnel", "/usr/local/bin/cloudflared"),
+        ]:
+            container = run("docker", "create", "--network", "none", refs[name])
+            try:
+                run("docker", "cp", container + ":" + path, str(pathlib.Path(d) / name))
+            finally:
+                run("docker", "rm", container)
+            binary_hashes[name] = digest(pathlib.Path(d) / name)
+    run(
+        "docker",
+        "save",
+        "-o",
+        str(root / "images.tar"),
+        *[image["reference"] for image in images.values()],
+    )
+    immutable = {
+        str(p.relative_to(root)): digest(p)
+        for p in sorted(root.rglob("*"))
+        if p.is_file() and p.name != "build.log"
+    }
+    manifest = {
+        "version": 1,
+        "source_revision": revision,
+        "config_sha256": digest(root / "config/gati.yaml"),
+        "effective_config_sha256": hashlib.sha256(effective_raw.encode()).hexdigest(),
+        "push_enabled": effective["notifications"]["push_enabled"],
+        "api_binary_sha256": api_binary_hash,
+        "runtime_binary_sha256": binary_hashes,
+        "images": images,
+        "browser_assets": assets,
+        "files": immutable,
+        "scope": "source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation",
+    }
+    (root / "release.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    (root / "release.sha256").write_text(
+        digest(root / "release.json") + "  release.json\n"
+    )
+    print(
+        "Prepared local release",
+        revision,
+        "manifest SHA256",
+        digest(root / "release.json"),
+    )
+
 
 def verify_files(root):
- manifest=json.loads((root/'release.json').read_text())
- if manifest.get('version')!=1:raise ValueError('unsupported release manifest')
- if (root/'release.sha256').read_text().split()[0]!=digest(root/'release.json'):raise ValueError('release manifest checksum changed')
- for name,want in manifest['files'].items():
-  path=root/name
-  if path.resolve()!=path or not path.is_relative_to(root) or digest(path)!=want:raise ValueError('release file verification failed')
- return manifest
+    manifest = json.loads((root / "release.json").read_text())
+    if manifest.get("version") != 1:
+        raise ValueError("unsupported release manifest")
+    if (root / "release.sha256").read_text().split()[0] != digest(
+        root / "release.json"
+    ):
+        raise ValueError("release manifest checksum changed")
+    for name, want in manifest["files"].items():
+        path = root / name
+        if (
+            path.resolve() != path
+            or not path.is_relative_to(root)
+            or digest(path) != want
+        ):
+            raise ValueError("release file verification failed")
+    return manifest
+
 
 def verify_images(manifest):
- for image in manifest['images'].values():
-  if run('docker','image','inspect','--format','{{.Id}}',image['reference'])!=image['image_id']:raise ValueError('release image identity changed')
+    for image in manifest["images"].values():
+        if (
+            run("docker", "image", "inspect", "--format", "{{.Id}}", image["reference"])
+            != image["image_id"]
+        ):
+            raise ValueError("release image identity changed")
+
 
 def preflight():
- problems=[]
- if pathlib.Path('/proc/swaps').read_text().strip().count('\n'):problems.append('host swap is enabled; configure the deployment host before public launch')
- if pathlib.Path('/sys/power/resume').exists() and pathlib.Path('/sys/power/resume').read_text().strip()!='0:0':problems.append('host resume/hibernation device is configured')
- info=json.loads(run('docker','info','--format','{{json .}}'))
- if not info.get('MemoryLimit') or not info.get('SwapLimit'):problems.append('Docker memory/swap limits are not supported')
- if info.get('MemTotal',0)<6*1024**3:problems.append('less than 6 GiB visible to Docker; validate a smaller configuration before deployment')
- print(json.dumps({'passed':not problems,'problems':problems,'manual_checks':['provider RAM snapshots disabled; no host request/body tracing or process-memory capture','host patching, access control, firewall and core dump policy reviewed','Cloudflare cache/trust/TLS and privacy settings verified on the actual hostname']},indent=2))
- return not problems
+    problems = []
+    if pathlib.Path("/proc/swaps").read_text().strip().count("\n"):
+        problems.append(
+            "host swap is enabled; configure the deployment host before public launch"
+        )
+    if (
+        pathlib.Path("/sys/power/resume").exists()
+        and pathlib.Path("/sys/power/resume").read_text().strip() != "0:0"
+    ):
+        problems.append("host resume/hibernation device is configured")
+    info = json.loads(run("docker", "info", "--format", "{{json .}}"))
+    if not info.get("MemoryLimit") or not info.get("SwapLimit"):
+        problems.append("Docker memory/swap limits are not supported")
+    if info.get("MemTotal", 0) < 6 * 1024**3:
+        problems.append(
+            "less than 6 GiB visible to Docker; validate a smaller configuration before deployment"
+        )
+    print(
+        json.dumps(
+            {
+                "passed": not problems,
+                "problems": problems,
+                "manual_checks": [
+                    "provider RAM snapshots disabled; no host request/body tracing or process-memory capture",
+                    "host patching, access control, firewall and core dump policy reviewed",
+                    "Cloudflare cache/trust/TLS and privacy settings verified on the actual hostname",
+                ],
+            },
+            indent=2,
+        )
+    )
+    return not problems
 
-def verify_runtime_shape(value,service,networks,image):
- """Compare security-relevant launch settings without printing secrets on failure.
 
- This detects accidental/operator drift, not a dishonest Docker daemon or host.
- Image defaults matter: Compose does not repeat the base image's user or PATH.
- """
- config=value['Config'];host=value['HostConfig']
- for field,key in [('Cmd','command'),('Entrypoint','entrypoint'),('User','user'),('WorkingDir','working_dir')]:
-  expected=service.get(key)
-  if expected is None:expected=image.get(field)
-  if (config.get(field) or None)!=(expected or None):raise ValueError('runtime launch settings differ: '+field)
- environment=dict(item.split('=',1) for item in image.get('Env') or [])
- environment.update(service.get('environment') or {})
- if dict(item.split('=',1) for item in config.get('Env') or [])!=environment:raise ValueError('runtime environment differs')
- if host.get('Privileged') or host.get('CapAdd') or host.get('Devices') or host.get('DeviceRequests') or host.get('PidMode') or host.get('NetworkMode')=='host':raise ValueError('unexpected runtime privilege or host access')
- if host.get('Memory')!=int(service['mem_limit']) or host.get('MemorySwap')!=int(service['memswap_limit']) or host.get('PidsLimit')!=service['pids_limit'] or host.get('NanoCpus')!=round(service['cpus']*1e9):raise ValueError('runtime resource bounds differ')
- expected_mounts={(m['target'],m['type'],m.get('source'),not m.get('read_only',False)) for m in service.get('volumes',[])}
- actual_mounts={(m['Destination'],m['Type'],m.get('Source'),m['RW']) for m in value['Mounts'] if m['Type']!='tmpfs'}
- if actual_mounts!=expected_mounts:raise ValueError('runtime mounts differ')
- expected_tmpfs=dict(item.split(':',1) if ':' in item else (item,'') for item in service.get('tmpfs',[]))
- if (host.get('Tmpfs') or {})!=expected_tmpfs:raise ValueError('runtime temporary mounts differ')
- expected_networks={networks[name]['name']:settings or {} for name,settings in service['networks'].items()}
- actual_networks=value['NetworkSettings']['Networks']
- if set(actual_networks)!=set(expected_networks):raise ValueError('runtime network attachments differ')
- for name,settings in expected_networks.items():
-  if settings.get('ipv4_address') and actual_networks[name]['IPAddress']!=settings['ipv4_address']:raise ValueError('runtime trusted proxy address differs')
+def verify_runtime_shape(value, service, networks, image):
+    """Compare security-relevant launch settings without printing secrets on failure.
 
-def verify_service_selection(root,project,replicas,edge):
- # Compose up does not stop services omitted by a changed profile. In particular,
- # an already running tunnel must not be mistaken for a private-only activation.
- for service,selected in [('worker',replicas>1),('tunnel',edge)]:
-  if not selected and compose(root,project,'ps','-q',service,replicas=2,edge=True):raise ValueError('unselected service still running: '+service+'; explicitly stop it or select its deployment flag')
+    This detects accidental/operator drift, not a dishonest Docker daemon or host.
+    Image defaults matter: Compose does not repeat the base image's user or PATH.
+    """
+    config = value["Config"]
+    host = value["HostConfig"]
+    for field, key in [
+        ("Cmd", "command"),
+        ("Entrypoint", "entrypoint"),
+        ("User", "user"),
+        ("WorkingDir", "working_dir"),
+    ]:
+        expected = service.get(key)
+        if expected is None:
+            expected = image.get(field)
+        if (config.get(field) or None) != (expected or None):
+            raise ValueError("runtime launch settings differ: " + field)
+    environment = dict(item.split("=", 1) for item in image.get("Env") or [])
+    environment.update(service.get("environment") or {})
+    if dict(item.split("=", 1) for item in config.get("Env") or []) != environment:
+        raise ValueError("runtime environment differs")
+    if (
+        host.get("Privileged")
+        or host.get("CapAdd")
+        or host.get("Devices")
+        or host.get("DeviceRequests")
+        or host.get("PidMode")
+        or host.get("NetworkMode") == "host"
+    ):
+        raise ValueError("unexpected runtime privilege or host access")
+    if (
+        host.get("Memory") != int(service["mem_limit"])
+        or host.get("MemorySwap") != int(service["memswap_limit"])
+        or host.get("PidsLimit") != service["pids_limit"]
+        or host.get("NanoCpus") != round(service["cpus"] * 1e9)
+    ):
+        raise ValueError("runtime resource bounds differ")
+    expected_mounts = {
+        (m["target"], m["type"], m.get("source"), not m.get("read_only", False))
+        for m in service.get("volumes", [])
+    }
+    actual_mounts = {
+        (m["Destination"], m["Type"], m.get("Source"), m["RW"])
+        for m in value["Mounts"]
+        if m["Type"] != "tmpfs"
+    }
+    if actual_mounts != expected_mounts:
+        raise ValueError("runtime mounts differ")
+    expected_tmpfs = dict(
+        item.split(":", 1) if ":" in item else (item, "")
+        for item in service.get("tmpfs", [])
+    )
+    if (host.get("Tmpfs") or {}) != expected_tmpfs:
+        raise ValueError("runtime temporary mounts differ")
+    expected_networks = {
+        networks[name]["name"]: settings or {}
+        for name, settings in service["networks"].items()
+    }
+    actual_networks = value["NetworkSettings"]["Networks"]
+    if set(actual_networks) != set(expected_networks):
+        raise ValueError("runtime network attachments differ")
+    for name, settings in expected_networks.items():
+        if (
+            settings.get("ipv4_address")
+            and actual_networks[name]["IPAddress"] != settings["ipv4_address"]
+        ):
+            raise ValueError("runtime trusted proxy address differs")
 
-def verify_running(root,project,manifest,replicas,edge=False):
- verify_images(manifest);seen=[]
- verify_service_selection(root,project,replicas,edge)
- resolved=json.loads(compose(root,project,'config','--format','json',replicas=replicas,edge=edge))
- for service in ['valkey','api','web']+(['worker'] if replicas>1 else [])+(['tunnel'] if edge else []):
-  ids=compose(root,project,'ps','-q',service,replicas=replicas,edge=edge).splitlines()
-  if len(ids)!=(replicas if service=='api' else 1):raise ValueError('unexpected running service count')
-  for container in ids:
-   value=json.loads(run('docker','inspect',container))[0];h=value['HostConfig']
-   if value['State']['Status']!='running' or value['State'].get('Health',{}).get('Status','healthy')!='healthy':raise ValueError('unhealthy release service')
-   if not h['ReadonlyRootfs'] or h['LogConfig']['Type']!='none' or h['PortBindings'] or h['Memory']<=0 or h['MemorySwap']!=h['Memory']:raise ValueError('runtime privacy/resource settings differ')
-   if 'ALL' not in h['CapDrop'] or 'no-new-privileges:true' not in h['SecurityOpt'] or not any(u['Name']=='core' and u['Hard']==0 for u in h['Ulimits']):raise ValueError('runtime privilege/core limits differ')
-   if any(m['Type']=='volume' or (m['Type']=='bind' and m['RW']) for m in value['Mounts']):raise ValueError('persistent writable mount')
-   key='api' if service=='worker' else service
-   if key in manifest['images'] and value['Image']!=manifest['images'][key]['image_id']:raise ValueError('running image differs from release')
-   image=json.loads(run('docker','image','inspect',manifest['images'][key]['image_id']))[0]['Config']
-   verify_runtime_shape(value,resolved['services'][service],resolved['networks'],image)
-   if service in ['api','worker']:
-    mounted=run('docker','exec',container,'/gati','-mode','config-show','-config','/config/gati.yaml')
-    expected=run('docker','run','--rm','--network','none',manifest['images']['api']['reference'],'-mode','config-show')
-    if mounted!=expected:raise ValueError('mounted functional settings differ from the release image')
-   if service=='valkey':
-    settings=json.loads(run('docker','exec',container,'sh','-c','VALKEYCLI_AUTH=$(cat /run/secrets/health-password) valkey-cli --user health --json CONFIG GET save appendonly maxmemory-policy acllog-max-len slowlog-log-slower-than'))
-    if settings!={'save':'','appendonly':'no','maxmemory-policy':'noeviction','acllog-max-len':'0','slowlog-log-slower-than':'-1'}:raise ValueError('store privacy settings differ')
-   seen.append(service)
- print('Verified local running services:',', '.join(seen),'; remote honesty and edge behavior are not established.')
 
-def verify_audit(root,manifest,path,now=None):
- if path is None:raise ValueError('public activation requires --audit with a fresh exact-release image audit')
- audit=json.loads(path.read_text());now=now or datetime.datetime.now(datetime.timezone.utc)
- scanned=datetime.datetime.fromisoformat(audit['scanned_at'])
- if scanned.tzinfo is None or not 0<=(now-scanned).total_seconds()<=86400:raise ValueError('image audit is stale or future-dated; rescan the release')
- if audit.get('passed') is not True or audit.get('release_manifest_sha256')!=digest(root/'release.json'):raise ValueError('image audit failed or belongs to another release')
- if set(audit['images'])!=set(manifest['images']):raise ValueError('image audit is incomplete')
- if set(manifest.get('runtime_binary_sha256',{}))!=set(manifest['images'])&{'api','web','tunnel'}:raise ValueError('release lacks runtime binary identities; prepare a new release')
- for name,image in manifest['images'].items():
-  entry=audit['images'][name]
-  if entry['image_id']!=image['image_id'] or entry['unresolved_findings']:raise ValueError('image audit identities or findings differ')
-  if name in manifest.get('runtime_binary_sha256',{}):
-   if entry.get('binary_scan_passed') is not True or entry.get('binary_sha256')!=manifest['runtime_binary_sha256'][name]:raise ValueError('runtime binary audit is incomplete')
-  for accepted in entry['accepted_findings']:
-   if datetime.date.fromisoformat(accepted['exception']['expires'])<now.date():raise ValueError('image audit exception expired; rescan the release')
+def verify_service_selection(root, project, replicas, edge):
+    # Compose up does not stop services omitted by a changed profile. In particular,
+    # an already running tunnel must not be mistaken for a private-only activation.
+    for service, selected in [("worker", replicas > 1), ("tunnel", edge)]:
+        if not selected and compose(
+            root, project, "ps", "-q", service, replicas=2, edge=True
+        ):
+            raise ValueError(
+                "unselected service still running: "
+                + service
+                + "; explicitly stop it or select its deployment flag"
+            )
 
-def activate(root,project,manifest,replicas,edge,current=None,audit=None):
- runtime=runtime_dir(root,project)
- if current:
-  previous=verify_files(current)
-  if previous['config_sha256']!=manifest['config_sha256']:raise ValueError('automatic rollback requires identical functional config; review schema/state compatibility explicitly')
-  if runtime_dir(current,project)!=runtime:raise ValueError('rollback releases must share the same parent and stable operational directory')
- verify_service_selection(root,project,replicas,edge)
- if edge:
-  verify_audit(root,manifest,audit)
-  if not preflight():raise ValueError('host preflight failed')
-  if not (runtime/'tunnel-token').is_file():raise ValueError('named tunnel credential must be provisioned privately on the host')
-  if 'GATI_PUBLIC_HOST=localhost\n' in (root/'deployment.env').read_text():raise ValueError('public deployment needs a real hostname release')
- runtime.mkdir(mode=0o700,exist_ok=True)
- if manifest.get('push_enabled') and not (runtime/'vapid.json').is_file():raise ValueError('optional push requires its privately provisioned VAPID key')
- run('python3',str(root/'scripts/init-secrets.py'),'--directory',str(runtime),*(['--check'] if (runtime/'app-password').is_file() else []))
- if not (runtime/'valkey.conf').exists():
-  import shutil
-  shutil.copyfile(root/'deploy/valkey.production.conf',runtime/'valkey.conf')
- elif digest(runtime/'valkey.conf')!=digest(root/'deploy/valkey.production.conf'):raise ValueError('store settings changed; review state-loss/restart implications explicitly')
- try:verify_images(manifest)
- except subprocess.CalledProcessError:
-  run('docker','load','-i',str(root/'images.tar'));verify_images(manifest)
- services=['valkey','api','web']+(['worker'] if replicas>1 else [])+(['tunnel'] if edge else [])
- print(compose(root,project,'up','-d','--no-build','--pull','never','--scale',f'api={replicas}','--wait','--wait-timeout','240',*services,replicas=replicas,edge=edge))
- verify_running(root,project,manifest,replicas,edge)
+
+def verify_running(root, project, manifest, replicas, edge=False):
+    verify_images(manifest)
+    seen = []
+    verify_service_selection(root, project, replicas, edge)
+    resolved = json.loads(
+        compose(
+            root, project, "config", "--format", "json", replicas=replicas, edge=edge
+        )
+    )
+    for service in (
+        ["valkey", "api", "web"]
+        + (["worker"] if replicas > 1 else [])
+        + (["tunnel"] if edge else [])
+    ):
+        ids = compose(
+            root, project, "ps", "-q", service, replicas=replicas, edge=edge
+        ).splitlines()
+        if len(ids) != (replicas if service == "api" else 1):
+            raise ValueError("unexpected running service count")
+        for container in ids:
+            value = json.loads(run("docker", "inspect", container))[0]
+            h = value["HostConfig"]
+            if (
+                value["State"]["Status"] != "running"
+                or value["State"].get("Health", {}).get("Status", "healthy")
+                != "healthy"
+            ):
+                raise ValueError("unhealthy release service")
+            if (
+                not h["ReadonlyRootfs"]
+                or h["LogConfig"]["Type"] != "none"
+                or h["PortBindings"]
+                or h["Memory"] <= 0
+                or h["MemorySwap"] != h["Memory"]
+            ):
+                raise ValueError("runtime privacy/resource settings differ")
+            if (
+                "ALL" not in h["CapDrop"]
+                or "no-new-privileges:true" not in h["SecurityOpt"]
+                or not any(u["Name"] == "core" and u["Hard"] == 0 for u in h["Ulimits"])
+            ):
+                raise ValueError("runtime privilege/core limits differ")
+            if any(
+                m["Type"] == "volume" or (m["Type"] == "bind" and m["RW"])
+                for m in value["Mounts"]
+            ):
+                raise ValueError("persistent writable mount")
+            key = "api" if service == "worker" else service
+            if (
+                key in manifest["images"]
+                and value["Image"] != manifest["images"][key]["image_id"]
+            ):
+                raise ValueError("running image differs from release")
+            image = json.loads(
+                run("docker", "image", "inspect", manifest["images"][key]["image_id"])
+            )[0]["Config"]
+            verify_runtime_shape(
+                value, resolved["services"][service], resolved["networks"], image
+            )
+            if service in ["api", "worker"]:
+                mounted = run(
+                    "docker",
+                    "exec",
+                    container,
+                    "/gati",
+                    "-mode",
+                    "config-show",
+                    "-config",
+                    "/config/gati.yaml",
+                )
+                expected = run(
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--network",
+                    "none",
+                    manifest["images"]["api"]["reference"],
+                    "-mode",
+                    "config-show",
+                )
+                if mounted != expected:
+                    raise ValueError(
+                        "mounted functional settings differ from the release image"
+                    )
+            if service == "valkey":
+                settings = json.loads(
+                    run(
+                        "docker",
+                        "exec",
+                        container,
+                        "sh",
+                        "-c",
+                        "VALKEYCLI_AUTH=$(cat /run/secrets/health-password) valkey-cli --user health --json CONFIG GET save appendonly maxmemory-policy acllog-max-len slowlog-log-slower-than",
+                    )
+                )
+                if settings != {
+                    "save": "",
+                    "appendonly": "no",
+                    "maxmemory-policy": "noeviction",
+                    "acllog-max-len": "0",
+                    "slowlog-log-slower-than": "-1",
+                }:
+                    raise ValueError("store privacy settings differ")
+            seen.append(service)
+    print(
+        "Verified local running services:",
+        ", ".join(seen),
+        "; remote honesty and edge behavior are not established.",
+    )
+
+
+def verify_audit(root, manifest, path, now=None):
+    if path is None:
+        raise ValueError(
+            "public activation requires --audit with a fresh exact-release image audit"
+        )
+    audit = json.loads(path.read_text())
+    now = now or datetime.datetime.now(datetime.timezone.utc)
+    scanned = datetime.datetime.fromisoformat(audit["scanned_at"])
+    if scanned.tzinfo is None or not 0 <= (now - scanned).total_seconds() <= 86400:
+        raise ValueError("image audit is stale or future-dated; rescan the release")
+    if audit.get("passed") is not True or audit.get(
+        "release_manifest_sha256"
+    ) != digest(root / "release.json"):
+        raise ValueError("image audit failed or belongs to another release")
+    if set(audit["images"]) != set(manifest["images"]):
+        raise ValueError("image audit is incomplete")
+    if set(manifest.get("runtime_binary_sha256", {})) != set(manifest["images"]) & {
+        "api",
+        "web",
+        "tunnel",
+    }:
+        raise ValueError(
+            "release lacks runtime binary identities; prepare a new release"
+        )
+    for name, image in manifest["images"].items():
+        entry = audit["images"][name]
+        if entry["image_id"] != image["image_id"] or entry["unresolved_findings"]:
+            raise ValueError("image audit identities or findings differ")
+        if name in manifest.get("runtime_binary_sha256", {}):
+            if (
+                entry.get("binary_scan_passed") is not True
+                or entry.get("binary_sha256") != manifest["runtime_binary_sha256"][name]
+            ):
+                raise ValueError("runtime binary audit is incomplete")
+        for accepted in entry["accepted_findings"]:
+            if (
+                datetime.date.fromisoformat(accepted["exception"]["expires"])
+                < now.date()
+            ):
+                raise ValueError("image audit exception expired; rescan the release")
+
+
+def activate(root, project, manifest, replicas, edge, current=None, audit=None):
+    runtime = runtime_dir(root, project)
+    if current:
+        previous = verify_files(current)
+        if previous["config_sha256"] != manifest["config_sha256"]:
+            raise ValueError(
+                "automatic rollback requires identical functional config; review schema/state compatibility explicitly"
+            )
+        if runtime_dir(current, project) != runtime:
+            raise ValueError(
+                "rollback releases must share the same parent and stable operational directory"
+            )
+    verify_service_selection(root, project, replicas, edge)
+    if edge:
+        verify_audit(root, manifest, audit)
+        if not preflight():
+            raise ValueError("host preflight failed")
+        if not (runtime / "tunnel-token").is_file():
+            raise ValueError(
+                "named tunnel credential must be provisioned privately on the host"
+            )
+        if "GATI_PUBLIC_HOST=localhost\n" in (root / "deployment.env").read_text():
+            raise ValueError("public deployment needs a real hostname release")
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    if manifest.get("push_enabled") and not (runtime / "vapid.json").is_file():
+        raise ValueError("optional push requires its privately provisioned VAPID key")
+    run(
+        "python3",
+        str(root / "scripts/init-secrets.py"),
+        "--directory",
+        str(runtime),
+        *(["--check"] if (runtime / "app-password").is_file() else []),
+    )
+    if not (runtime / "valkey.conf").exists():
+        import shutil
+
+        shutil.copyfile(root / "deploy/valkey.production.conf", runtime / "valkey.conf")
+    elif digest(runtime / "valkey.conf") != digest(
+        root / "deploy/valkey.production.conf"
+    ):
+        raise ValueError(
+            "store settings changed; review state-loss/restart implications explicitly"
+        )
+    try:
+        verify_images(manifest)
+    except subprocess.CalledProcessError:
+        run("docker", "load", "-i", str(root / "images.tar"))
+        verify_images(manifest)
+    services = (
+        ["valkey", "api", "web"]
+        + (["worker"] if replicas > 1 else [])
+        + (["tunnel"] if edge else [])
+    )
+    print(
+        compose(
+            root,
+            project,
+            "up",
+            "-d",
+            "--no-build",
+            "--pull",
+            "never",
+            "--scale",
+            f"api={replicas}",
+            "--wait",
+            "--wait-timeout",
+            "240",
+            *services,
+            replicas=replicas,
+            edge=edge,
+        )
+    )
+    verify_running(root, project, manifest, replicas, edge)
+
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('action',choices=['prepare','verify','up','rollback','preflight']);p.add_argument('--release',type=pathlib.Path);p.add_argument('--current',type=pathlib.Path);p.add_argument('--audit',type=pathlib.Path);p.add_argument('--public-host',default='localhost');p.add_argument('--project',default='gati-production');p.add_argument('--replicas',type=int,choices=[1,2],default=1);p.add_argument('--edge',action='store_true');p.add_argument('--running',action='store_true');a=p.parse_args()
- if not re.fullmatch(r'[a-z][a-z0-9-]{1,63}',a.project):raise ValueError('invalid project name')
- if a.action=='preflight':raise SystemExit(0 if preflight() else 1)
- if a.release is None:p.error('--release is required')
- root=a.release.resolve()
- if a.action=='prepare':prepare(root,a.public_host);return
- manifest=verify_files(root)
- if a.action=='verify':
-  if a.running:verify_running(root,a.project,manifest,a.replicas,a.edge)
-  else:print('Release file hashes verified. Compare release.sha256 through an independent channel.')
- elif a.action=='rollback':
-  if a.current is None:p.error('rollback requires --current for compatibility and operational secrets')
-  activate(root,a.project,manifest,a.replicas,a.edge,a.current.resolve(),a.audit)
- else:activate(root,a.project,manifest,a.replicas,a.edge,audit=a.audit)
+    p = argparse.ArgumentParser()
+    p.add_argument(
+        "action", choices=["prepare", "verify", "up", "rollback", "preflight"]
+    )
+    p.add_argument("--release", type=pathlib.Path)
+    p.add_argument("--current", type=pathlib.Path)
+    p.add_argument("--audit", type=pathlib.Path)
+    p.add_argument("--public-host", default="localhost")
+    p.add_argument("--project", default="gati-production")
+    p.add_argument("--replicas", type=int, choices=[1, 2], default=1)
+    p.add_argument("--edge", action="store_true")
+    p.add_argument("--running", action="store_true")
+    a = p.parse_args()
+    if not re.fullmatch(r"[a-z][a-z0-9-]{1,63}", a.project):
+        raise ValueError("invalid project name")
+    if a.action == "preflight":
+        raise SystemExit(0 if preflight() else 1)
+    if a.release is None:
+        p.error("--release is required")
+    root = a.release.resolve()
+    if a.action == "prepare":
+        prepare(root, a.public_host)
+        return
+    manifest = verify_files(root)
+    if a.action == "verify":
+        if a.running:
+            verify_running(root, a.project, manifest, a.replicas, a.edge)
+        else:
+            print(
+                "Release file hashes verified. Compare release.sha256 through an independent channel."
+            )
+    elif a.action == "rollback":
+        if a.current is None:
+            p.error(
+                "rollback requires --current for compatibility and operational secrets"
+            )
+        activate(
+            root, a.project, manifest, a.replicas, a.edge, a.current.resolve(), a.audit
+        )
+    else:
+        activate(root, a.project, manifest, a.replicas, a.edge, audit=a.audit)
 
-if __name__=='__main__':main()
+
+if __name__ == "__main__":
+    main()

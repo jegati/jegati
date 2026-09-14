@@ -1,0 +1,10 @@
+# Incremental formatting scope; unrelated Python helpers retain their current style.
+required-version = "==0.11.13"
+target-version = "py312"
+include = [
+  "scripts/release.py",
+  "scripts/audit-images.py",
+  "scripts/verify-public.py",
+  "scripts/rehearse-release.py",
+  "scripts/test_release.py",
+]

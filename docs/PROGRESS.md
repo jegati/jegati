@@ -1199,3 +1199,32 @@ rehearsal evidence; the real hostname needs a new release and a fresh audit befo
 activation. Next: obtain the delivered server's nonsecret connection details,
 arrange local SSH key access, then proceed through actual host/edge/pilot checks.
 Keep commands.txt untouched and credentials outside chat/tracked files.
+
+## Auditability cleanup: release formatting — 2026-09-14
+
+The user authorized the proposed simplification work. Start with small, locally
+committed changes that preserve product/privacy behavior; no remote push or public
+activation. Preserve commands.txt. Remaining slices: response allowlists, strict
+parsing, dead-code/configuration clarification and a current audit/evidence index;
+browser-state and Lua refactoring need their own transition regression gates.
+
+Formatted five release/audit/public-verification/rehearsal Python files and release
+guard tests with development-only Ruff 0.11.13. Scope and version are pinned in
+ruff.toml; DEVELOPMENT documents the ignored local environment and check command.
+The downloaded Linux wheel SHA256 was checked against PyPI publisher metadata:
+4ffbc82d70424b275b089166310448051afdc6e914fdab90e08df66c43bb5ca9.
+No release orchestration or runtime guards changed. Syntax-tree comparison against
+2335b81 passed after normalizing docstring indentation (the first exact comparison
+correctly flagged that documentation whitespace change).
+
+Validation: pinned doctor and Docker daemon ready; baseline make test (Go race,
+simulation build tests, vet, TypeScript), 25 Python tests and make test-store passed.
+Real-store tests use a disposable restricted Valkey; ordinary make test skips those
+integrations. After formatting, all 25 Python tests and make format-python-check
+passed. The formatted orchestration/verification tools passed a 127.36-second local
+rollback rehearsal against the existing 06fa798 release images: unexpected network
+attachment rejected, served assets/config verified, two compatible directory
+switches preserved store identity and session expiry, cancellation passed. Evidence:
+reports/local/audit-format-release/release-rehearsal.json. This validates the current
+Python helpers with prior application images, not a new audited production release.
+Baseline seeded population and additional response-contract tests are in progress.

@@ -1,5 +1,24 @@
 # Local development
 
+## Formatting release helpers
+
+The release, image-audit, public-verification and rollback helpers and release
+guard tests use Ruff 0.11.13. This is a development-only formatter, not a runtime
+dependency. Install it in an ignored local environment:
+
+```sh
+python3 -m venv .runtime/format-tools
+.runtime/format-tools/bin/python -m pip install ruff==0.11.13
+make format-python-check
+# Apply formatting within the explicit ruff.toml scope:
+.runtime/format-tools/bin/ruff format
+```
+
+Keep formatting separate from behavior changes. For a mechanical Python cleanup,
+compare syntax trees with the previous revision (normalizing only docstring
+indentation), then run the Python guard suite. Do not infer behavior equivalence
+from a clean formatting check alone.
+
 ## Pinned user-local toolchain
 
 On Linux x86_64, from the repository root:
