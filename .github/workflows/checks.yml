@@ -41,7 +41,12 @@ jobs:
       - run: cd web && npx playwright install --with-deps chromium
       - run: make test-browser
       - run: cd web && npx playwright install --with-deps firefox webkit
-      - run: make test-browser-matrix
+      # Firefox headless has no WebGL2 device on the hosted runner. Xvfb plus
+      # Mesa software rendering exercises the real MapLibre path without a GPU.
+      - run: xvfb-run --auto-servernum make test-browser-matrix
+        env:
+          GATI_FIREFOX_HEADED: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'
       - run: make test-devices
       - run: make test-recovery
       - run: make test-pressure

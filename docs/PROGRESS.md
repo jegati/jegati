@@ -63,6 +63,16 @@ and candidate overflowing elements. The focused accessibility journey passed 20/
 with `CI=true` and one CPU; the final full Chromium suite passed 42/42 in 2.2 minutes
 under the same constraint. This CSS/test correction still needs its own GitHub run.
 
+Run 34897648802 confirmed the Chromium correction (42/42), then failed in the
+Firefox matrix: all 23 non-map journeys passed and 10 map journeys reached the
+explicit no-map fallback because the hosted headless Firefox exposed no usable
+WebGL2 context. MapLibre 6 requires WebGL2. The matrix now diagnoses WebGL2 and its
+renderer directly, enables Firefox's WebGL preferences, and runs Firefox headed
+under Xvfb with forced Mesa software rendering on GitHub; WebKit remains headless.
+The 34-test Firefox matrix, including the new capability check, passes locally with
+`CI=true`, forced Mesa and one CPU. This workstation lacks Xvfb, so the headed path
+and the unchanged WebKit matrix require validation by the corrective GitHub run.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with
