@@ -6,11 +6,12 @@ optional push, private monitoring, measured 100k load and deployment/release too
 No public deployment or independent audit has occurred. Read this summary first;
 entries below are dated historical evidence, not competing current instructions.
 
-GitHub's first `main` verification exposed an undeclared `ripgrep` dependency in
-the simulation readiness loop. The loop now uses runner-provided `grep`; `make
-simulate` passed locally afterward with all 40 synthetic credentials accepted,
-34 expiries verified and both race-enabled integration packages passing. Re-run
-the GitHub workflow on the corrective commit before creating the deploy branch.
+GitHub's first `main` verifications exposed an undeclared `ripgrep` dependency and
+a cold-container readiness race in the simulation harness. The loop now uses
+runner-provided `grep` and waits for an authenticated Valkey `PING` instead of a
+bare Docker TCP accept. Both `make simulate` scenarios passed locally afterward,
+including their race-enabled integration packages. Re-run the GitHub workflow on
+the corrective commit before creating the deploy branch.
 
 ## Current task and authorization
 

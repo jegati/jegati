@@ -39,15 +39,27 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 store_address=$(docker port "$container" 6379/tcp)
-# Readiness checks use TCP only, never print the store credential.
-python3 - "$store_address" <<'PY'
-import socket,sys,time
-host,port=sys.argv[1].split(':')
-for _ in range(100):
+# Wait for the authenticated operation required by the API. Docker's published
+# port can accept TCP connections briefly before Valkey has loaded its ACL.
+python3 - "$store_address" .runtime/simulation/app-password <<'PY'
+import pathlib,socket,sys,time
+host,port=sys.argv[1].rsplit(':',1)
+password=pathlib.Path(sys.argv[2]).read_text().strip()
+def command(*parts):
+    encoded=[part.encode() for part in parts]
+    return b'*'+str(len(encoded)).encode()+b'\r\n'+b''.join(
+        b'$'+str(len(part)).encode()+b'\r\n'+part+b'\r\n' for part in encoded)
+for _ in range(300):
     try:
-        with socket.create_connection((host,int(port)),timeout=.2):break
-    except OSError:time.sleep(.05)
-else:raise SystemExit('Simulation store did not start')
+        with socket.create_connection((host,int(port)),timeout=.5) as connection:
+            stream=connection.makefile('rb')
+            connection.sendall(command('AUTH','app',password))
+            if stream.readline()!=b'+OK\r\n':raise OSError
+            connection.sendall(command('PING'))
+            if stream.readline()==b'+PONG\r\n':break
+    except OSError:pass
+    time.sleep(.1)
+else:raise SystemExit('Simulation store did not become authentication-ready')
 PY
 # A fresh free loopback port avoids touching a pre-existing API.
 api_port=$(python3 -c 'import socket; s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()')
