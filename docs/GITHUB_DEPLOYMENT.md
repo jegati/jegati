@@ -2,7 +2,8 @@
 
 The public alpha is deployed only from the protected `deploy` branch. The
 `production` GitHub Environment must have required reviewers enabled. Normal
-development pushes and pull requests never activate the VPS.
+development pushes and pull requests never activate the VPS. The workflow also
+checks the exact Git ref, so a manual run must explicitly select `deploy`.
 
 The workflow builds and tests on an ephemeral GitHub runner, prepares a content
 addressed release, audits the exact image IDs, transfers the archive over SSH,
