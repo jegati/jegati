@@ -39,6 +39,16 @@ optional alert service.
 
 ## First VPS preparation
 
+Copy and run [`scripts/vps-bootstrap.sh`](../scripts/vps-bootstrap.sh) from the
+OVH console or an initial SSH session as root. It is idempotent and prompts for
+the public key that GitHub Actions will use; passing `GATI_SSH_PUBLIC_KEY` in the
+environment is also supported. It does not ask for or store the private key.
+
+```sh
+scp scripts/vps-bootstrap.sh root@VPS_IP:/root/
+ssh root@VPS_IP 'bash /root/vps-bootstrap.sh'
+```
+
 Install Docker Engine and grant the deployment user access to Docker. Configure the
 host firewall so only SSH and the management path are available; the application
 ports remain private because Cloudflare Tunnel connects outbound. Disable swap,
