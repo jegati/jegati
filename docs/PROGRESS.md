@@ -1972,3 +1972,51 @@ in the generated manifest. Initial methods-page overflow was fixed before export
 User's manual web/index.html edit is preserved. Next: user may share the final PDF;
 actual source publication/alpha deployment remain separate. No messages or public
 uploads were performed.
+
+## Final local predeployment checkpoint — 2026-09-14
+
+The intended alpha behavior and production topology are locally ready to freeze.
+`make audit-local` passed the Go race and simulation suites, vet, TypeScript/build,
+configuration and Compose validation, storeless smoke, all 47 Python guard tests,
+and real-Valkey API/store/worker/notification integration. A clean rerun of
+`make audit-journeys` passed 42 Chromium journeys, the real publisher/arrival/map/
+preview/late-admission journey, and the two-API/dedicated-worker production lab.
+The journey Make target now gives each stage a separate evidence directory; its
+collective invitation assertion is scoped to the invitation panel so an independent
+public-map `JEMI GATI.` heading cannot make the test ambiguous.
+
+Additional current checks passed: Firefox's 33-test browser suite; security audit
+(zero called Go vulnerabilities and zero npm audit findings); deterministic planner
+replay for 3,000 inputs, 100 m cells, all 6,491 crossroads and eight unchanged
+decision digests; day-study race/tests; Python formatting; release/publication
+guards; monitor and email/webhook guard tests; fuzz targets; six replica/store/
+monitor recovery cases; owned noeviction memory-pressure handling; and pinned
+runtime source/test/vulnerability checks. The 90-second real-time lifecycle smoke
+created 39 sessions and exercised invitation, decline, going, arrival retry,
+retraction, late admission, public publication and expiry paths. Evidence is under
+`reports/local/final-predeploy-*` and remains untracked/private local output.
+
+The latest device rerun passed all 36 Pixel 7/Chromium cases. Firefox passed as
+above. WebKit could not start on this workstation because its Linux host libraries
+require administrator installation; therefore the latest iPhone/iPad/WebKit and
+desktop WebKit matrices are not passed. A prior 108-case emulated-device run passed
+before the final copy/test-only edits, but it is not a substitute for this blocked
+rerun or a real iPhone/Safari check. Install with Playwright's documented
+`npx playwright install-deps webkit` under administrator control, then rerun
+`make test-browser-matrix` and `make test-devices`. A rootless extracted-library
+experiment was incomplete and is not evidence.
+
+Both eight-hour real-clock lifecycle observations remain active and must be read
+after their recorded expected finish times; running is not passed. The newer run
+uses implementation/config commit 12431f3 and the current functional config. The
+short lifecycle gate above provides current smoke evidence but does not replace
+the overnight expiry and memory-drift result.
+
+Next local action: export the clean committed revision to
+`reports/local/jamgati-alpha-final`, audit its exact images, rehearse activation and
+rollback, and reproduce its binaries/assets. Deployment-day work still needs the
+delivered VPS and working SSH access, private Cloudflare named-tunnel and VAPID
+credentials, private SMTP settings, actual host hardening/preflight, exact-release
+audit less than 24 hours old, real edge/TLS/cache/direct-origin checks, and real
+phone location/push checks. Source publication, remote push, DNS changes and public
+deployment have not been performed.
