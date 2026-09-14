@@ -1,0 +1,27 @@
+name: Problem gjatë përdorimit të alfa-s
+description: Raporto një problem pa të dhëna personale ose pjesëmarrjeje.
+title: "[Alfa] "
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Ky raport është publik. Mos përfshi emra, vendndodhje, pika takimi,
+        kode hyrjeje, kërkesa rrjeti ose pamje me të dhëna private.
+        Për çështje sigurie shkruaj privatisht në jegati@proton.me.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Çfarë prisje dhe çfarë ndodhi?
+      description: Përshkruaj sjelljen e aplikacionit pa treguar pjesëmarrjen tënde.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Si mund ta përsërisim problemin?
+      description: Përdor shembuj pa vendndodhje apo të dhëna reale.
+  - type: input
+    id: browser
+    attributes:
+      label: Shfletuesi dhe sistemi i pajisjes
+      description: Opsionale; mos jep identifikues pajisjeje ose emër përdoruesi.

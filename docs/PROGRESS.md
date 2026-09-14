@@ -1678,3 +1678,23 @@ public deployment occurred. Next: delivered host/access, actual host/edge checks
 alpha label/optional sanitized feedback instructions and private operational alerts;
 prepare jamgati.com artifacts with a fresh exact audit before activation. No separate
 volunteer stage. Real-device, independent-review and overnight-lifetime gaps remain.
+
+
+## Alpha presentation and optional feedback — 2026-09-14
+
+Added a small Albanian Version alfa notice and static optional feedback section,
+plus a sanitized Albanian GitHub issue form. External links contain only fixed
+project contact/template information, never session state or location. Email/GitHub
+identity/publication boundaries are explicit. Existing manual About copy is preserved.
+No in-app reporting database, analytics or automatic external request was added.
+
+Validation: 42 Chromium checks passed in 1.1m; 108 Pixel/iPhone/iPad preset checks
+passed in 2.7m. The first Chromium run caught a new heading overflowing at 200% text;
+scoped wrapping fixed it, and accessibility/overflow checks pass. New tests verify
+reading feedback creates no willingness, makes no external request and preserves an
+active session. Existing map/arrival/push/renewal journeys passed. Build retains the
+known MapLibre size warning. No real-device or public deployment claim.
+
+The other authorized preparations (alert routing, hostname package and real-lifetime
+run) are in progress. Alert destination preference was requested without credentials;
+no external notification has been sent. Keep all secrets outside chat and Git.

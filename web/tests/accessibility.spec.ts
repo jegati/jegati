@@ -2,6 +2,37 @@ import { test, expect } from './fixtures';
 import AxeBuilder from '@axe-core/playwright';
 import { fileURLToPath } from 'node:url';
 
+test('alpha feedback is optional, static and preserves an active session', async ({ page, context }) => {
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ latitude: 41.32754321, longitude: 19.81812345, accuracy: 20 });
+  const origins = new Set<string>();
+  let writes = 0;
+  page.on('request', request => {
+    if (request.url().startsWith('http')) origins.add(new URL(request.url()).origin);
+    if (request.method() !== 'GET') writes++;
+  });
+  await page.goto('/');
+  await expect(page.locator('.alpha-notice')).toContainText('Version alfa');
+  await page.getByRole('link', { name: 'Ke hasur një problem?' }).click();
+  await expect(page.locator('#feedback-title')).toBeInViewport();
+  expect(writes).toBe(0);
+  await expect(page.locator('#feedback-email')).toHaveAttribute('href', 'mailto:jegati@proton.me?subject=GATI%20alfa%20%E2%80%94%20problem');
+  await expect(page.locator('#feedback-issue')).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(page.locator('#komente')).toContainText('Raportimet në GitHub janë publike');
+  await page.locator('#ready').click();
+  await expect(page.locator('#active-title')).toHaveText('JAM GATI.');
+  const before = await page.evaluate(() => sessionStorage.getItem('gati-session-v2'));
+  const beforeWrites = writes;
+  await page.getByRole('link', { name: 'Ke hasur një problem?' }).click();
+  expect(await page.evaluate(() => sessionStorage.getItem('gati-session-v2'))).toBe(before);
+  expect(writes).toBe(beforeWrites);
+  expect([...origins]).toEqual([String(test.info().project.use.baseURL)]);
+  const links = await page.locator('#komente a').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')).join(''));
+  expect(links).not.toContain(JSON.parse(before!).token);
+  await page.locator('#cancel').click();
+  await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
+});
+
 test('Albanian initial and active views meet automated WCAG AA checks at mobile width', async ({page,context})=>{
   await page.setViewportSize({width:390,height:844});
   await context.grantPermissions(['geolocation']);

@@ -6,6 +6,11 @@ main { width: min(100%, 42rem); margin: auto; padding-block: 1rem 2rem; }
 header { display: flex; justify-content: space-between; align-items: center; }
 .brand { letter-spacing: .12em; font-weight: 750; }.brand span { font-size: 1.8rem; }
 .city, .muted, .hint, footer { color: #71616a; }
+.alpha-notice { font-size: .9rem; padding: .8rem 1rem; background: #f4e8e6; border-radius: .7rem; }
+.alpha-feedback { margin-top: 2rem; padding: 1.4rem; border: 1px solid #d9cbc5; border-radius: 1rem; scroll-margin-top: 1.5rem; overflow-wrap: anywhere; }
+.alpha-feedback h2 { font-size: 1.4rem; }
+.feedback-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
+.feedback-links a { display: inline-flex; align-items: center; min-height: 46px; }
 h1 { font-size: clamp(2.7rem, 10vw, 4.7rem); line-height: 1; letter-spacing: -.05em; margin-block: 2rem 1rem; }
 p { line-height: 1.5; }.tagline { font-size: 1.25rem; margin-bottom: .5rem; }.muted { margin-top: 0; }
 .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-block: 1.8rem; }
