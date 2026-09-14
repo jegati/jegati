@@ -1336,3 +1336,9 @@ share a helper; public cell maps retain their separate renderer. Initial map run
 repeats passed, followed by 36/36 in the full repeat
 (`reports/local/cleanup2-map-confirm`). TypeScript and diff checks passed.
 Controller/Lua work remains in progress. No remote push or deployment occurred.
+
+The session controller extraction passed TypeScript checking and all 36 Chromium
+journeys (`reports/local/cleanup2-controller`). Defaults, Albanian copy, markup,
+CSS, map options, one-second scheduling, poll jitter and cancellation/expiry
+ordering are preserved. Full delayed-publication verification is running; Lua
+formatting and a test-only planner replay remain to be committed separately.

@@ -21,6 +21,17 @@ and exact scope of their local regression evidence.
 | Optional push | [client opt-in/resume](../web/src/push.ts), [HTTP registration](../internal/httpapi/push.go) | [temporary subscriptions/outbox](../internal/store/push.go), [delivery service](../internal/notification/service.go); see [notification lifecycle](NOTIFICATIONS.md) | [browser push](../web/tests/push.spec.ts), real-store notification tests in `make test-store`; external provider/device checks remain |
 | Deployment and operations | [trusted proxy](../internal/httpapi/proxy.go), [production Compose](../compose.production.yaml), [release guards](../scripts/release.py) | Memory-only Valkey, restricted service roles, bounded [private monitoring](MONITORING.md) | [release guard tests](../scripts/test_release.py), [deployment rehearsal](../scripts/deployment-lab.py), [runtime audit](RUNTIME_SECURITY.md) |
 
+The browser entry point [main.ts](../web/src/main.ts) owns DOM rendering, startup,
+map/preview cleanup, optional push wiring and the existing timer/event scheduling.
+[session-controller.ts](../web/src/session-controller.ts) owns the mutable session
+state, authenticated requests, retry backoff, intent/arrival transitions and deadline
+checks. [session.ts](../web/src/session.ts) owns credential persistence. The shared
+[private-map helper](../web/src/destination-map.ts) keeps preview/destination styles
+consistent; public activity rendering remains cell-only. The controller's cleanup
+hooks preserve push/preview cancellation before credentials are cleared and map/UI
+cleanup afterward. Startup-failure expiry still runs independently of successful
+initialization; cancellation remains available during other in-flight operations.
+
 For each flow, inspect authorization, the whole atomic transition, server deadlines,
 index cleanup, retries and every response. Storage TTL alone does not expire sorted
 set members, and the matching owner's private memory cache has a separate lifecycle.
@@ -70,5 +81,6 @@ Keep formatter-only changes separate from behavior changes. Request schemas and
 response allowlists belong at the HTTP boundary; private storage data must not
 become a public contract by embedding a storage record. Preserve atomic Lua checks,
 production/simulation isolation, deadlines, client cancellation races and startup
-failure cleanup when reorganizing those modules. Deeper browser-state and Lua
-layout refactors remain separate work with their own regression gates.
+failure cleanup when reorganizing those modules. The browser controller extraction is covered by the same browser journeys and
+explicit startup/cancellation regressions. Lua layout changes have a separate
+real-store and fixed-clock regression gate.
