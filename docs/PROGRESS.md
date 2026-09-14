@@ -1404,3 +1404,20 @@ in this review. The expired gathering-index and stale-reference retention findin
 need targeted keeper/churn tests and a fix; do not infer complete physical cleanup
 from the earlier passing logical-expiry journeys. Extending/moving gatherings
 would change agreed frozen-lifetime/destination policy and needs explicit design.
+
+## September 14 — lifecycle priorities implementation (in progress)
+
+User authorized bounded expired-metadata cleanup, clear ended public presentation
+and explicit early presence renewal. No willingness/gathering lifetime extension
+or active destination movement is included. Toolchain doctor passes after sourcing
+scripts/env.sh (the initial unsourced shell did not expose installed tools).
+
+Cleanup now prunes expired gathering-index members in bounded batches alongside
+willingness expiry, and includes gathering backlog in private cleanup-lag metrics.
+Expired session associations/nonces are cleared on own-session reads and when the
+existing bounded matching snapshots encounter them. No new participant index or
+persistent scan cursor is introduced; old records are covered by reconciliation.
+The mutation rereads current state, preserving any newer assignment and original
+willingness expiry. Tests cover repeated expiry with a live keeper, stale links
+without client polling, and delayed cleanup after reassignment. `make test-store`
+passed the real Valkey/race store, HTTP, notification and worker packages.

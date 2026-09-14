@@ -132,7 +132,7 @@ func (s *Store) Create(ctx context.Context, hash, cell string, radius float64, m
 	return decode(raw)
 }
 
-var status = newScript(`
+var status = newScript(expiredGatheringLua + `
 local raw = redis.call('GET', KEYS[1])
 if not raw then
   return 'GONE'
@@ -141,6 +141,9 @@ __CLOCK__
 local s = cjson.decode(raw)
 if s.expires_at <= now then
   return 'GONE'
+end
+if clearExpiredGathering(KEYS[1], s, now) then
+  return cjson.encode(s)
 end
 if s.arrival_until and s.arrival_until <= now then
   removeArrival(s)
@@ -204,11 +207,30 @@ for _, member in ipairs(expired) do
   end
   redis.call('ZREM', KEYS[1], member)
 end
-return #expired
+-- The shared index can stay alive while new gatherings are created. Prune
+-- expired members independently of its whole-key TTL, in the same bounded budget.
+local gatherings = redis.call('ZRANGEBYSCORE', KEYS[2], '-inf', now, 'LIMIT', 0, ARGV[1])
+for _, id in ipairs(gatherings) do
+  local key = 'gati:gathering:' .. id
+  local raw = redis.call('GET', key)
+  if raw then
+    local g = cjson.decode(raw)
+    if g.ends_at <= now then
+      local destination = 'gati:destination:' .. g.intersection.id
+      if redis.call('GET', destination) == id then
+        redis.call('DEL', destination)
+      end
+      redis.call('DEL', key, 'gati:arrivals:' .. id, 'gati:presence:' .. id)
+    end
+  end
+  redis.call('ZREM', KEYS[2], id)
+end
+-- A full batch in either index asks the existing worker loop for another pass.
+return math.max(#expired, #gatherings)
 `)
 
 func (s *Store) Cleanup(ctx context.Context, batch int) (int, error) {
-	return cleanup.Run(ctx, s.Client, []string{keyPrefix + "expiry"}, batch).Int()
+	return cleanup.Run(ctx, s.Client, []string{keyPrefix + "expiry", keyPrefix + "gatherings"}, batch).Int()
 }
 
 var limit = newScript(`

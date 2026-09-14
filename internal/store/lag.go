@@ -19,7 +19,15 @@ func (s *Store) PendingLag(ctx context.Context) (time.Duration, error) {
 	return s.deadlineLag(ctx, "pending")
 }
 func (s *Store) CleanupLag(ctx context.Context) (time.Duration, error) {
-	return s.deadlineLag(ctx, "expiry")
+	signals, err := s.deadlineLag(ctx, "expiry")
+	if err != nil {
+		return -1, err
+	}
+	gatherings, err := s.deadlineLag(ctx, "gatherings")
+	if err != nil {
+		return -1, err
+	}
+	return max(signals, gatherings), nil
 }
 func (s *Store) deadlineLag(ctx context.Context, index string) (time.Duration, error) {
 	n, e := oldestLag.Run(ctx, s.Client, []string{keyPrefix + index}).Int64()

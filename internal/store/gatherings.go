@@ -303,6 +303,7 @@ func (s *Store) eligibleSnapshot(ctx context.Context, grid geography.Grid, now i
 			if err != nil {
 				return nil, err
 			}
+			stale := []string{}
 			for n, raw := range values {
 				if raw == nil {
 					continue
@@ -319,6 +320,9 @@ func (s *Store) eligibleSnapshot(ctx context.Context, grid geography.Grid, now i
 				if v.ExpiresAt <= now {
 					continue
 				}
+				if v.Gathering != "" && v.GatheringUntil <= now {
+					stale = append(stale, keys[start+n])
+				}
 				cell, ok := cells[v.Cell]
 				if !ok {
 					cell, err = grid.Parse(v.Cell)
@@ -328,6 +332,9 @@ func (s *Store) eligibleSnapshot(ctx context.Context, grid geography.Grid, now i
 					cells[v.Cell] = cell
 				}
 				result = append(result, matching.Signal{Hash: hashes[start+n], Area: geography.ParticipantArea{Cell: cell, RadiusKM: v.RadiusKM}, CreatedAt: v.CreatedAt, ExpiresAt: v.ExpiresAt, Assigned: v.GatheringUntil > now, AssignedUntil: v.GatheringUntil, ReservedUntil: v.PendingUntil, Declined: v.Declined})
+			}
+			if err := s.clearExpiredGatheringLinks(ctx, stale); err != nil {
+				return nil, err
 			}
 		}
 		if len(entries) < batch {

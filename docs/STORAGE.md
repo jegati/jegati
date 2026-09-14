@@ -155,3 +155,14 @@ endpoint or permanent identifier is required by this store interface. The existi
 signal holds `_push_revision`, incremented on opt-out to reject stale registrations;
 it expires with the signal and is stripped from ordinary signal responses.
 Endpoint encryption, authenticated registration and bounded transport are connected. Decision 0009 documents reconciliation/coalescing and provider limits.
+
+## Expired gathering cleanup
+
+The normal cleanup worker prunes expired `gatherings` members independently of the
+whole index TTL, bounded by `cleanup_batch_size` per index/pass. Private cleanup
+lag includes both willingness and gathering indexes. Logical deadlines still apply
+immediately if cleanup is delayed. Existing bounded matching snapshots clear expired
+`_gathering`, `_gathering_until`, arrival metadata and associated challenges on
+still-live sessions; own-session reads do the same. Each mutation rereads state
+atomically so a newer assignment survives, and preserves the original session TTL.
+This reuses existing reconciliation rather than adding a participant index/cursor.
