@@ -12,6 +12,10 @@ retain their own licenses. Tool binaries and their bundled notices remain outsid
 this repository. Container references are pinned by digest in deploy/images.env
 and Dockerfiles; they contain separately licensed operating-system/runtime packages.
 
+Release-helper formatting uses Ruff 0.11.13 (MIT), pinned in ruff.toml. Its binary
+and bundled license remain in the ignored development environment; it is not an
+application dependency or part of the deployed images. DEVELOPMENT documents setup.
+
 Tirana public map data is now included under `data/tirana`, with OpenStreetMap
 attribution, ODbL-1.0 terms, a source manifest, archived input and reproducible import.
 See data/tirana/README.md. Geographic calculations use github.com/paulmach/orb

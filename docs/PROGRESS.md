@@ -45,8 +45,9 @@ by formatting/refactoring tests.
   contract tests and 33 passing Chromium tests.
 - 26242b1: shared strict JSON parsing, malformed-input matrix, old/new differential
   fuzz comparison and permanent round-trip fuzz target.
-- Current slice: remove unused bookkeeping/wrapper, label reserved settings, make
-  audit entry points explicit and reconcile stale status documents.
+- 3d3015c: removed unused bookkeeping/wrapper, labeled reserved settings, added
+  audit entry points and reconciled stale status documents. First batch complete;
+  final evidence is in reports/auditability-2026-09-14.md.
 - Separate follow-ups: deeper Lua layout/transition catalog and browser-state
   controller refactoring. Preserve atomic checks, cancellation races and cleanup
   during startup failure; do not treat these refactors as already implemented.
@@ -60,9 +61,10 @@ production-image rehearsal sequentially. `make simulate-population` uses current
 settings; `make load` and monitored component benchmarks also exist. All are local
 synthetic checks, not remote deployment or external push evidence.
 
-Finish and record the current cleanup validation below. Hosting work still needs
-the delivered server's nonsecret connection details and privately arranged SSH and
-Cloudflare access. Keep optional push off until provider/device verification.
+The first cleanup batch is complete. Next code-cleanup scope is the separate
+browser-state and Lua refactors listed above; no product behavior changes are
+authorized by a formatting refactor. Hosting work still needs the delivered
+server's nonsecret connection details and privately arranged SSH/Cloudflare access. Keep optional push off until provider/device verification.
 Historical entries follow; their old next-action lists are superseded by this one.
 
 ## Milestone 04 evidence
@@ -1290,3 +1292,34 @@ It covers runtime privacy settings, proxy/cache boundaries, real Chromium creati
 cancellation, activation/arrival replay, worker separation and shared rate limits.
 The full normal-clock delayed publisher journey is still running and not yet
 counted as passed. No public deployment, remote push or fresh exact-release audit.
+
+
+## Auditability cleanup: final first-batch evidence — 2026-09-14
+
+The actual production-binary browser journey passed in 15.4 minutes with normal
+matching/arrival/publication settings and clock: willingness, going, fresh arrival,
+JEMI KËTU, delayed public statistics, eligible private preview, late admission and
+cancellation. The currently released snapshot initially preceded the test gathering;
+the test waited for the next scheduled release rather than bypassing privacy delay.
+Evidence: reports/local/audit-full-journey. All 33 Chromium checks then passed again
+against the final code in 57.1 seconds (reports/local/audit-final-browser).
+
+Two clean source exports of 3d3015c with separate compilation caches produced
+identical API/browser/Caddy/cloudflared artifacts using the pinned toolchain.
+Evidence: reports/local/audit-reproduction/reproduction.json. This is same-host
+reproduction, not independent/remote attestation. The final summary and sanitized
+log copies are under reports/local/audit-cleanup; the tracked report is
+[the auditability report](reports/auditability-2026-09-14.md). Added the development
+formatter's MIT notice to THIRD_PARTY. No new runtime dependency was introduced.
+
+Final checks: audit-local, formatting, real-store/fixed-clock journeys, malformed
+request matrix and differential/round-trip fuzz, 33 browser cases, normal-delay full
+journey, production-image two-API rehearsal, prior-release rollback rehearsal and
+two clean builds passed within the scopes recorded above. No scale benchmark or
+new exact-release image audit was run. Owned test labs cleaned up; commands.txt
+remains untouched. No source push, account operation or public deployment.
+
+This completes the first cleanup batch. Deeper Lua/controller reorganization is
+still a separate unimplemented follow-up, with atomic transitions, cancellation
+races and startup-failure expiry to preserve. Actual hosting checks await the
+previously requested VPS/SSH/Cloudflare handoff; provider identity decisions stand.
