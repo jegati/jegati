@@ -28,7 +28,10 @@ type Gathering struct {
 	ConfigHash   string                 `json:"config_sha256"`
 }
 
-var readClock = newScript(`__CLOCK__; return now`)
+var readClock = newScript(`
+__CLOCK__
+return now
+`)
 
 func (s *Store) Now(ctx context.Context) (int64, error) {
 	return readClock.Run(ctx, s.Client, nil).Int64()
@@ -36,24 +39,52 @@ func (s *Store) Now(ctx context.Context) (int64, error) {
 
 var reserve = newScript(`
 __CLOCK__
-if redis.call('EXISTS',KEYS[1])==1 or redis.call('EXISTS',KEYS[3])==1 or redis.call('EXISTS',KEYS[4])==1 then return 'CONFLICT' end
-local proposal=cjson.decode(ARGV[1])
-local ready=now+tonumber(ARGV[2]);local expiry=ready+tonumber(ARGV[3]);local minimum=ready+tonumber(ARGV[4])
-local records={};local expected=cjson.decode(ARGV[5])
-for n,hash in ipairs(proposal.founders) do
- local raw=redis.call('GET','gati:s:'..hash);if not raw then return 'CONFLICT' end
- local v=cjson.decode(raw)
- if v.cell~=expected[n].cell or v.radius_km~=expected[n].radius or v.created_at~=expected[n].created or v.expires_at~=expected[n].expires or v.expires_at<minimum or (v._pending_until or 0)>now or (v._gathering_until or 0)>now then return 'CONFLICT' end
- table.insert(records,v)
+if
+  redis.call('EXISTS', KEYS[1]) == 1
+  or redis.call('EXISTS', KEYS[3]) == 1
+  or redis.call('EXISTS', KEYS[4]) == 1
+then
+  return 'CONFLICT'
 end
-proposal.ready_at=ready;proposal.expires_at=expiry
-redis.call('SET',KEYS[4],proposal.id,'PX',expiry-now)
-redis.call('SET',KEYS[1],cjson.encode(proposal),'PX',expiry-now)
-redis.call('ZADD',KEYS[2],ready,proposal.id)
-if redis.call('PTTL',KEYS[2])<expiry-now then redis.call('PEXPIRE',KEYS[2],expiry-now) end
-for n,hash in ipairs(proposal.founders) do
- local v=records[n];v._pending=proposal.id;v._pending_until=expiry
- redis.call('SET','gati:s:'..hash,cjson.encode(v),'KEEPTTL');markCell(v.cell)
+local proposal = cjson.decode(ARGV[1])
+local ready = now + tonumber(ARGV[2])
+local expiry = ready + tonumber(ARGV[3])
+local minimum = ready + tonumber(ARGV[4])
+local records = {}
+local expected = cjson.decode(ARGV[5])
+for n, hash in ipairs(proposal.founders) do
+  local raw = redis.call('GET', 'gati:s:' .. hash)
+  if not raw then
+    return 'CONFLICT'
+  end
+  local v = cjson.decode(raw)
+  if
+    v.cell ~= expected[n].cell
+    or v.radius_km ~= expected[n].radius
+    or v.created_at ~= expected[n].created
+    or v.expires_at ~= expected[n].expires
+    or v.expires_at < minimum
+    or (v._pending_until or 0) > now
+    or (v._gathering_until or 0) > now
+  then
+    return 'CONFLICT'
+  end
+  table.insert(records, v)
+end
+proposal.ready_at = ready
+proposal.expires_at = expiry
+redis.call('SET', KEYS[4], proposal.id, 'PX', expiry - now)
+redis.call('SET', KEYS[1], cjson.encode(proposal), 'PX', expiry - now)
+redis.call('ZADD', KEYS[2], ready, proposal.id)
+if redis.call('PTTL', KEYS[2]) < expiry - now then
+  redis.call('PEXPIRE', KEYS[2], expiry - now)
+end
+for n, hash in ipairs(proposal.founders) do
+  local v = records[n]
+  v._pending = proposal.id
+  v._pending_until = expiry
+  redis.call('SET', 'gati:s:' .. hash, cjson.encode(v), 'KEEPTTL')
+  markCell(v.cell)
 end
 return cjson.encode(proposal)
 `)
@@ -93,35 +124,81 @@ func (s *Store) Reserve(ctx context.Context, id, configHash string, p matching.P
 
 var activate = newScript(`
 __CLOCK__
-local existing=redis.call('GET',KEYS[3]);if existing then return existing end
-local raw=redis.call('GET',KEYS[1]);if not raw then redis.call('ZREM',KEYS[2],ARGV[1]);return 'GONE' end
-local p=cjson.decode(raw);if now<p.ready_at then return 'WAIT' end
-local records={};local valid=now<p.expires_at and p.config_sha256==ARGV[4]
-local ends=now+tonumber(ARGV[3]);local minimum=now+tonumber(ARGV[2])
-for _,hash in ipairs(p.founders) do
- local value=redis.call('GET','gati:s:'..hash)
- if value then
-  local v=cjson.decode(value);table.insert(records,{hash=hash,value=v})
-  if v._pending~=p.id or v.expires_at<minimum or (v._gathering_until or 0)>now then valid=false end
-  if v.expires_at<ends then ends=v.expires_at end
- else valid=false end
+local existing = redis.call('GET', KEYS[3])
+if existing then
+  return existing
+end
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  redis.call('ZREM', KEYS[2], ARGV[1])
+  return 'GONE'
+end
+local p = cjson.decode(raw)
+if now < p.ready_at then
+  return 'WAIT'
+end
+local records = {}
+local valid = now < p.expires_at and p.config_sha256 == ARGV[4]
+local ends = now + tonumber(ARGV[3])
+local minimum = now + tonumber(ARGV[2])
+for _, hash in ipairs(p.founders) do
+  local value = redis.call('GET', 'gati:s:' .. hash)
+  if value then
+    local v = cjson.decode(value)
+    table.insert(records, { hash = hash, value = v })
+    if v._pending ~= p.id or v.expires_at < minimum or (v._gathering_until or 0) > now then
+      valid = false
+    end
+    if v.expires_at < ends then
+      ends = v.expires_at
+    end
+  else
+    valid = false
+  end
 end
 if not valid then
- for _,entry in ipairs(records) do
-  local v=entry.value;if v._pending==p.id then v._pending=nil;v._pending_until=nil;redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL');markCell(v.cell) end
- end
- redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);if redis.call('GET','gati:destination:'..p.intersection.id)==p.id then redis.call('DEL','gati:destination:'..p.intersection.id) end;return 'GONE'
+  for _, entry in ipairs(records) do
+    local v = entry.value
+    if v._pending == p.id then
+      v._pending = nil
+      v._pending_until = nil
+      redis.call('SET', 'gati:s:' .. entry.hash, cjson.encode(v), 'KEEPTTL')
+      markCell(v.cell)
+    end
+  end
+  redis.call('DEL', KEYS[1])
+  redis.call('ZREM', KEYS[2], ARGV[1])
+  if redis.call('GET', 'gati:destination:' .. p.intersection.id) == p.id then
+    redis.call('DEL', 'gati:destination:' .. p.intersection.id)
+  end
+  return 'GONE'
 end
-local g={id=p.id,intersection=p.intersection,activated_at=now,ends_at=ends,state='jemi_gati',config_sha256=p.config_sha256}
-redis.call('SET',KEYS[3],cjson.encode(g),'PX',ends-now)
-redis.call('SET','gati:destination:'..g.intersection.id,g.id,'PX',ends-now)
-redis.call('ZADD',KEYS[4],ends,g.id)
-if redis.call('PTTL',KEYS[4])<ends-now then redis.call('PEXPIRE',KEYS[4],ends-now) end
-for _,entry in ipairs(records) do
- local v=entry.value;v._pending=nil;v._pending_until=nil;v._gathering=g.id;v._gathering_until=ends;v.state='invited'
- redis.call('SET','gati:s:'..entry.hash,cjson.encode(v),'KEEPTTL');markCell(v.cell)
+local g = {
+  id = p.id,
+  intersection = p.intersection,
+  activated_at = now,
+  ends_at = ends,
+  state = 'jemi_gati',
+  config_sha256 = p.config_sha256,
+}
+redis.call('SET', KEYS[3], cjson.encode(g), 'PX', ends - now)
+redis.call('SET', 'gati:destination:' .. g.intersection.id, g.id, 'PX', ends - now)
+redis.call('ZADD', KEYS[4], ends, g.id)
+if redis.call('PTTL', KEYS[4]) < ends - now then
+  redis.call('PEXPIRE', KEYS[4], ends - now)
 end
-redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1])
+for _, entry in ipairs(records) do
+  local v = entry.value
+  v._pending = nil
+  v._pending_until = nil
+  v._gathering = g.id
+  v._gathering_until = ends
+  v.state = 'invited'
+  redis.call('SET', 'gati:s:' .. entry.hash, cjson.encode(v), 'KEEPTTL')
+  markCell(v.cell)
+end
+redis.call('DEL', KEYS[1])
+redis.call('ZREM', KEYS[2], ARGV[1])
 return cjson.encode(g)
 `)
 var ErrWait = errors.New("stability interval incomplete")
@@ -150,12 +227,14 @@ func (s *Store) DueReservations(ctx context.Context, now int64, batch int) ([]st
 // Deletion of the cursor forces a bounded retry rather than silently skipping
 // continuously present signals. No lock or participant cursor is persisted.
 var snapshotPage = newScript(`
-if ARGV[1]=='' then
- return redis.call('ZRANGEBYSCORE',KEYS[1],ARGV[2],'+inf','LIMIT',0,ARGV[3])
+if ARGV[1] == '' then
+  return redis.call('ZRANGEBYSCORE', KEYS[1], ARGV[2], '+inf', 'LIMIT', 0, ARGV[3])
 end
-local rank=redis.call('ZRANK',KEYS[1],ARGV[1])
-if not rank then return false end
-return redis.call('ZRANGE',KEYS[1],rank+1,rank+tonumber(ARGV[3]))
+local rank = redis.call('ZRANK', KEYS[1], ARGV[1])
+if not rank then
+  return false
+end
+return redis.call('ZRANGE', KEYS[1], rank + 1, rank + tonumber(ARGV[3]))
 `)
 var errSnapshotChanged = errors.New("snapshot cursor removed")
 
@@ -321,9 +400,24 @@ func (s *Store) PendingReservations(ctx context.Context, maximum int) ([]Reserva
 
 var readGathering = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
-local g=cjson.decode(raw);if g.ends_at<=now then return 'GONE' end
-if g.state=='jemi_ketu' and g._presence_threshold and redis.call('ZCOUNT','gati:arrivals:'..g.id,'('..now,'+inf')<g._presence_threshold then g.state='jemi_gati';raw=cjson.encode(g);redis.call('SET',KEYS[1],raw,'KEEPTTL');redis.call('DEL','gati:presence:'..g.id) end
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  return 'GONE'
+end
+local g = cjson.decode(raw)
+if g.ends_at <= now then
+  return 'GONE'
+end
+if
+  g.state == 'jemi_ketu'
+  and g._presence_threshold
+  and redis.call('ZCOUNT', 'gati:arrivals:' .. g.id, '(' .. now, '+inf') < g._presence_threshold
+then
+  g.state = 'jemi_gati'
+  raw = cjson.encode(g)
+  redis.call('SET', KEYS[1], raw, 'KEEPTTL')
+  redis.call('DEL', 'gati:presence:' .. g.id)
+end
 return raw
 `)
 
@@ -341,11 +435,22 @@ func (s *Store) GatheringByID(ctx context.Context, id string) (Gathering, error)
 }
 
 var lease = newScript(`
-local old=redis.call('GET',KEYS[1]);if old and old~=ARGV[1] then return 0 end
-redis.call('SET',KEYS[1],ARGV[1],'PX',ARGV[2]);return 1
+local old = redis.call('GET', KEYS[1])
+if old and old ~= ARGV[1] then
+  return 0
+end
+redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
+return 1
 `)
 
-var consumeDirty = newScript(`local v=redis.call('GET',KEYS[1]);redis.call('DEL',KEYS[1]);if v then return 1 end;return 0`)
+var consumeDirty = newScript(`
+local v = redis.call('GET', KEYS[1])
+redis.call('DEL', KEYS[1])
+if v then
+  return 1
+end
+return 0
+`)
 
 func (s *Store) ConsumeDirty(ctx context.Context) (bool, error) {
 	n, e := consumeDirty.Run(ctx, s.Client, []string{keyPrefix + "dirty"}).Int()

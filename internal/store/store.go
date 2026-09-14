@@ -71,22 +71,45 @@ func decode(raw string) (Signal, error) {
 
 const createLua = `
 __CLOCK__
-local old=redis.call('GET',KEYS[1])
+local old = redis.call('GET', KEYS[1])
 if old then
- local s=cjson.decode(old)
- if s.expires_at<=now then return 'GONE' end
- if s.cell==ARGV[1] and s.radius_km==tonumber(ARGV[2]) and s.availability_minutes==tonumber(ARGV[3]) then return old end
- return 'CONFLICT'
+  local s = cjson.decode(old)
+  if s.expires_at <= now then
+    return 'GONE'
+  end
+  if
+    s.cell == ARGV[1]
+    and s.radius_km == tonumber(ARGV[2])
+    and s.availability_minutes == tonumber(ARGV[3])
+  then
+    return old
+  end
+  return 'CONFLICT'
 end
-if redis.call('EXISTS',KEYS[2])==1 then return 'GONE' end
-if redis.call('ZCARD',KEYS[3])>=tonumber(ARGV[5]) then return 'CAPACITY' end
-local expiry=now+tonumber(ARGV[4])
-local s=cjson.encode({cell=ARGV[1],radius_km=tonumber(ARGV[2]),availability_minutes=tonumber(ARGV[3]),created_at=now,expires_at=expiry,state='gati'})
-redis.call('SET',KEYS[1],s,'PX',ARGV[4])
-redis.call('SET',KEYS[2],'used','PX',ARGV[4])
-redis.call('ZADD',KEYS[3],expiry,ARGV[6])
-redis.call('ZADD',KEYS[4],expiry,ARGV[7])
-for n=3,4 do if redis.call('PTTL',KEYS[n])<tonumber(ARGV[4]) then redis.call('PEXPIRE',KEYS[n],ARGV[4]) end end
+if redis.call('EXISTS', KEYS[2]) == 1 then
+  return 'GONE'
+end
+if redis.call('ZCARD', KEYS[3]) >= tonumber(ARGV[5]) then
+  return 'CAPACITY'
+end
+local expiry = now + tonumber(ARGV[4])
+local s = cjson.encode({
+  cell = ARGV[1],
+  radius_km = tonumber(ARGV[2]),
+  availability_minutes = tonumber(ARGV[3]),
+  created_at = now,
+  expires_at = expiry,
+  state = 'gati',
+})
+redis.call('SET', KEYS[1], s, 'PX', ARGV[4])
+redis.call('SET', KEYS[2], 'used', 'PX', ARGV[4])
+redis.call('ZADD', KEYS[3], expiry, ARGV[6])
+redis.call('ZADD', KEYS[4], expiry, ARGV[7])
+for n = 3, 4 do
+  if redis.call('PTTL', KEYS[n]) < tonumber(ARGV[4]) then
+    redis.call('PEXPIRE', KEYS[n], ARGV[4])
+  end
+end
 markCell(ARGV[1])
 return s
 `
@@ -110,11 +133,25 @@ func (s *Store) Create(ctx context.Context, hash, cell string, radius float64, m
 }
 
 var status = newScript(`
-local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  return 'GONE'
+end
 __CLOCK__
-local s=cjson.decode(raw)
-if s.expires_at<=now then return 'GONE' end
-if s.arrival_until and s.arrival_until<=now then removeArrival(s);s.arrival_until=nil;s._arrival_member=nil;if s.state=='here' then s.state='going' end;raw=cjson.encode(s);redis.call('SET',KEYS[1],raw,'KEEPTTL') end
+local s = cjson.decode(raw)
+if s.expires_at <= now then
+  return 'GONE'
+end
+if s.arrival_until and s.arrival_until <= now then
+  removeArrival(s)
+  s.arrival_until = nil
+  s._arrival_member = nil
+  if s.state == 'here' then
+    s.state = 'going'
+  end
+  raw = cjson.encode(s)
+  redis.call('SET', KEYS[1], raw, 'KEEPTTL')
+end
 return raw
 `)
 
@@ -130,15 +167,18 @@ func (s *Store) Status(ctx context.Context, hash string) (Signal, error) {
 }
 
 var cancel = newScript(`
-redis.call('DEL','gati:push:'..ARGV[1],'gati:push-gap:'..ARGV[1])
-redis.call('ZREM','gati:push-due',ARGV[1])
-local raw=redis.call('GET',KEYS[1]);if not raw then return 0 end
-local s=cjson.decode(raw)
+redis.call('DEL', 'gati:push:' .. ARGV[1], 'gati:push-gap:' .. ARGV[1])
+redis.call('ZREM', 'gati:push-due', ARGV[1])
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  return 0
+end
+local s = cjson.decode(raw)
 removeArrival(s)
-redis.call('DEL','gati:arrival-nonce:'..ARGV[1])
-redis.call('DEL',KEYS[1])
-redis.call('ZREM',KEYS[2],ARGV[1]..'|'..s.cell)
-redis.call('ZREM','gati:cell:'..s.cell,ARGV[1])
+redis.call('DEL', 'gati:arrival-nonce:' .. ARGV[1])
+redis.call('DEL', KEYS[1])
+redis.call('ZREM', KEYS[2], ARGV[1] .. '|' .. s.cell)
+redis.call('ZREM', 'gati:cell:' .. s.cell, ARGV[1])
 markCell(s.cell)
 return 1
 `)
@@ -152,16 +192,17 @@ func (s *Store) Cancel(ctx context.Context, hash string) error {
 
 var cleanup = newScript(`
 __CLOCK__
-local expired=redis.call('ZRANGEBYSCORE',KEYS[1],'-inf',now,'LIMIT',0,ARGV[1])
-for _,member in ipairs(expired) do
- local split=string.find(member,'|',1,true)
- if split then
-  local hash=string.sub(member,1,split-1);local cell=string.sub(member,split+1)
-  redis.call('ZREM','gati:cell:'..cell,hash)
-  redis.call('DEL','gati:push:'..hash,'gati:push-gap:'..hash)
-  redis.call('ZREM','gati:push-due',hash)
- end
- redis.call('ZREM',KEYS[1],member)
+local expired = redis.call('ZRANGEBYSCORE', KEYS[1], '-inf', now, 'LIMIT', 0, ARGV[1])
+for _, member in ipairs(expired) do
+  local split = string.find(member, '|', 1, true)
+  if split then
+    local hash = string.sub(member, 1, split - 1)
+    local cell = string.sub(member, split + 1)
+    redis.call('ZREM', 'gati:cell:' .. cell, hash)
+    redis.call('DEL', 'gati:push:' .. hash, 'gati:push-gap:' .. hash)
+    redis.call('ZREM', 'gati:push-due', hash)
+  end
+  redis.call('ZREM', KEYS[1], member)
 end
 return #expired
 `)
@@ -171,8 +212,13 @@ func (s *Store) Cleanup(ctx context.Context, batch int) (int, error) {
 }
 
 var limit = newScript(`
-local n=redis.call('INCR',KEYS[1]);if n==1 then redis.call('PEXPIRE',KEYS[1],ARGV[2]) end
-if n>tonumber(ARGV[1]) then return 0 end
+local n = redis.call('INCR', KEYS[1])
+if n == 1 then
+  redis.call('PEXPIRE', KEYS[1], ARGV[2])
+end
+if n > tonumber(ARGV[1]) then
+  return 0
+end
 return 1
 `)
 
@@ -180,16 +226,16 @@ return 1
 // races expiration at an epoch boundary and can reject a valid request with 503.
 // Use the store's real clock, independently of the functional simulation clock.
 const networkSecretLua = `
-local clock=redis.call('TIME')
-local now=tonumber(clock[1])*1000+math.floor(tonumber(clock[2])/1000)
-local epoch=math.floor(now/600000)
-local key=KEYS[1]..tostring(epoch)
-local secret=redis.call('GET',key)
+local clock = redis.call('TIME')
+local now = tonumber(clock[1]) * 1000 + math.floor(tonumber(clock[2]) / 1000)
+local epoch = math.floor(now / 600000)
+local key = KEYS[1] .. tostring(epoch)
+local secret = redis.call('GET', key)
 if not secret then
- secret=ARGV[1]
- redis.call('SET',key,secret,'PX',(epoch+1)*600000-now)
+  secret = ARGV[1]
+  redis.call('SET', key, secret, 'PX', (epoch + 1) * 600000 - now)
 end
-return {tostring(epoch),secret}
+return { tostring(epoch), secret }
 `
 
 var networkSecret = redis.NewScript(networkSecretLua)
@@ -225,16 +271,23 @@ func newScript(source string) *redis.Script {
 // below-threshold interval between worker ticks. No public counts are returned.
 const removeArrivalLua = `
 local function removeArrival(s)
- if not s._arrival_member or not s._gathering then return end
- __CLOCK__
- local index='gati:arrivals:'..s._gathering
- redis.call('ZREM',index,s._arrival_member)
- local key='gati:gathering:'..s._gathering;local raw=redis.call('GET',key)
- if raw then
-  local g=cjson.decode(raw)
-  if g._presence_threshold and redis.call('ZCOUNT',index,'('..now,'+inf')<g._presence_threshold then
-   g.state='jemi_gati';redis.call('SET',key,cjson.encode(g),'KEEPTTL');redis.call('DEL','gati:presence:'..g.id)
+  if not s._arrival_member or not s._gathering then
+    return
   end
- end
+  __CLOCK__
+  local index = 'gati:arrivals:' .. s._gathering
+  redis.call('ZREM', index, s._arrival_member)
+  local key = 'gati:gathering:' .. s._gathering
+  local raw = redis.call('GET', key)
+  if raw then
+    local g = cjson.decode(raw)
+    if
+      g._presence_threshold and redis.call('ZCOUNT', index, '(' .. now, '+inf') < g._presence_threshold
+    then
+      g.state = 'jemi_gati'
+      redis.call('SET', key, cjson.encode(g), 'KEEPTTL')
+      redis.call('DEL', 'gati:presence:' .. g.id)
+    end
+  end
 end
 `

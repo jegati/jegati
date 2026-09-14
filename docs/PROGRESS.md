@@ -1342,3 +1342,13 @@ journeys (`reports/local/cleanup2-controller`). Defaults, Albanian copy, markup,
 CSS, map options, one-second scheduling, poll jitter and cancellation/expiry
 ordering are preserved. Full delayed-publication verification is running; Lua
 formatting and a test-only planner replay remain to be committed separately.
+
+All 34 embedded Lua fragments were expanded into readable layout with StyLua's AST
+verification and a second 6,414-token comparison. Non-Lua Go source is byte-for-byte
+unchanged. Added docs/TRANSACTIONS.md with source, guard/lifecycle and test links.
+Real Valkey race tests passed before and after (`make test-store`); the fixed-clock
+simulation accepted 40/40 credentials, rejected zero, verified expiry for 34, and
+passed both real simulation-store and HTTP integration packages
+(`reports/local/cleanup2-simulation`). `make test` passed race, simulation-build,
+vet and TypeScript checks. These layout changes do not change atomic boundaries,
+configuration, real/simulation clocks or script assembly.

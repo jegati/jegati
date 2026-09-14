@@ -12,7 +12,13 @@ import (
 // store role. Virtual time is frozen between explicit advances. Real native TTLs
 // remain a maximum lifetime, independently of paused functional time.
 const keyPrefix = "gati-sim:"
-const clockLua = `local value=redis.call('GET','gati:simulation:clock'); if not value then return redis.error_reply('simulation clock absent') end; local now=tonumber(value)`
+const clockLua = `
+local value = redis.call('GET', 'gati:simulation:clock')
+if not value then
+  return redis.error_reply('simulation clock absent')
+end
+local now = tonumber(value)
+`
 const SimulationEpoch int64 = 1800000000000
 
 func (s *Store) initializeClock(ctx context.Context) error {
@@ -24,10 +30,12 @@ func (s *Store) initializeClock(ctx context.Context) error {
 
 var advanceClock = newScript(`
 __CLOCK__
-local delta=tonumber(ARGV[1])
-if delta<0 or delta>86400000 or now+delta>1800604800000 then return redis.error_reply('invalid advance') end
-now=now+delta
-redis.call('SET',KEYS[1],now,'KEEPTTL')
+local delta = tonumber(ARGV[1])
+if delta < 0 or delta > 86400000 or now + delta > 1800604800000 then
+  return redis.error_reply('invalid advance')
+end
+now = now + delta
+redis.call('SET', KEYS[1], now, 'KEEPTTL')
 return now
 `)
 

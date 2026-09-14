@@ -31,22 +31,38 @@ type PushPolicy struct {
 
 var registerPush = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[1]);if not raw then return 'GONE' end
-local s=cjson.decode(raw);if s.expires_at<=now then return 'GONE' end
-local proposed=cjson.decode(ARGV[1]);if proposed.revision~=(s._push_revision or 0) then return 'CONFLICT' end
-local old=redis.call('GET',KEYS[2]);local b=cjson.decode(ARGV[1])
-if old then
- local previous=cjson.decode(old)
- if previous.expires_at>now then
-  if previous.digest~=b.digest or previous.binding~=b.binding then return 'CONFLICT' end
-  return tostring(previous.expires_at)
- end
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  return 'GONE'
 end
-b.expires_at=math.min(s.expires_at,b.expires_at)
-if b.expires_at<=now then return 'GONE' end
-redis.call('SET',KEYS[2],cjson.encode(b),'PX',b.expires_at-now)
-redis.call('ZADD',KEYS[3],now,ARGV[2])
-if redis.call('PTTL',KEYS[3])<b.expires_at-now then redis.call('PEXPIRE',KEYS[3],b.expires_at-now) end
+local s = cjson.decode(raw)
+if s.expires_at <= now then
+  return 'GONE'
+end
+local proposed = cjson.decode(ARGV[1])
+if proposed.revision ~= (s._push_revision or 0) then
+  return 'CONFLICT'
+end
+local old = redis.call('GET', KEYS[2])
+local b = cjson.decode(ARGV[1])
+if old then
+  local previous = cjson.decode(old)
+  if previous.expires_at > now then
+    if previous.digest ~= b.digest or previous.binding ~= b.binding then
+      return 'CONFLICT'
+    end
+    return tostring(previous.expires_at)
+  end
+end
+b.expires_at = math.min(s.expires_at, b.expires_at)
+if b.expires_at <= now then
+  return 'GONE'
+end
+redis.call('SET', KEYS[2], cjson.encode(b), 'PX', b.expires_at - now)
+redis.call('ZADD', KEYS[3], now, ARGV[2])
+if redis.call('PTTL', KEYS[3]) < b.expires_at - now then
+  redis.call('PEXPIRE', KEYS[3], b.expires_at - now)
+end
 return tostring(b.expires_at)
 `)
 
@@ -67,9 +83,17 @@ func (s *Store) RegisterPush(ctx context.Context, hash string, binding PushBindi
 
 var dropPush = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[3])
-if raw then local s=cjson.decode(raw);if s.expires_at>now then s._push_revision=(s._push_revision or 0)+1;redis.call('SET',KEYS[3],cjson.encode(s),'KEEPTTL') end end
-redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);return 1
+local raw = redis.call('GET', KEYS[3])
+if raw then
+  local s = cjson.decode(raw)
+  if s.expires_at > now then
+    s._push_revision = (s._push_revision or 0) + 1
+    redis.call('SET', KEYS[3], cjson.encode(s), 'KEEPTTL')
+  end
+end
+redis.call('DEL', KEYS[1])
+redis.call('ZREM', KEYS[2], ARGV[1])
+return 1
 `)
 
 func (s *Store) DropPush(ctx context.Context, hash string) error {
@@ -91,54 +115,110 @@ func (s *Store) PushDue(ctx context.Context, maximum int) ([]string, error) {
 
 var claimPush = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[1]);local signal=redis.call('GET',KEYS[2])
+local raw = redis.call('GET', KEYS[1])
+local signal = redis.call('GET', KEYS[2])
 local function drop()
- redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[3],ARGV[1]);return ''
+  redis.call('DEL', KEYS[1])
+  redis.call('ZREM', KEYS[3], ARGV[1])
+  return ''
 end
-if not raw or not signal then return drop() end
-local b=cjson.decode(raw);local s=cjson.decode(signal)
-if b.expires_at<=now or s.expires_at<=now then return drop() end
+if not raw or not signal then
+  return drop()
+end
+local b = cjson.decode(raw)
+local s = cjson.decode(signal)
+if b.expires_at <= now or s.expires_at <= now then
+  return drop()
+end
 local function save(next)
- redis.call('SET',KEYS[1],cjson.encode(b),'KEEPTTL')
- redis.call('ZADD',KEYS[3],math.min(next,b.expires_at),ARGV[1])
+  redis.call('SET', KEYS[1], cjson.encode(b), 'KEEPTTL')
+  redis.call('ZADD', KEYS[3], math.min(next, b.expires_at), ARGV[1])
 end
-if (b.lease_until or 0)>now then save(b.lease_until);return '' end
-local current='';local deadline=b.expires_at
-if s._gathering and (s._gathering_until or 0)>now then
- local event=redis.call('GET','gati:gathering:'..s._gathering)
- if event then
-  local g=cjson.decode(event)
-  if g.ends_at>now and (s.state=='going' or s.state=='here' or (g.ends_at>=now+tonumber(ARGV[9]) and s.expires_at>=now+tonumber(ARGV[9]))) then
-   local state=g.state
-   if state=='jemi_ketu' and g._presence_threshold and redis.call('ZCOUNT','gati:arrivals:'..g.id,'('..now,'+inf')<g._presence_threshold then state='jemi_gati' end
-   current=g.id..':'..state;deadline=math.min(deadline,g.ends_at)
+if (b.lease_until or 0) > now then
+  save(b.lease_until)
+  return ''
+end
+local current = ''
+local deadline = b.expires_at
+if s._gathering and (s._gathering_until or 0) > now then
+  local event = redis.call('GET', 'gati:gathering:' .. s._gathering)
+  if event then
+    local g = cjson.decode(event)
+    if
+      g.ends_at > now
+      and (
+        s.state == 'going'
+        or s.state == 'here'
+        or (g.ends_at >= now + tonumber(ARGV[9]) and s.expires_at >= now + tonumber(ARGV[9]))
+      )
+    then
+      local state = g.state
+      if
+        state == 'jemi_ketu'
+        and g._presence_threshold
+        and redis.call('ZCOUNT', 'gati:arrivals:' .. g.id, '(' .. now, '+inf') < g._presence_threshold
+      then
+        state = 'jemi_gati'
+      end
+      current = g.id .. ':' .. state
+      deadline = math.min(deadline, g.ends_at)
+    end
   end
- end
 end
 -- Keep only the latest relevant state; never a transition history. This bounded
 -- reconciler can coalesce short-lived transitions between checks.
-if b.seen~=current then
- -- Do not start a short queue TTL while rate limiting forbids delivery. Re-read
- -- the latest live state when the gap opens; stable changes must not be lost.
- local gap=tonumber(redis.call('GET',KEYS[4]) or '0')
- if current~='' and gap>now then
-  b.pending=nil;b.claim=nil;b.lease_until=nil;save(math.min(gap,now+tonumber(ARGV[3])));return ''
- end
- b.seen=current;b.pending=nil;b.claim=nil;b.lease_until=nil
- if current~='' then b.pending=current;b.until_at=math.min(deadline,now+tonumber(ARGV[4]));b.attempts=0;b.retry_at=now end
+if b.seen ~= current then
+  -- Do not start a short queue TTL while rate limiting forbids delivery. Re-read
+  -- the latest live state when the gap opens; stable changes must not be lost.
+  local gap = tonumber(redis.call('GET', KEYS[4]) or '0')
+  if current ~= '' and gap > now then
+    b.pending = nil
+    b.claim = nil
+    b.lease_until = nil
+    save(math.min(gap, now + tonumber(ARGV[3])))
+    return ''
+  end
+  b.seen = current
+  b.pending = nil
+  b.claim = nil
+  b.lease_until = nil
+  if current ~= '' then
+    b.pending = current
+    b.until_at = math.min(deadline, now + tonumber(ARGV[4]))
+    b.attempts = 0
+    b.retry_at = now
+  end
 end
-if not b.pending or b.until_at<=now or (b.attempts or 0)>=tonumber(ARGV[8]) then
- b.pending=nil;save(now+tonumber(ARGV[3]));return ''
+if not b.pending or b.until_at <= now or (b.attempts or 0) >= tonumber(ARGV[8]) then
+  b.pending = nil
+  save(now + tonumber(ARGV[3]))
+  return ''
 end
-if (b.retry_at or 0)>now then save(b.retry_at);return '' end
-if b.attempts==0 then
- local gap=tonumber(redis.call('GET',KEYS[4]) or '0')
- if gap>now then save(math.min(gap,now+tonumber(ARGV[3])));return '' end
- redis.call('SET',KEYS[4],now+tonumber(ARGV[5]),'PX',s.expires_at-now)
+if (b.retry_at or 0) > now then
+  save(b.retry_at)
+  return ''
 end
-b.attempts=b.attempts+1;b.claim=ARGV[2];b.lease_until=now+tonumber(ARGV[7]);b.retry_at=now+tonumber(ARGV[6])*2^(b.attempts-1)
+if b.attempts == 0 then
+  local gap = tonumber(redis.call('GET', KEYS[4]) or '0')
+  if gap > now then
+    save(math.min(gap, now + tonumber(ARGV[3])))
+    return ''
+  end
+  redis.call('SET', KEYS[4], now + tonumber(ARGV[5]), 'PX', s.expires_at - now)
+end
+b.attempts = b.attempts + 1
+b.claim = ARGV[2]
+b.lease_until = now + tonumber(ARGV[7])
+b.retry_at = now + tonumber(ARGV[6]) * 2 ^ (b.attempts - 1)
 save(b.lease_until)
-return cjson.encode({binding=b.binding,digest=b.digest,ciphertext=b.ciphertext,expires_at=b.expires_at,claim=b.claim,["until"]=math.min(b.until_at,deadline)})
+return cjson.encode({
+  binding = b.binding,
+  digest = b.digest,
+  ciphertext = b.ciphertext,
+  expires_at = b.expires_at,
+  claim = b.claim,
+  ['until'] = math.min(b.until_at, deadline),
+})
 `)
 
 func (s *Store) ClaimPush(ctx context.Context, hash, claim string, p PushPolicy) (*PushJob, error) {
@@ -158,15 +238,37 @@ func (s *Store) ClaimPush(ctx context.Context, hash, claim string, p PushPolicy)
 
 var finishPush = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[1]);if not raw then return 0 end
-local b=cjson.decode(raw)
-if b.expires_at<=now then redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);return 0 end
-if b.claim~=ARGV[2] then return 0 end
-if ARGV[3]=='gone' then redis.call('DEL',KEYS[1]);redis.call('ZREM',KEYS[2],ARGV[1]);return 1 end
-b.claim=nil;b.lease_until=nil
-if ARGV[3]=='sent' then b.pending=nil end
-redis.call('SET',KEYS[1],cjson.encode(b),'KEEPTTL')
-redis.call('ZADD',KEYS[2],math.min(b.expires_at,math.max(now+tonumber(ARGV[4]),b.retry_at or 0)),ARGV[1]);return 1
+local raw = redis.call('GET', KEYS[1])
+if not raw then
+  return 0
+end
+local b = cjson.decode(raw)
+if b.expires_at <= now then
+  redis.call('DEL', KEYS[1])
+  redis.call('ZREM', KEYS[2], ARGV[1])
+  return 0
+end
+if b.claim ~= ARGV[2] then
+  return 0
+end
+if ARGV[3] == 'gone' then
+  redis.call('DEL', KEYS[1])
+  redis.call('ZREM', KEYS[2], ARGV[1])
+  return 1
+end
+b.claim = nil
+b.lease_until = nil
+if ARGV[3] == 'sent' then
+  b.pending = nil
+end
+redis.call('SET', KEYS[1], cjson.encode(b), 'KEEPTTL')
+redis.call(
+  'ZADD',
+  KEYS[2],
+  math.min(b.expires_at, math.max(now + tonumber(ARGV[4]), b.retry_at or 0)),
+  ARGV[1]
+)
+return 1
 `)
 
 // Acknowledgement cannot overwrite a replacement binding or another worker claim.
@@ -182,14 +284,24 @@ func (s *Store) FinishPush(ctx context.Context, hash, claim, outcome string, pol
 
 var pushStatus = newScript(`
 __CLOCK__
-local raw=redis.call('GET',KEYS[1]);local signal=redis.call('GET',KEYS[2])
-if not signal then return 'GONE' end
-local s=cjson.decode(signal);if s.expires_at<=now then return 'GONE' end
-local revision=s._push_revision or 0
-if not raw then return cjson.encode({revision=revision}) end
-local b=cjson.decode(raw)
-if b.expires_at<=now then return cjson.encode({revision=revision}) end
-return cjson.encode({binding=b.binding,expires_at=b.expires_at,revision=revision})
+local raw = redis.call('GET', KEYS[1])
+local signal = redis.call('GET', KEYS[2])
+if not signal then
+  return 'GONE'
+end
+local s = cjson.decode(signal)
+if s.expires_at <= now then
+  return 'GONE'
+end
+local revision = s._push_revision or 0
+if not raw then
+  return cjson.encode({ revision = revision })
+end
+local b = cjson.decode(raw)
+if b.expires_at <= now then
+  return cjson.encode({ revision = revision })
+end
+return cjson.encode({ binding = b.binding, expires_at = b.expires_at, revision = revision })
 `)
 
 func (s *Store) PushStatus(ctx context.Context, hash string) (PushBinding, error) {

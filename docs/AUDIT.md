@@ -32,6 +32,9 @@ hooks preserve push/preview cancellation before credentials are cleared and map/
 cleanup afterward. Startup-failure expiry still runs independently of successful
 initialization; cancellation remains available during other in-flight operations.
 
+The [transaction catalog](TRANSACTIONS.md) maps each embedded Lua transaction to
+its guards, lifecycle and integration tests, including shared fragments and clocks.
+
 For each flow, inspect authorization, the whole atomic transition, server deadlines,
 index cleanup, retries and every response. Storage TTL alone does not expire sorted
 set members, and the matching owner's private memory cache has a separate lifecycle.

@@ -129,11 +129,19 @@ func (s *Store) HasActivityEpoch(ctx context.Context, hash string, epoch int64) 
 
 var stageActivity = newScript(`
 __CLOCK__
-if redis.call('GET',KEYS[1])~=ARGV[1] then return 0 end
-local expires=tonumber(ARGV[3]);local release=tonumber(ARGV[4])
-if now>=release or expires<=release then return 0 end
-local result=redis.call('SET',KEYS[2],ARGV[2],'PX',expires-now,'NX')
-if result then return 1 end;return 0
+if redis.call('GET', KEYS[1]) ~= ARGV[1] then
+  return 0
+end
+local expires = tonumber(ARGV[3])
+local release = tonumber(ARGV[4])
+if now >= release or expires <= release then
+  return 0
+end
+local result = redis.call('SET', KEYS[2], ARGV[2], 'PX', expires - now, 'NX')
+if result then
+  return 1
+end
+return 0
 `)
 
 func (s *Store) StageActivity(ctx context.Context, owner string, c config.Config, r activity.Release, data []byte) (bool, error) {
@@ -153,14 +161,16 @@ func (s *Store) StageActivity(ctx context.Context, owner string, c config.Config
 
 var latestActivity = newScript(`
 __CLOCK__
-for _,key in ipairs(KEYS) do
- local raw=redis.call('GET',key)
- if raw then
-  local v=cjson.decode(raw)
-  if v.release_at<=now and v.expires_at>now then return {now,raw} end
- end
+for _, key in ipairs(KEYS) do
+  local raw = redis.call('GET', key)
+  if raw then
+    local v = cjson.decode(raw)
+    if v.release_at <= now and v.expires_at > now then
+      return { now, raw }
+    end
+  end
 end
-return {now,''}
+return { now, '' }
 `)
 
 // LatestActivity reads only bounded precomputed aggregate documents, never signals.

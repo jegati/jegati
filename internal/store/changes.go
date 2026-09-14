@@ -12,19 +12,21 @@ import (
 // The periodic full reconciliation must run at least as often as this lifetime.
 const dirtyCellLua = `
 local function markCell(cell)
- __CLOCK__
- local key='gati:dirty-cells'
- redis.call('ZREMRANGEBYSCORE',key,'-inf',now-10000)
- redis.call('ZADD',key,now,cell)
- redis.call('PEXPIRE',key,10000)
- redis.call('SET','gati:dirty','1','PX',10000)
+  __CLOCK__
+  local key = 'gati:dirty-cells'
+  redis.call('ZREMRANGEBYSCORE', key, '-inf', now - 10000)
+  redis.call('ZADD', key, now, cell)
+  redis.call('PEXPIRE', key, 10000)
+  redis.call('SET', 'gati:dirty', '1', 'PX', 10000)
 end
 `
 
 var takeCells = newScript(`
-if redis.call('ZCARD',KEYS[1])>tonumber(ARGV[1]) then return redis.error_reply('cell work bound exceeded') end
-local cells=redis.call('ZRANGE',KEYS[1],0,-1)
-redis.call('DEL',KEYS[1])
+if redis.call('ZCARD', KEYS[1]) > tonumber(ARGV[1]) then
+  return redis.error_reply('cell work bound exceeded')
+end
+local cells = redis.call('ZRANGE', KEYS[1], 0, -1)
+redis.call('DEL', KEYS[1])
 return cells
 `)
 
@@ -53,9 +55,15 @@ func (s *Store) CellSnapshot(ctx context.Context, grid geography.Grid, cell stri
 }
 
 var matchingLeaseState = newScript(`
-local old=redis.call('GET',KEYS[1]);if old and old~=ARGV[1] then return 0 end
-redis.call('SET',KEYS[1],ARGV[1],'PX',ARGV[2])
-if old then return 1 end;return 2
+local old = redis.call('GET', KEYS[1])
+if old and old ~= ARGV[1] then
+  return 0
+end
+redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
+if old then
+  return 1
+end
+return 2
 `)
 
 func (s *Store) MatchingLeaseState(ctx context.Context, owner string, ttlMS int64) (won, fresh bool, err error) {
