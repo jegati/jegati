@@ -14,6 +14,9 @@ benchmarks nor two API replicas certify 1M capacity. Earlier pilot hostname/rele
 references below mean the selected alpha deployment target.
 See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
 
+See [the jamgati.com preparation package](ALPHA_DEPLOYMENT.md) for the reviewed
+alpha target, local hostname rehearsal and operator service templates.
+
 ## Selected pilot target — 2026-09-14
 
 The canonical pilot hostname is **jamgati.com**; the OVHcloud VPS is awaiting
@@ -226,8 +229,8 @@ python3 scripts/monitor.py --container gati-production-api-1 --socket /run/ops/g
 Use a private RAM-backed output directory in production; one bounded file per
 process, no event logs. Alert on file freshness, unavailable monitors, errors,
 worker/deadline lag and sustained released latency/failure buckets. See
-[monitoring semantics](MONITORING.md). Notification routing needs an operator-chosen
-private destination; the collector currently records alerts locally. Measure host
+[monitoring semantics](MONITORING.md). The optional tested HTTPS alert sender and service templates are described in
+[monitoring](MONITORING.md); actual routing still needs a privately selected endpoint. Measure host
 memory pressure without reading participant memory; do not enable request logging
 to diagnose overload. Use voluntary human feedback for usability, not tracking.
 

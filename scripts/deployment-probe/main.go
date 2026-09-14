@@ -16,6 +16,7 @@ import (
 func main() {
 	check := flag.String("check", "", "one anonymous GET instead of serving")
 	want := flag.Int("want", 403, "expected check status")
+	host := flag.String("host-header", "", "configured release hostname for a local rehearsal")
 	flag.Parse()
 	if *check != "" {
 		client := http.Client{Timeout: 3 * time.Second, Transport: &http.Transport{}}
@@ -33,6 +34,9 @@ func main() {
 	proxy := &httputil.ReverseProxy{Rewrite: func(p *httputil.ProxyRequest) {
 		p.SetURL(target)
 		p.Out.Host = p.In.Host
+		if *host != "" {
+			p.Out.Host = *host
+		}
 		ip, _, _ := net.SplitHostPort(p.In.RemoteAddr)
 		// Only this disposable, loopback-published lab accepts synthetic networks.
 		// It is not an origin-authentication mechanism or a production connector.

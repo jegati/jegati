@@ -26,6 +26,12 @@ def rehearse(source, out):
         shutil.copytree(source, a)
         shutil.copytree(source, b, copy_function=os.link)
         manifest = verify_files(a)
+        # deployment.env is covered by the verified release manifest. Exercise the
+        # actual hostname through the local test connector without DNS or a tunnel.
+        host = dict(
+            line.split("=", 1)
+            for line in (a / "deployment.env").read_text().splitlines()
+        )["GATI_PUBLIC_HOST"]
 
         def command(*args, **kw):
             return subprocess.check_output(args, stderr=log, **kw).decode().strip()
@@ -86,6 +92,8 @@ def rehearse(source, out):
                 "--entrypoint",
                 "/probe",
                 manifest["images"]["api"]["reference"],
+                "-host-header",
+                host,
             )
             port = int(command("docker", "port", connector, "8090").rsplit(":", 1)[1])
             base = f"http://localhost:{port}"
@@ -158,6 +166,7 @@ def rehearse(source, out):
             report = {
                 "synthetic": True,
                 "source_revision": manifest["source_revision"],
+                "configured_hostname": host,
                 "checks": [
                     "immutable release verification and actual combined-role activation",
                     "unexpected live network attachment rejected, restored topology accepted",

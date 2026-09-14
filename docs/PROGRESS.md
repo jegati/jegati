@@ -1726,3 +1726,18 @@ Next: launch the full eight-hour run from this committed tooling, with a tempora
 process-owned sleep inhibitor, and prepare/audit/rehearse the jamgati.com package.
 Only an eventual passed report is overnight evidence. Alert channel choice remains
 pending; no remote push, DNS modification or public deployment is authorized here.
+
+
+## jamgati.com release preparation — 2026-09-14
+
+Added the alpha deployment checklist, linked from README/deployment docs, covering
+immutable artifacts, conservative edge caching, host checks, monitoring and actual
+provider verification still needed. The local release rehearsal now forwards the
+checksummed configured hostname through its disposable connector, so jamgati.com
+routing can be tested without DNS, an external tunnel or changing the production API.
+
+Validation before artifact export: all 40 Python guard tests passed; test connector
+compiles. The actual hostname rehearsal and exact new-image audit are next and are
+not yet credited. Full overnight runner was launched separately from source dcfda14
+at reports/local/alpha-lifecycle-overnight with a temporary sleep inhibitor; its
+final status remains pending. No external alerts or remote operations performed.
