@@ -28,7 +28,7 @@ jobs:
       - run: node scripts/check-population.mjs reports/local/tirana-success/report.json --success
       - run: make audit-local COMPOSE='docker compose'
       - run: docker compose build
-      - run: make secrets
+      - run: make push-keys
       - run: docker compose up -d --wait --wait-timeout 90
       - run: |
           curl --fail http://127.0.0.1:8080/healthz

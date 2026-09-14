@@ -23,6 +23,13 @@ link and cold-run timeout. Deployment now requires a successful verification for
 the exact SHA and checks SSH, architecture, tools, Docker, memory/disk, swap/resume,
 directory access and fixed subnet conflicts before expensive release work.
 
+The following runner passed `audit-local` and production image construction, then
+exposed that the clean Compose check generated store secrets but not the VAPID key
+required after push became default-on. CI now uses the existing idempotent
+`make push-keys` target before starting Compose, generating both ignored credential
+sets without printing them. Production deployment already generated and retained
+its VAPID key conditionally and was not affected by this CI-only omission.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with
