@@ -1,4 +1,4 @@
-name: scaffold checks
+name: local verification
 on: [push, pull_request]
 permissions:
   contents: read
@@ -19,14 +19,12 @@ jobs:
       - run: make security-check
       - run: make test-runtimes
       - run: make test-monitor
-      - run: python3 -m unittest discover -s scripts -p 'test_*.py'
       - run: make test-fuzz
-      - run: make test-store
       - run: make simulate
       - run: make simulate SCENARIO=tirana-sybil
       - run: make simulate-population SCENARIO=tirana-success OUTPUT=reports/local/tirana-success
       - run: node scripts/check-population.mjs reports/local/tirana-success/report.json --success
-      - run: make verify-local COMPOSE='docker compose'
+      - run: make audit-local COMPOSE='docker compose'
       - run: docker compose build
       - run: make secrets
       - run: docker compose up -d --wait --wait-timeout 90

@@ -2,22 +2,22 @@
 
 Update 2026-09-14: matching now retains a private per-cell working set only in the active owner, discards it on error/ownership changes, and rechecks deadlines before use. Ten-second cell change markers contain no participant IDs. [Decision 0011](decisions/0011-incremental-matching-working-set.md) documents the additional live-memory exposure and retention/reconciliation controls; no public count or arrival guarantee changes.
 
-Status: willingness, private activation/arrival, limited network/write admission
-and service ACLs are implemented; public aggregate publication remains planned. See STORAGE.md and API.md. See the
-[scaffold report](reports/02-scaffold.md) for config validation, API headers and
-simulation-profile rejection tests. Keep this document updated as milestones land. The [plan's data inventory](DEVELOPMENT_PLAN.md#6-data-inventory-and-expiry-contract)
-defines proposed storage/access/lifetimes; avoid maintaining a conflicting copy.
+Status: willingness, private matching/admission/arrival, delayed aggregate releases,
+optional session push, limited anonymous admission controls, private monitoring and
+production ingress/release tooling are implemented locally. [AUDIT](AUDIT.md) maps
+these controls to source and tests. See [PROGRESS](PROGRESS.md) for current evidence;
+older milestone sections below record the implementation as it stood at that time.
+Known inference, spoofed presence/Sybils and privileged-operator risks remain.
 
 ## Assets and trust boundaries
 
-The proposed deployment boundary and its unimplemented controls are detailed in
-[DEPLOYMENT_PREPARATION.md](DEPLOYMENT_PREPARATION.md). In particular, the current
-API uses the direct peer IP for network limits: a trusted forwarding boundary must
-be implemented and tested before using a shared production proxy. An HTTPS edge
-provider can inspect temporary authorization capabilities and coarse-cell request
-contents; provider-side retention is outside application TTL guarantees. Tunnel
-origin isolation does not remove that provider visibility. These are planning
-findings, not evidence that a Cloudflare deployment is configured or audited.
+The production boundary is described in [DEPLOYMENT](DEPLOYMENT.md) and
+[decision 0012](decisions/0012-production-boundaries.md). Direct requests use the
+socket peer for network limits; explicit trusted-proxy validation is implemented
+and tested locally. Actual Cloudflare/host configuration remains unverified. An
+HTTPS edge provider can inspect temporary authorization capabilities and coarse
+request contents; provider retention is outside application TTL guarantees. Tunnel
+origin isolation does not remove that visibility.
 
 Protect coarse participation, session capabilities, transient admission/arrival
 links, notification subscriptions and service integrity. Exact participant
@@ -72,8 +72,9 @@ changes; it does not reduce the already documented private-invitation inference.
 The client requests location only after an explicit one-shot action, quantizes it
 using the published grid, and sends only a cell ID. Manual map choice was removed
 in schema 5; the current client requires device location.
-No runtime map/font provider, analytics, cookies, localStorage or service worker
-is used. Same-origin sessionStorage contains one capability, coarse request,
+No external map/font provider, analytics or cookies are used. The initial
+willingness flow uses sessionStorage; later optional push adds an expiring browser
+resume record and service worker, documented in the push section below. Same-origin sessionStorage contains one capability, coarse request,
 confirmation flag and deadline; retries reuse it without renewal, cancellation
 success/expiry removes it, and reopening rejects expired state before sending it.
 An unavailable sessionStorage falls back to tab memory; closing that tab can lose

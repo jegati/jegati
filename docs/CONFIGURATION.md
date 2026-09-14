@@ -16,6 +16,22 @@ Willingness, matching, admission, arrival and device-fix quality settings are ac
 Public activity and optional session push settings are active. Daily summaries and
 area follows/alerts remain unfinished; fields alone do not establish a feature.
 
+These fields are reserved and have no runtime behavior today. They remain in
+schema 8 for compatibility; their presence and validation do not implement the
+associated requirement:
+
+| Reserved setting | Current limitation |
+| --- | --- |
+| `matching.intersection_index_batch_size` | The current static reachability index does not use this batch size. |
+| `public_activity.daily_summary_retention_days` | No daily-summary producer or historical API. |
+| `notifications.nearby_gati_count` / `nearby_arrival_count` | No area-alert producer; these do not set private activation/presence thresholds or session-push triggers. |
+| `notifications.nearby_radius_km` | No nearby-area alert subscription/filter. |
+| `notifications.area_follow_max_hours` | No geographic follow subscription. |
+
+Active threshold/timing consumers and bounds are documented in
+[MATCHING_PARAMETERS](MATCHING_PARAMETERS.md). Removing reserved fields would be a
+separate versioned schema decision; this clarification changes no effective value.
+
 The public representation uses deterministic JSON field order and a SHA-256 hash
 of those bytes. YAML comments/formatting do not change the hash. All consumers can
 inspect the effective settings and schema version. Changes require restart. Gatherings pin their original configuration hash and

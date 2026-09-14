@@ -41,8 +41,9 @@ cancellation returns 204. Invalid credentials: 401. Cross-origin browser request
 403. Limits: 429 with Retry-After. Missing/unavailable store or admission capacity:
 503. There is no GET collection endpoint, anonymous count query or admin route.
 
-Forwarded network headers are not trusted. Vite proxies use the socket peer's shared
-limit; configured proxy trust is a later deployment concern. The JSON media type,
+Direct requests ignore forwarded network headers. Vite proxies use the socket
+peer's shared limit. Production supports explicitly configured trusted proxies
+with validated forwarding headers; actual host/edge setup remains a deployment gate. The JSON media type,
 explicit bearer capability and same-host Origin check prevent ambient-cookie CSRF.
 This is not strong human/Sybil verification.
 

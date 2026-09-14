@@ -7,10 +7,6 @@ CONFIG ?= config/gati.yaml
 COMPOSE ?= docker-compose
 RUFF ?= .runtime/format-tools/bin/ruff
 
-.PHONY: format-python-check
-format-python-check:
-	$(RUFF) format --check
-
 .PHONY: bootstrap doctor deps test build config-check config-show config-check-simulation dev dev-native down compose-check verify-local
 bootstrap:
 	bash scripts/bootstrap.sh
@@ -151,3 +147,15 @@ test-runtimes:
 	python3 scripts/build-runtimes.py --test --output "$(or $(OUTPUT),reports/local/runtime-check-$(shell date -u +%Y%m%dT%H%M%S))"
 audit-images:
 	python3 scripts/audit-images.py --release "$(RELEASE)" --output "$(or $(OUTPUT),reports/local/image-audit-$(shell date -u +%Y%m%dT%H%M%S))"
+
+# Audit entry points stay sequential: their labs/builds may share local outputs.
+.PHONY: audit-local audit-journeys format-python-check
+audit-local: verify-local
+	python3 -m unittest discover -s scripts -p 'test_*.py'
+	$(MAKE) test-store
+audit-journeys:
+	$(MAKE) test-browser
+	$(MAKE) test-full-journey
+	$(MAKE) test-deployment
+format-python-check:
+	$(RUFF) format --check

@@ -18,7 +18,7 @@ matching:
   maximum_debounce_seconds: 2
   reconciliation_seconds: 10
   minimum_remaining_minutes: 15
-  intersection_index_batch_size: 500
+  intersection_index_batch_size: 500 # Reserved: current static reachability index does not batch.
   candidate_batch_size: 100
   destination_rule: nearest_eligible_crossroad_to_coarse_group_center
   prefer_open_gatherings: true
@@ -39,7 +39,7 @@ public_activity:
   release_seconds: 300
   delay_epochs: 1
   snapshot_retention_minutes: 15
-  daily_summary_retention_days: 30
+  daily_summary_retention_days: 30 # Reserved: daily summaries are not implemented.
 notifications:
   push_enabled: false
   push_contact: "https://localhost"
@@ -50,6 +50,7 @@ notifications:
   push_timeout_seconds: 5
   push_max_attempts: 3
   push_retry_seconds: 10
+  # Reserved for area alerts; these do not control current invitation/session push.
   nearby_gati_count: 50
   nearby_arrival_count: 50
   nearby_radius_km: 5
@@ -57,7 +58,7 @@ notifications:
   push_min_interval_seconds: 300
   push_max_per_hour: 6
   queue_ttl_seconds: 300
-  area_follow_max_hours: 24
+  area_follow_max_hours: 24 # Reserved: area follows are not implemented.
 limits:
   arrival_requests_per_signal_window: 20
   max_declines_per_signal: 32

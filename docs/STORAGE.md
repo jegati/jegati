@@ -1,4 +1,4 @@
-# Ephemeral storage schema — willingness (schema 1)
+# Ephemeral storage schema and lifecycles
 
 The active matching owner also holds a private per-cell working set in process memory. It reconciles within ten seconds, removes expired references on deadline wakeups, and discards the cache on errors, lease changes or shutdown. It is not an HTTP/admin view or authoritative membership store. See [decision 0011](decisions/0011-incremental-matching-working-set.md). Updated deployments must regenerate the restricted ACL and recreate the store with it: MGET, ZRANGE, ZRANK and ZREMRANGEBYSCORE are now required within the private namespace.
 
@@ -23,11 +23,11 @@ deadline. A used capability cannot mutate its initial area/radius/duration or
 resurrect cancellation before its deadline. After expiry, the client must generate
 a fresh random capability; no permanent registry tracks reuse across sessions.
 
-The API currently handles index cleanup on a configured reconciliation ticker;
-multiple replicas can call the idempotent bounded cleanup script. At most ten
+The combined process or dedicated worker handles index cleanup on a configured
+reconciliation ticker; API-only replicas do not run that ticker. The bounded
+cleanup script is idempotent. At most ten
 configured batches run per tick. Under backlog, logical expiration remains immediate
-but index-removal latency is a benchmark concern. The later dedicated worker will
-own matching/publication. Do not claim bounded physical deletion under arbitrary DoS.
+but index-removal latency is a benchmark concern. The combined/dedicated worker also runs matching and publication. Do not claim bounded physical deletion under arbitrary DoS.
 
 Network keys use the socket peer (IPv4 address / IPv6 /56 prefix); untrusted forwarded
 headers are ignored. A Vite proxy therefore shares one limiter identity locally.
@@ -67,11 +67,11 @@ generated ACL credentials. Their frozen clock affects functional deadlines only;
 real native TTLs still bound the disposable store. See SIMULATION.md. Production
 creation retries now explicitly check stored deadlines as well as native TTL.
 
-## Matching transaction groundwork (milestone 07, not yet scheduled)
+## Matching transactions
 
 Signals can contain private `_pending`, `_pending_until`, `_gathering`,
-`_gathering_until` and `_declined` bookkeeping. The own-session API removes these
-fields; the upcoming invitation view will expose only the selected gathering.
+`_gathering_until` and `_declined` bookkeeping. Explicit HTTP response allowlists
+exclude these fields; the private invitation view exposes the selected gathering.
 `pending:<id>` holds a bounded founding hash list and public intersection while the
 stability timer runs; its TTL covers stability plus bounded recovery. The `pending`
 sorted index uses ready-at scores and a TTL no longer than its latest reservation.

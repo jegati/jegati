@@ -345,11 +345,6 @@ local old=redis.call('GET',KEYS[1]);if old and old~=ARGV[1] then return 0 end
 redis.call('SET',KEYS[1],ARGV[1],'PX',ARGV[2]);return 1
 `)
 
-func (s *Store) MatchingLease(ctx context.Context, owner string, ttlMS int64) (bool, error) {
-	won, _, err := s.MatchingLeaseState(ctx, owner, ttlMS)
-	return won, err
-}
-
 var consumeDirty = newScript(`local v=redis.call('GET',KEYS[1]);redis.call('DEL',KEYS[1]);if v then return 1 end;return 0`)
 
 func (s *Store) ConsumeDirty(ctx context.Context) (bool, error) {

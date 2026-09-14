@@ -7,11 +7,11 @@ The current deployment/scaling proposal is in
 incremental matching, worker roles, trusted proxies, edge privacy and release gates.
 This supplements the original milestone order; PROGRESS.md remains the evidence index.
 
-The next implementation slice is detailed in
+The implemented activity slice is detailed in
 [ACTIVITY_IMPLEMENTATION_PLAN.md](ACTIVITY_IMPLEMENTATION_PLAN.md): the four requested
 nearby-statistics, invitation, arrival-statistics and citywide-map journeys. It
 specifies the public release contract, notification lifecycle, commit sequence and
-acceptance gates. It is proposed work, not completion evidence.
+acceptance gates. Use PROGRESS.md for actual completion evidence.
 
 
 Status: architecture and milestone plan. Implementation has started; consult PROGRESS.md for completed functionality and validation. This document describes intended behavior, not evidence that every protection already exists.

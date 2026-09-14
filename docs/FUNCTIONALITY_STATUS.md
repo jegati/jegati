@@ -1,6 +1,6 @@
 # Functionality and test coverage
 
-Reviewed 2026-09-13 against REQUIREMENTS.md, the current API routes/client, configuration,
+Current summary reconciled 2026-09-14 against REQUIREMENTS.md, the current API routes/client, configuration,
 test sources and locally executed evidence. Optional future availability is excluded.
 “Tested” means the checks below cover the stated behavior; it does not certify all
 security properties or a public deployment. A configured field alone is not a feature.
@@ -14,7 +14,7 @@ Implementation order and remaining work are in
 | --- | --- | --- | --- |
 | 1. First visit → JAM GATI → nearby willingness count | Implemented locally | Device-only willingness, cancellation/expiry and a nearby published-area bucket. Real-store capture/API tests plus browser presentation with fixed public fixtures. | Public figures describe a delayed observation, not immediate occupancy. Below-minimum values remain unavailable, never zero. |
 | 2. Nearby threshold → invitation → accept/decline | Partial | Continuous private activation, foreground JEMI GATI, PO, PO SHKOJ / JO TANI; browser and fixed-clock API tests. | Optional background push/outbox is implemented and tested with fake transport/browser delivery; real provider/device verification and follows remain. JO TANI preserves willingness. |
-| 3. Going → location-checked JAM KËTU → approximate going/arrival statistics | Implemented locally | Real API/browser arrival, nonce retry/retraction and expiry; same published going/here cards before/after arrival. Real fixed-clock publisher tests verify public suppression independently of private JEMI KËTU. | Presentation tests use fixed public fixtures alongside real arrival tests. No live-device presence proof; fresh claims last at most 15 minutes. Full browser-to-real-publisher test under the normal 5–10 minute delay remains a later integration extension. |
+| 3. Going → location-checked JAM KËTU → approximate going/arrival statistics | Implemented locally | Real API/browser arrival, nonce retry/retraction and expiry; same published going/here cards before/after arrival. Real fixed-clock publisher tests verify public suppression independently of private JEMI KËTU. | Presentation tests use fixed public fixtures alongside real arrival tests. No live-device presence proof; fresh claims last at most 15 minutes. The normal-clock real-publisher browser journey is implemented; publication may approach 15 minutes from the button press. See AUTOMATED_TESTING for its scope. |
 | 4. Tirana activity map | Implemented locally | Always-visible first-party city map; willingness polygons and gathering entries in the same public cells; statistics/list, explicit public-map join and capability-preserving retry. | Exact crossroads appear only in private invitations/admission and explicit eligible private previews (decision 0008). No daily-history summaries yet. Population discovery still uses its existing synthetic scheduling; it does not yet consume the new map API. |
 
 Evidence: [publication policy](../internal/activity/release_test.go),
@@ -54,14 +54,14 @@ anonymity, a 100k benchmark, or a production deployment certification.
 | Architectural privacy | Partial; known unmet requirement | Coarse inputs, temporary hashes, TTL checks, private nonpersistent store and no individual public views have evidence. A prior-config colluding-input probe reconstructs a target cell. No complete cross-surface/differencing or privileged-operator protection; the new 100 m default is not an anonymity proof. |
 | Abuse resistance | Partial | Request/body/create/global/arrival limits, replay controls, atomic transitions and rate-secret rollover regression exist. Distributed Sybils, fabricated device claims, effective anomaly detection and upstream/edge DoS protection remain unresolved. Shared-network exclusions are measured, not solved. |
 | Independent arrivals / accurate physical presence | Unmet as a guarantee | One credential is not one human, and client location can be spoofed. Existing arrival checks establish bounded accepted coarse claims only. |
-| 100k+ capacity and spikes | Unverified | No 100k real-time benchmark, reference capacity result or complete worker failover/overload tests. 3,000-person accelerated simulations do not establish this. |
-| Simple local maintenance | Partial | Pinned toolchain, Compose, ephemeral-store settings, health endpoint and local checks exist. Full operational monitoring, production deployment/rollback, host hardening and nonparticipant backup/restore evidence remain later work. |
+| 100k+ capacity and spikes | Measured locally; host capacity unverified | Real-time 100k mixed-load/component measurements, monitored recovery and pressure tests exist (reports/scaling-2026-09-14.md). They do not establish VPS/edge capacity or 1M-user support. |
+| Simple local maintenance | Partial | Pinned toolchain, Compose, ephemeral-store settings, health endpoint and local checks exist. Bounded private monitoring and local production/rollback rehearsals are implemented. Actual host hardening, operator recovery practice and provider controls remain deployment work. |
 | Open-source auditability | Partial | AGPL source, schema, infrastructure, tests, threat/data-flow docs, config/map hashes and reviewed reports exist. Independent security/privacy audit has not run. |
-| Actual deployment verification | Missing | No published production release/deployment, signed release/SBOM/independent build comparison or privileged host verification. A config hash is not remote attestation. |
+| Actual deployment verification | Implemented locally; remote/independent checks remain | Exact-release image audits/SBOMs, same-host clean rebuilds, served-asset/runtime checks and compatible rollback have local evidence. No public deployment, independent attestation or actual provider/host verification. |
 | PWA packaging/offline installation | Partial | First-party manifest/icon/push worker exist. No offline response cache; real-device installation and push interoperability remain unverified. Native apps are outside the MVP. |
 | All configurable knobs affect behavior | Partial | Matching/arrival/device settings are active. Public snapshots are active; push delivery settings are active; area alerts/follows and daily summaries are pending, and matching.intersection_index_batch_size is validated but unused. See MATCHING_PARAMETERS.md. |
 
-## Validation refreshed for the 100 m default
+## Historical validation: introduction of the 100 m default
 
 - `make config-check`; simulation-build validation of the population profile.
 - `make verify-local`: unit/race and simulation-tag tests, vet, TypeScript, builds,

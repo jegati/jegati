@@ -8,10 +8,12 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 
 | Command | Scope and approximate local duration |
 | --- | --- |
+| `make audit-local` | Native/build/config/smoke checks, Python guard suite and real-store integrations; recommended audit starting point |
+| `make audit-journeys` | Sequential Chromium suite, normal-clock full journey and two-API production-image rehearsal; potentially 20+ minutes |
 | `make verify-local` | Go race/simulation/vet, frontend type/build, configuration and smoke checks; minutes |
 | `make test-store` | Restricted real-store behavior, state model, rollover, push outage/fanout; seconds |
 | `make test-monitor` | Private socket, suppression, retention, concurrency and collector checks |
-| `python3 -m unittest discover -s scripts -p 'test_*.py'` | Collector and synthetic load evidence rejection checks |
+| `python3 -m unittest discover -s scripts -p 'test_*.py'` | Release/runtime guards, image audit, collector and synthetic load evidence rejection checks |
 | `make test-fuzz` | Five native fuzz targets, including strict request round trips, 30 seconds each by default |
 | `make test-browser` | Chromium journeys, optional push fixtures, accessibility and resilience; about one minute |
 | `make test-browser-matrix` | Core, accessibility and resilience in Firefox then WebKit; separate stores, a few minutes |
@@ -99,6 +101,6 @@ work remains for overnight realistic lifetimes, gradual production-sized pressur
 traffic, mass late admission and synchronized API expiry at scale, 10k cached public
 reads/s, per-gathering matching/expiry latency, a separate 4-vCPU/8-GB host with remote
 generator, actual edge/network DoS protection, independent human audit, real devices,
-volunteer usability, public-map pedestrian suitability, deployment/rollback and
+volunteer usability, public-map pedestrian suitability, actual-host deployment/rollback and
 remote served-artifact verification. Clean builds on this PC demonstrate local byte
 reproducibility, not another operator's honesty. No public deployment is performed.

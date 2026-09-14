@@ -1,92 +1,69 @@
 # Development progress and handoff
 
-Updated: 2026-09-13. Status: milestones 02–08 implemented; nearest-crossroad/device-only correction implemented and validated. The 3,000-person response simulation suite is complete. Milestone 09 now has the current activity publisher/API/cards/cell map; daily history remains. Decision 0007 accepts documented inference for implementation.
+Updated: 2026-09-14. Local implementation includes temporary willingness, continuous
+crossroad matching, late admission, arrivals, delayed cell-only statistics/map,
+optional push, private monitoring, measured 100k load and deployment/release tooling.
+No public deployment or independent audit has occurred. Read this summary first;
+entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
-The user resumed implementation after documentation preparation. Installing needed
-tools, implementing/testing milestones and making incremental local commits are
-authorized. Docker access is now available; continue through the plan. No remote Git push or public deployment
-is authorized, and GitHub authentication/write access remains unverified.
+The user authorized auditability cleanup, tests and incremental local commits while
+OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
+OVHcloud + Cloudflare Free. Exact host sizing/OS, SSH, zone activation and private
+reporting/alert channels remain unverified. Preserve commands.txt. Do not request
+provider/identity decisions again; no remote Git push is authorized.
 
-## Actual repository state
+## Current implementation and evidence
 
-- Product requirements, plan, agent instructions and initial threat/decision records.
-- Checksum-pinned user-local bootstrap for Go 1.27.1, Node 24.21.0/npm 11.19.0 and
-  Compose 5.5.1. Source `scripts/env.sh` or use Make to select installed tools.
-- Typed YAML configuration, production/simulation validation, canonical JSON/hash,
-  Go config/health API, Albanian client preparation screen and native HTTP smoke.
-- AGPL-3.0-or-later LICENSE and contributor/security/third-party guidance.
-- Pinned Dockerfiles/development Compose and CI definition; container runtime checks passed; remote CI has not run. The API connects to private Valkey with a restricted role.
-- Fixed coarse Tirana grid, public map import/provenance and static intersection reachability index (6,491 road junctions).
-- Expiring willingness APIs, replay tombstones, bounded indexes, rate limits and restricted ephemeral Valkey roles.
-- Albanian willingness UI with first-party roads, required one-shot device location, expiring client capability and cancellation.
-- Continuous activation, late admission, going/decline and temporary arrivals are implemented.
-  Delayed public cell maps and willingness/going/here statistics are implemented.
-  Optional temporary background notifications are implemented with local fake-provider
-  and browser evidence; real provider/device verification and daily history remain.
-
-## Milestone tracker
-
-| Plan milestone | State | Evidence / next work |
+| Plan milestone | Current state | Evidence / remaining work |
 | --- | --- | --- |
-| 01 — Product/threat boundaries | Documented | Requirements, plan, decision 0001, THREAT_MODEL |
-| 02 — Toolchain, scaffold, license, typed config | Complete | Native and container checks passed; reports/02-scaffold.md |
-| 03 — Coarse geography and intersection fixtures | Complete | 6,491 imported road intersections, 28,124 road segments; grid/selection tests and byte-identical offline rebuild |
-| 04 — Expiring willingness | Complete | Restricted real-store lifecycle/TTL/replay/race/ACL tests and running Compose create/status/cancel passed |
-| 05 — Albanian willingness UI | Complete | 13 Chromium checks pass after device-only correction; previous five-check milestone evidence below is historical |
-| 06 — Seeded Tirana simulation | Complete; response suite added | Dedicated store/build, controllable clock, 18 checked city cases, 3,000-person behavior/arrival replay; reports/population-3000.md |
-| 07 — Continuous activation and late admission | Implemented | Worker lease/deadlines, atomic reservation/activation, existing/direct late joins, decline/cutoff tests and real-browser gathering flow |
-| 08 — Arrival claims | Implemented | Shared fresh coarse claims, one-use nonce/replay tests, stable JEMI KËTU, retraction/expiry and browser arrival flow |
-| 09 — Aggregate map/statistics | Current activity implemented; daily history remains | Cell-only delayed releases/API/cards/map, real-store and browser evidence below; inference accepted in decision 0007 |
-| 10 — Notifications and follows | In progress | Worker-side offers, foreground display and temporary optional push/outbox/browser resume implemented; live provider/device verification and follows remain |
-| 11 — Security and lifecycle hardening | Not started | Store/host/runtime controls and hostile-use scenarios |
-| 12 — 100k benchmark | Not started | Reference hardware, real-time workload and capacity report |
-| 13 — Deployment | Not started | Production stack, backup/restore/rollback and clean VM validation |
-| 14 — Verifiable releases | Not started | SBOM, signed manifests and independent artifact comparison |
-| 15 — Independent audit/pilot evidence | Not started | Resolve findings; no production-ready claim yet |
+| 01 — Product/threat boundaries | Documented; residual limits accepted | REQUIREMENTS, THREAT_MODEL, decisions 0001/0004/0007 |
+| 02–05 — Toolchain, geography, willingness and UI | Implemented locally | Pinned tools; 6,491 imported crossroads; 100 m private cells; fresh device-only location; 30-minute minimum; expiry/retry/cancel tests |
+| 06 — Tirana simulation | Implemented | Parameterized 3,000-person response scenarios and smaller adversarial fixtures; reports/population-3000.md and current cleanup evidence below |
+| 07–08 — Activation/admission and arrival | Implemented locally | Continuous matching, frozen destinations/deadlines, late admission, nonce/replay/freshness/stability checks; real-store and fixed-clock journeys |
+| 09 — Aggregate activity | Current map/cards implemented; history incomplete | Fixed delayed suppressed/bucketed releases, cell-only public gatherings; daily summaries remain |
+| 10 — Notifications/follows | Optional session push implemented locally | Real-store/fake-provider/browser worker checks; real provider/device delivery, geographic follows and area alerts remain |
+| 11 — Hardening/monitoring | Local automation implemented | Private bounded monitoring, replay/race/fuzz/recovery/pressure checks; realistic maximum-lifetime soak, real host/edge and independent audit remain |
+| 12 — 100k capacity | Measured locally; deployment capacity unverified | reports/scaling-2026-09-14.md: component and mixed-load measurements; not a VPS or 1M-user guarantee |
+| 13 — Deployment | Local production/rollback rehearsals implemented | API/worker roles, trusted ingress, private Compose, runbook; actual OVH/Cloudflare/TLS/host checks remain |
+| 14 — Verifiable releases | Local artifact/runtime verification implemented | Exact image audits/SBOMs, two clean same-host builds, served-asset/runtime comparisons; independent build/signature/host evidence remains |
+| 15 — Independent audit/pilot | Not performed | Requires external review, delivered host, actual edge/device checks and capped pilot |
 
-## Working commands
+Runtime remediation passed locally on 06fa798 with two exact unused-code exceptions
+expiring 2026-10-14; see RUNTIME_SECURITY and reports/runtime-remediation-2026-09-14.md.
+That audit covers its exact localhost release only. Source changes and jamgati.com
+need a newly prepared release and fresh audit before public activation. Workstation
+swap fails host preflight; it has not been disabled. No capacity claim is refreshed
+by formatting/refactoring tests.
 
-```sh
-make deps
-make config-check
-make config-show
-make config-check-simulation
-make verify-local
-make dev-native
-```
+## Auditability cleanup
 
-`make verify-local` runs native tests/builds/config checks, Compose **parsing** and
-an HTTP smoke. It does not start containers. `make dev-native` serves a read-only UI/API preview at http://127.0.0.1:5173; Ctrl-C stops its API/client processes. It has no Valkey connection; use Compose for willingness. Read [DEVELOPMENT.md](DEVELOPMENT.md) for setup.
+- 4560a64: readable release/audit/public-verification helpers, pinned formatting and
+  unchanged Python syntax trees apart from docstring indentation; rollback passed.
+- b0a1dd8: explicit own-session/private-invitation response allowlists, nested JSON
+  contract tests and 33 passing Chromium tests.
+- 26242b1: shared strict JSON parsing, malformed-input matrix, old/new differential
+  fuzz comparison and permanent round-trip fuzz target.
+- Current slice: remove unused bookkeeping/wrapper, label reserved settings, make
+  audit entry points explicit and reconcile stale status documents.
+- Separate follow-ups: deeper Lua layout/transition catalog and browser-state
+  controller refactoring. Preserve atomic checks, cancellation races and cleanup
+  during startup failure; do not treat these refactors as already implemented.
 
-`make dev` / `make down` are implemented for Compose but require Docker Engine.
-`make simulate` runs the isolated willingness population simulator and controllable
-clock. `make load` does not exist yet. Matching/arrival scenarios follow those features.
+## Working commands and next action
 
-## Validation and commits
+Start with [AUDIT](AUDIT.md) for source→storage→test links and [DEVELOPMENT](DEVELOPMENT.md)
+for setup. `make audit-local` includes real Valkey integrations; plain `make test`
+does not. `make audit-journeys` runs Chromium, real delayed publication and the local
+production-image rehearsal sequentially. `make simulate-population` uses current
+settings; `make load` and monitored component benchmarks also exist. All are local
+synthetic checks, not remote deployment or external push evidence.
 
-[Milestone 02 report](reports/02-scaffold.md) records exact validation and limitations.
-Use `git log` for authoritative commit IDs. The preparation commit is `a082b7a`;
-toolchain installation was committed as `b9b362e`. Subsequent scaffold work is a
-separate coherent local commit. Do not embed a commit's own hash in its files.
-
-## Next action
-
-USABILITY_IMPLEMENTATION_PLAN.md selections 1/2/3/5 are implemented locally:
-optional push, one-action willingness, private destination preview and clearer
-waiting/recovery. Final integration evidence is recorded below as it completes.
-Sharing links/QR (4) and new purpose copy (6) remain excluded. Default push stays
-off until the operator supplies a real public project/security-contact URL and
-provider/device delivery is tested. Local service keys already exist in ignored
-.runtime; no credentials should be posted in chat. No native location verification
-is claimed. Broader daily summaries, follows, deployment hardening, 100k benchmark
-and independently verified releases remain separate incomplete milestones.
-The user-created untracked `commands.txt` is unrelated: leave it untouched/uncommitted.
-
-The real map extract is archived with a 2026-09-13 base timestamp/checksum. Offline
-rebuild needs no network. `make map-check` and geographic race tests passed.
-Keep updating this tracker with tests, failures and the next concrete action.
+Finish and record the current cleanup validation below. Hosting work still needs
+the delivered server's nonsecret connection details and privately arranged SSH and
+Cloudflare access. Keep optional push off until provider/device verification.
+Historical entries follow; their old next-action lists are superseded by this one.
 
 ## Milestone 04 evidence
 
@@ -1248,8 +1225,8 @@ bookkeeping and check map geometry/optional-arrival round trips. All 33 Chromium
 browser tests passed in 58.0 seconds (reports/local/browser-20260914T080916).
 
 Baseline Tirana population with seed 42 and unchanged config/gati.yaml completed:
-3,000 synthetic people/accepted credentials, 1,897 invited, 1,486 arrived, 43 observed
-gatherings, 218.5 wall seconds (reports/local/audit-baseline-population-3000).
+3,000 synthetic people/accepted credentials, 1,897 invited, 1,486 accepted arrival
+operations (1,067 distinct arrived credentials), 43 observed gatherings, 218.5 wall seconds (reports/local/audit-baseline-population-3000).
 An earlier small success-fixture run used 80 people despite its output directory
 name audit-baseline-3000; do not mistake that directory for the 3,000-person run.
 Next: consolidate strict JSON parsing, compare malformed/valid input behavior,
@@ -1276,3 +1253,40 @@ checks (reports/local/audit-parser-journey), and make test passed afterward.
 Full real-publisher browser and final seeded population checks are running; their
 results are not yet counted as passed. Next: dead-code/configuration clarity and
 current audit/status documentation, then record the final regression evidence.
+
+## Auditability cleanup: audit entry points and current status — 2026-09-14
+
+Removed the write-only Engine.lastSweep field/assignment and unused MatchingLease
+wrapper. The activity publisher's separate lease script remains in use and was
+preserved. No Lua transition, worker scheduling or retention policy changed.
+The production YAML now labels six reserved fields (including the unused static
+intersection-index batch size); their schema membership/values remain unchanged.
+Canonical effective configuration before/after is byte-identical.
+
+Added docs/AUDIT.md linking flows, validation, state owners and tests. Reconciled
+stale current summaries in PROGRESS, FUNCTIONALITY_STATUS, THREAT_MODEL, STORAGE,
+API and development docs with implemented monitoring, 100k measurements, optional
+push and production/release evidence. Dated old evidence remains identifiable.
+Added make audit-local (native/build/config/smoke, Python guards, real-store checks)
+and sequential audit-journeys (Chromium, normal-clock publisher, production images).
+CI now calls audit-local in place of the same constituent checks and has a current
+workflow name; remote CI has not run. Formatting stays separately invocable and
+plain make still selects bootstrap; dry-run checked its default target.
+
+Validation: make audit-local and format-python-check passed; all 55 local links in
+AUDIT resolve. Small before/after scenario JSON is identical across baseline, DTO
+and parser runs. Both seed-42 3,000-person reports passed expiry/funnel/configuration
+invariants with 3,000 accepted credentials, 456 cancellations and 2,544 verified
+expiries. Larger scenario totals are not identical: baseline/after has 1,897/1,898
+invited credentials, 1,067/1,063 distinct arrived credentials, 1,486/1,501 accepted
+arrival operations and 43/45 observed gatherings. Driver credentials and worker
+IDs remain cryptographically random; matching uses their hashes/IDs as tie-breaks.
+Thus this is invariant/scenario evidence, not deterministic equivalence or a speed
+comparison. No 100k/1M benchmark was repeated for this cleanup.
+
+The current production-image two-API/Caddy rehearsal passed in 72.06 seconds with
+zero observed proxy 5xx during deliberate replica loss (reports/local/audit-deployment).
+It covers runtime privacy settings, proxy/cache boundaries, real Chromium creation/
+cancellation, activation/arrival replay, worker separation and shared rate limits.
+The full normal-clock delayed publisher journey is still running and not yet
+counted as passed. No public deployment, remote push or fresh exact-release audit.

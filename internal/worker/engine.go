@@ -28,7 +28,6 @@ type Engine struct {
 	step             sync.Mutex
 	mu               sync.RWMutex
 	open             []store.Gathering
-	lastSweep        int64
 	offerCursor      string
 	offerCursorUntil int64
 	population       *population
@@ -138,7 +137,6 @@ func (e *Engine) Step(ctx context.Context) (err error) {
 	if e.population != nil && !deadlineDue && !dirty && len(due) == 0 && now-e.population.fullAt < int64(e.Config.Matching.ReconciliationSeconds)*1000 {
 		return nil
 	}
-	e.lastSweep = now
 	signals, err := e.populationSnapshot(ctx, now)
 	if err != nil {
 		return err

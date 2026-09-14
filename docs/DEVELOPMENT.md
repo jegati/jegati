@@ -141,8 +141,9 @@ local map needs no external tile/font service. Continuous matching, private
 crossroad preview, going/decline, arrival and public aggregate views are implemented.
 
 Install the pinned test browser with `make browser-install` (user cache), then run
-`make test-browser` while the Compose API runs. Playwright builds the client and starts its own Vite preview at
-127.0.0.1:5174, uses synthetic coordinates and cancels its synthetic signals.
+`make test-browser`. It creates an owned disposable API/store; no running development
+Compose stack is needed. Playwright builds the client and starts its Vite preview
+at 127.0.0.1:5174, uses synthetic coordinates and cancels its synthetic signals.
 No traces/videos are recorded; its synthetic mobile screenshot is ignored under
 reports/local. `make dev-native` previews the UI but needs an explicit store
 connection to accept willingness; prefer Compose for the full implemented flow.
