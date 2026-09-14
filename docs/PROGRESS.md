@@ -1854,3 +1854,31 @@ and record its PID/completion status separately. The earlier jamgati-alpha-overn
 continues with the old config and cannot certify these new defaults. Old immutable
 release/audit packages are not current deployment candidates; export/audit/rehearse
 the final artifact again before public activation. No remote push or deployment.
+
+
+## Current usability release and overnight checkpoint — 2026-09-14
+
+Committed implementation 12431f3. Prepared the new jamgati.com artifact at
+reports/local/usability-fast-release, manifest SHA256
+816b1ffe9d25ef7a37cd0c159a83ab6be13065543fdd1f83a2359a3e929d5a41.
+Four image audits passed with zero unresolved findings (two scoped exceptions still
+expire 2026-10-14); exact freshness/identity gate passed. Native API/browser build
+hashes match the artifact. Its actual local activation/compatible rollback rehearsal
+with private VAPID setup passed in 127.49s. Build/storeless protocol smoke also passed.
+
+New real-clock eight-hour run is ACTIVE at
+reports/local/usability-fast-overnight/lifecycle.json, source 12431f3, driver PID
+1903120 if still current (always read the report before process control). Expected
+finish 2026-09-15 00:26:51 Europe/Rome. API binary matches the release; initial
+activation/arrival/replay/retraction/late join are already exercised. Final expiry,
+renewal and memory-drift evidence requires status=passed. Old-config overnight
+continues separately. Temporary sleep inhibition only; no OS setting changes.
+
+Local Compose preview rebuilt and GET /api/config verified current hash
+ e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7
+at http://127.0.0.1:5173. See [verification report](reports/usability-fast-2026-09-14.md)
+and sanitized JSON for exact tests, load scope and accepted privacy tradeoffs.
+
+Next: review the new terminal overnight report, then obtain VPS/SSH and private
+SMTP settings, perform real host/Cloudflare/TLS/cache and phone/push checks, and
+rescan the exact release within 24 hours of activation. No remote push/deployment.

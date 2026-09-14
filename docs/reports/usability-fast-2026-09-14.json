@@ -1,0 +1,309 @@
+{
+  "release_source": "12431f34d503b0c107fcd1e03690e05d4dd37ff0",
+  "config_sha256": "e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7",
+  "load_build": {
+    "source_dirty": true,
+    "binary_sha256": "79985baf392f461d6d80c81568d4c0b72a0f6c1cd81d67b3a95cd109ebddad84",
+    "scope": "worktree before final missing-publication monitoring correction; current capture and release policy"
+  },
+  "hardware": {
+    "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+    "cpu_model": "AMD Ryzen 7 7435HS",
+    "logical_cpus": 16,
+    "store_maxmemory_mb": 512
+  },
+  "same_host_other_test_jobs": true,
+  "stages": [
+    {
+      "accepted_responses": 100000,
+      "attempted_population": 100000
+    }
+  ],
+  "phases": [
+    {
+      "name": "create-100000",
+      "seconds": 333.33573412,
+      "attempted": 100000,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 100000
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "status-100000",
+      "seconds": 60.001276627,
+      "attempted": 200040,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 200040
+      },
+      "p95_upper_ms": 50
+    },
+    {
+      "name": "public-origin-100000",
+      "seconds": 60.001798609,
+      "attempted": 60000,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 60000
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "invitation-sample",
+      "seconds": 10.001573747,
+      "attempted": 1000,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 1000
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "mixed-status",
+      "seconds": 60.001448711,
+      "attempted": 200040,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 200040
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "mixed-public-origin",
+      "seconds": 60.000899299,
+      "attempted": 60000,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 60000
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "mixed-going",
+      "seconds": 20.003438327,
+      "attempted": 1000,
+      "generator_dropped": 0,
+      "statuses": {
+        "200": 1000
+      },
+      "p95_upper_ms": 10
+    },
+    {
+      "name": "cancellation",
+      "seconds": 5.001922283,
+      "attempted": 1000,
+      "generator_dropped": 0,
+      "statuses": {
+        "204": 1000
+      },
+      "p95_upper_ms": 10
+    }
+  ],
+  "sampled_alerts": {},
+  "peak_sampled_rss_bytes": {
+    "resources": 601632768,
+    "store_resources": 95346688
+  },
+  "public_observations": [
+    {
+      "checked_at": 1789395642582,
+      "status": 200,
+      "id": "e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7-178939563",
+      "observed_from": 1789395630030,
+      "observed_until": 1789395630465,
+      "release_at": 1789395640000,
+      "expires_at": 1789395690030
+    },
+    {
+      "checked_at": 1789395674058,
+      "status": 200,
+      "id": "e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7-178939566",
+      "observed_from": 1789395660030,
+      "observed_until": 1789395660579,
+      "release_at": 1789395670000,
+      "expires_at": 1789395720030
+    }
+  ],
+  "tests": {
+    "chromium": 42,
+    "device_presets": 108,
+    "python": 45,
+    "real_store_race": "passed",
+    "real_full_journey": "passed",
+    "key_and_monitor_regressions": "passed"
+  },
+  "production_rehearsal": {
+    "synthetic": true,
+    "checks": [
+      "actual containers: read-only, no request logs/ports/persistent writes, no container swap/core dumps, bounded memory",
+      "actual Valkey persistence, eviction and metadata-log settings verified",
+      "untrusted peers, wrong host, malformed IP, query and oversized body rejected; IPv4/IPv6 accepted; no public test/ops routes",
+      "built Albanian client and first-party assets; Authorization/Cookie responses bypass shared caching",
+      "Chromium runs the built client through production CSP/proxy: map loads, device-derived willingness, status and cancellation",
+      "two API replicas plus one worker: real activation/going, concurrent arrival retry, replay rejection, surviving API after one replica stops",
+      "API-only role has destination view only; matching/publication/cleanup worker and private docker-exec monitoring verified",
+      "shared per-network admission limit survives replicas and forged forwarding headers; another network retains admission"
+    ],
+    "transient_proxy_5xx_during_failover": 0,
+    "wall_seconds": 79.83,
+    "scope": "local production images and Caddy with a fake loopback connector; no Cloudflare, real TLS/device/push or VPS capacity test"
+  },
+  "scope": "local synthetic traffic, no real-device GPS, provider push, host capacity, independent review or completed overnight evidence",
+  "release_audit": {
+    "source_revision": "12431f34d503b0c107fcd1e03690e05d4dd37ff0",
+    "release_manifest_sha256": "816b1ffe9d25ef7a37cd0c159a83ab6be13065543fdd1f83a2359a3e929d5a41",
+    "scanned_at": "2026-09-14T14:26:57.212132+00:00",
+    "scanner": {
+      "Version": "0.74.0",
+      "VulnerabilityDB": {
+        "Version": 2,
+        "NextUpdate": "2026-09-15T01:15:36.636778479Z",
+        "UpdatedAt": "2026-09-14T01:15:36.63677888Z",
+        "DownloadedAt": "2026-09-14T03:10:51.184807266Z"
+      }
+    },
+    "scope": "local image inventory plus Go binary symbol checks; no exploitability or remote attestation guarantee",
+    "images": {
+      "api": {
+        "image_id": "sha256:63266e7fc6cad126be627b3eb7e78787e60c891632da06ea86acccec8507415e",
+        "accepted_findings": [
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "75ee854480115bc47da1543499e937bb03bac84a5917e39590b76d56fb0ce3f4",
+        "binary_scan_passed": true
+      },
+      "web": {
+        "image_id": "sha256:43ae9a7d00964fe12df6ac23d56596288287cb30333772f7e3979276fc47fea8",
+        "accepted_findings": [
+          {
+            "id": "GHSA-gcjh-h69q-9w9g",
+            "package": "github.com/google/cel-go",
+            "version": "v0.28.1",
+            "fixed": "0.29.0",
+            "severity": "MEDIUM",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GHSA-gcjh-h69q-9w9g",
+              "package": "github.com/google/cel-go",
+              "version": "v0.28.1",
+              "services": [
+                "web"
+              ],
+              "reason": "Caddy uses CEL matching, but does not call ext.NativeTypes or ext.ParseStructTag. The minimal image has no affected binary symbols. CEL 0.29/0.30 change interpreter APIs and cannot directly replace this dependency without a Caddy compatibility update. Review on any module/config change.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-6094"
+            }
+          },
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "d9e84314255cd1b9b56149f2c4f14152699d4fb09ec3828df10d73cc0fccfd28",
+        "binary_scan_passed": true
+      },
+      "tunnel": {
+        "image_id": "sha256:734232b587909f18b9084d17eb9e079cb92d0f43c7f3ada9d02ee5876c06d553",
+        "accepted_findings": [
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "e363c0a5795373726f98315070f4d30b0839b44af0ab992c1312361a321dee2d",
+        "binary_scan_passed": true
+      },
+      "valkey": {
+        "image_id": "sha256:a0dbf4c1d5708782907c10e2c72deff317518518b5288a58416981d9db95d30b",
+        "accepted_findings": [],
+        "unresolved_findings": []
+      }
+    },
+    "passed": true
+  },
+  "release_rehearsal": {
+    "synthetic": true,
+    "source_revision": "12431f34d503b0c107fcd1e03690e05d4dd37ff0",
+    "configured_hostname": "jamgati.com",
+    "checks": [
+      "immutable release verification and actual combined-role activation",
+      "unexpected live network attachment rejected, restored topology accepted",
+      "served browser assets and effective config hash match",
+      "two compatible release-directory switches preserve store identity/start time and live capability",
+      "return to first release preserves original expiry and cancellation works"
+    ],
+    "wall_seconds": 127.49,
+    "scope": "same-code/config local rollback mechanics; no schema migration, external host, real Cloudflare or public publication"
+  },
+  "overnight_checkpoint": {
+    "status": "running",
+    "recorded_at": 1789396177,
+    "source_revision": "12431f34d503b0c107fcd1e03690e05d4dd37ff0",
+    "expected_finish_at": "2026-09-15T00:26:51+02:00",
+    "api_binary_matches_release": true,
+    "report": "reports/local/usability-fast-overnight/lifecycle.json"
+  }
+}
