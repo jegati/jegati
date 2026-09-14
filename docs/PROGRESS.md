@@ -70,6 +70,12 @@ settings; `make load` and monitored component benchmarks also exist. All are loc
 synthetic checks, not remote deployment or external push evidence.
 
 Both cleanup batches are complete; no product behavior/defaults were changed.
+A subsequent [lifecycle review](LIFECYCLE_REVIEW.md) found a retention follow-up:
+expired gathering index entries are filtered but not explicitly pruned, and stale
+session gathering references can persist until reassignment/session expiry. Add
+keeper/churn regression coverage and bounded cleanup before longer-lived workflows.
+The public renderer can retain ended gatherings in an unexpired delayed snapshot;
+joining is disabled, but explicit ended-state handling is a usability follow-up.
 `make test-planner-replay` adds an exact planner regression without issuing
 credentials or changing ordinary simulation behavior. Hosting work still needs
 the delivered server's nonsecret connection details and privately arranged
@@ -1385,3 +1391,16 @@ conditional cleanup scope. Details and the isolated push-test failure are in
 reports/auditability-followup-2026-09-14.md. No public deployment, remote Git push,
 new product decision, new capacity claim or fresh exact-release security audit.
 Next action is the pending VPS/access preparation described in the summary above.
+
+
+## September 14 — lifecycle questions and static review
+
+Reviewed current configuration, admission/activation/arrival transactions, private
+and public UI, expiry cleanup and existing tests. Answers and candidate features
+are in docs/LIFECYCLE_REVIEW.md. Late joining and post-expiry arrival reconfirmation
+are implemented; willingness extension, automatic gathering extension and active
+location changes are not. No runtime code/configuration changes or new test runs
+in this review. The expired gathering-index and stale-reference retention findings
+need targeted keeper/churn tests and a fix; do not infer complete physical cleanup
+from the earlier passing logical-expiry journeys. Extending/moving gatherings
+would change agreed frozen-lifetime/destination policy and needs explicit design.
