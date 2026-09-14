@@ -82,8 +82,43 @@ def preflight():
  print(json.dumps({'passed':not problems,'problems':problems,'manual_checks':['provider RAM snapshots disabled; no host request/body tracing or process-memory capture','host patching, access control, firewall and core dump policy reviewed','Cloudflare cache/trust/TLS and privacy settings verified on the actual hostname']},indent=2))
  return not problems
 
+def verify_runtime_shape(value,service,networks,image):
+ """Compare security-relevant launch settings without printing secrets on failure.
+
+ This detects accidental/operator drift, not a dishonest Docker daemon or host.
+ Image defaults matter: Compose does not repeat the base image's user or PATH.
+ """
+ config=value['Config'];host=value['HostConfig']
+ for field,key in [('Cmd','command'),('Entrypoint','entrypoint'),('User','user'),('WorkingDir','working_dir')]:
+  expected=service.get(key)
+  if expected is None:expected=image.get(field)
+  if (config.get(field) or None)!=(expected or None):raise ValueError('runtime launch settings differ: '+field)
+ environment=dict(item.split('=',1) for item in image.get('Env') or [])
+ environment.update(service.get('environment') or {})
+ if dict(item.split('=',1) for item in config.get('Env') or [])!=environment:raise ValueError('runtime environment differs')
+ if host.get('Privileged') or host.get('CapAdd') or host.get('Devices') or host.get('DeviceRequests') or host.get('PidMode') or host.get('NetworkMode')=='host':raise ValueError('unexpected runtime privilege or host access')
+ if host.get('Memory')!=int(service['mem_limit']) or host.get('MemorySwap')!=int(service['memswap_limit']) or host.get('PidsLimit')!=service['pids_limit'] or host.get('NanoCpus')!=round(service['cpus']*1e9):raise ValueError('runtime resource bounds differ')
+ expected_mounts={(m['target'],m['type'],m.get('source'),not m.get('read_only',False)) for m in service.get('volumes',[])}
+ actual_mounts={(m['Destination'],m['Type'],m.get('Source'),m['RW']) for m in value['Mounts'] if m['Type']!='tmpfs'}
+ if actual_mounts!=expected_mounts:raise ValueError('runtime mounts differ')
+ expected_tmpfs=dict(item.split(':',1) if ':' in item else (item,'') for item in service.get('tmpfs',[]))
+ if (host.get('Tmpfs') or {})!=expected_tmpfs:raise ValueError('runtime temporary mounts differ')
+ expected_networks={networks[name]['name']:settings or {} for name,settings in service['networks'].items()}
+ actual_networks=value['NetworkSettings']['Networks']
+ if set(actual_networks)!=set(expected_networks):raise ValueError('runtime network attachments differ')
+ for name,settings in expected_networks.items():
+  if settings.get('ipv4_address') and actual_networks[name]['IPAddress']!=settings['ipv4_address']:raise ValueError('runtime trusted proxy address differs')
+
+def verify_service_selection(root,project,replicas,edge):
+ # Compose up does not stop services omitted by a changed profile. In particular,
+ # an already running tunnel must not be mistaken for a private-only activation.
+ for service,selected in [('worker',replicas>1),('tunnel',edge)]:
+  if not selected and compose(root,project,'ps','-q',service,replicas=2,edge=True):raise ValueError('unselected service still running: '+service+'; explicitly stop it or select its deployment flag')
+
 def verify_running(root,project,manifest,replicas,edge=False):
  verify_images(manifest);seen=[]
+ verify_service_selection(root,project,replicas,edge)
+ resolved=json.loads(compose(root,project,'config','--format','json',replicas=replicas,edge=edge))
  for service in ['valkey','api','web']+(['worker'] if replicas>1 else [])+(['tunnel'] if edge else []):
   ids=compose(root,project,'ps','-q',service,replicas=replicas,edge=edge).splitlines()
   if len(ids)!=(replicas if service=='api' else 1):raise ValueError('unexpected running service count')
@@ -95,6 +130,8 @@ def verify_running(root,project,manifest,replicas,edge=False):
    if any(m['Type']=='volume' or (m['Type']=='bind' and m['RW']) for m in value['Mounts']):raise ValueError('persistent writable mount')
    key='api' if service=='worker' else service
    if key in manifest['images'] and value['Image']!=manifest['images'][key]['image_id']:raise ValueError('running image differs from release')
+   image=json.loads(run('docker','image','inspect',manifest['images'][key]['image_id']))[0]['Config']
+   verify_runtime_shape(value,resolved['services'][service],resolved['networks'],image)
    if service in ['api','worker']:
     mounted=run('docker','exec',container,'/gati','-mode','config-show','-config','/config/gati.yaml')
     expected=run('docker','run','--rm','--network','none',manifest['images']['api']['reference'],'-mode','config-show')
@@ -111,6 +148,7 @@ def activate(root,project,manifest,replicas,edge,current=None):
   previous=verify_files(current)
   if previous['config_sha256']!=manifest['config_sha256']:raise ValueError('automatic rollback requires identical functional config; review schema/state compatibility explicitly')
   if runtime_dir(current,project)!=runtime:raise ValueError('rollback releases must share the same parent and stable operational directory')
+ verify_service_selection(root,project,replicas,edge)
  if edge:
   if not preflight():raise ValueError('host preflight failed')
   if not (runtime/'tunnel-token').is_file():raise ValueError('named tunnel credential must be provisioned privately on the host')

@@ -88,6 +88,7 @@ dev-push: push-keys
 	$(COMPOSE) -f compose.yaml -f compose.push.yaml up --build
 security-check:
 	go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
+	npm --prefix web audit --audit-level=low
 
 .PHONY: test-fuzz test-monitor
 test-fuzz:

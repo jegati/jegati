@@ -297,3 +297,21 @@ be claimed blind or governed by application TTL. Host administrators can inspect
 live Valkey/API memory. Immutable releases, independently compared browser assets
 and privileged image/config checks improve verifiability, not remote attestation.
 See [the runbook and residual gates](DEPLOYMENT.md).
+
+## Final review findings — 2026-09-14
+
+Application dependency audits and behavioral tests do not cover the whole runtime.
+The [image inventory and security review](reports/security-2026-09-14.md) found
+outdated Caddy Go/OS dependencies and additional tunnel package advisories. Public
+launch is on hold pending remediation/triage and fresh artifact verification.
+The Go application and npm dependency scans found no affected application code;
+the module-only OpenPGP advisory concerns a package GATI does not import.
+
+Release verification now rejects launch-command/environment/user, mount, resource,
+network-attachment and reserved-proxy-address drift. It also refuses an unintended
+live tunnel/worker omitted by deployment flags. Tests include an actual additional
+network attachment rejected before accepting the restored topology. These controls
+address accidental configuration drift, not malicious administrators or a dishonest
+Docker API. Account-managed tunnel rules and host network definitions still need
+separate review. CI now runs both Go and npm dependency audits; full production-image
+scanning remains a separate release gate.

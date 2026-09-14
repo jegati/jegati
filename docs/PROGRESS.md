@@ -1060,3 +1060,45 @@ real edge cache/spoof limits and operator alert routing before the small pilot.
 Keep advanced geographic parallelism and remaining linear planner/publication work
 as measured follow-up optimization; current 100k local mixed traffic met its gates.
 Preserve unrelated untracked commands.txt.
+
+## Final security review — 2026-09-14
+
+User requested a final code security review and deployment plan. Reviewed the
+security-sensitive application/store/browser/push/ingress/release paths and exact
+production artifacts. **Public deployment is on hold:** the Caddy image contains
+outdated Go/OS dependencies (40 high-severity package/advisory pairs; binary scan
+finds affected symbols for 25 advisories). Tunnel package findings need explicit
+triage; its Go binary scan found zero affected symbols. Application Go/npm audits
+pass, including the explanation of unused OpenPGP GO-2026-5932. Valkey image scan
+has zero findings. These are scoped results, not exploit or anonymity guarantees.
+
+Fixed a release-verification gap: compare command/entrypoint/user/environment,
+working directory, resource bounds, mounts, network attachments and proxy IPs with
+the release configuration and image defaults. Reject omitted live worker/tunnel
+services before activation, so omitting --edge cannot silently leave a public
+tunnel running while claiming a private launch. Errors omit secret values. Added
+mutation regression tests and a live extra-network-attachment rejection rehearsal.
+CI now invokes Go/npm dependency audits; full image scans remain a release gate.
+
+Validation: make test (race/simulation/vet/TypeScript; cached unchanged Go results),
+fresh make test-store with race/count=1, all four 30-second fuzz targets, 20 Python
+tests including 11 release guards, and make security-check passed. Modified local
+release/rollback rehearsal passed in 129.94s with actual network-drift rejection,
+asset/config comparison and preserved Valkey/session expiry. Owned rehearsal
+containers/networks were cleaned up. Trivy 0.74.0 was installed user-locally with
+official checksum verification; all four actual image scans completed, and a
+clean tracked-tree secret scan found nothing. This is not a full Git-history scan.
+Host preflight still fails on developer-host swap, which was not changed.
+
+See [findings and deployment plan](reports/security-2026-09-14.md) and
+[sanitized scan/test inventory](reports/security-2026-09-14.json). Raw local outputs
+are in reports/local/security-2026-09-14. Existing release-auditable still contains
+the old verifier/runtime and must not be published as a cleared release. No source
+was pushed and no remote/public service was created.
+
+Next technical action needs no credentials: remediate the web runtime dependencies,
+triage/update the tunnel image, add repeatable full-image release auditing, then
+build/scan/rehearse a new immutable artifact. Only afterward proceed to independent
+review and a chosen domain/VPS, privately arranged SSH/Cloudflare authentication,
+security-reporting and alert channels, actual host/edge/device gates and explicit
+public authorization. Preserve unrelated commands.txt.

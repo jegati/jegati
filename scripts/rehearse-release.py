@@ -15,6 +15,15 @@ def rehearse(source,out):
   def command(*args,**kw):return subprocess.check_output(args,stderr=log,**kw).decode().strip()
   try:
    activate(a,project,manifest,1,False)
+   web=compose(a,project,'ps','-q','web')
+   command('docker','network','connect',project+'_backend',web)
+   try:
+    try:verify_running(a,project,manifest,1,False)
+    except ValueError as e:
+     if str(e)!='runtime network attachments differ':raise
+    else:raise AssertionError('unexpected network attachment passed release verification')
+   finally:command('docker','network','disconnect',project+'_backend',web)
+   verify_running(a,project,manifest,1,False)
    store=compose(a,project,'ps','-q','valkey');before=json.loads(command('docker','inspect',store))[0]['State']['StartedAt']
    command('go','build','-trimpath','-buildvcs=false','-o',str(parent/'probe'),'./scripts/deployment-probe',cwd=ROOT,env={**os.environ,'CGO_ENABLED':'0'})
    command('docker','run','-d','--name',connector,'--network',project+'_edge','--ip','172.30.10.2','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges:true','--log-driver','none','-p','127.0.0.1::8090','-v',str(parent/'probe')+':/probe:ro','--entrypoint','/probe',manifest['images']['api']['reference'])
@@ -40,7 +49,7 @@ def rehearse(source,out):
    status,state=request('GET','/api/signal');assert status==200 and state['expires_at']==created['expires_at']
    assert request('DELETE','/api/signal')[0]==204
    command('python3',str(ROOT/'scripts/verify-public.py'),'--release',str(a),'--url',base)
-   report={'synthetic':True,'source_revision':manifest['source_revision'],'checks':['immutable release verification and actual combined-role activation','served browser assets and effective config hash match','two compatible release-directory switches preserve store identity/start time and live capability','return to first release preserves original expiry and cancellation works'],'wall_seconds':round(time.time()-started,2),'scope':'same-code/config local rollback mechanics; no schema migration, external host, real Cloudflare or public publication'}
+   report={'synthetic':True,'source_revision':manifest['source_revision'],'checks':['immutable release verification and actual combined-role activation','unexpected live network attachment rejected, restored topology accepted','served browser assets and effective config hash match','two compatible release-directory switches preserve store identity/start time and live capability','return to first release preserves original expiry and cancellation works'],'wall_seconds':round(time.time()-started,2),'scope':'same-code/config local rollback mechanics; no schema migration, external host, real Cloudflare or public publication'}
    (out/'release-rehearsal.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
   finally:
    subprocess.run(['docker','rm','-f',connector],stdout=log,stderr=log)

@@ -2,7 +2,11 @@
 
 The production images, private container networks, Caddy proxy, process roles and
 local rehearsal are implemented. No public deployment or Cloudflare account has
-been created. Start with a capped, monitored pilot after the remaining host/edge
+been created. **The 2026-09-14 security review places public launch on hold:** the
+pinned Caddy runtime has unresolved dependency advisories. Review the
+[findings and ordered deployment gates](reports/security-2026-09-14.md) before
+using an existing release bundle. Passing the local rehearsal is not a vulnerability
+clearance. Start with a capped, monitored pilot after the dependency and host/edge
 checks; neither the laptop benchmarks nor two API replicas certify 1M capacity.
 See [measured performance and memory tradeoffs](reports/scaling-2026-09-14.md).
 
@@ -99,6 +103,13 @@ obtained release. Disable content rewriting at the edge. A privileged
 reviewer must separately inspect running image IDs, mounts, configuration, host
 controls and ingress rules. There is no pretend backend attestation endpoint.
 
+Running verification also compares command/entrypoint, user, working directory,
+environment, resource bounds, bind/tmpfs mounts, attached networks and reserved
+proxy addresses against resolved release Compose settings and image defaults.
+Mismatch errors omit environment values and secret contents. This detects drift
+visible through an honest Docker daemon; it cannot attest a hostile host, validate
+provider controls or replace inspection of actual network/firewall policy.
+
 ## Host setup and activation
 
 Before provisioning: choose the VPS/domain and accept the provider visibility
@@ -118,7 +129,11 @@ python3 scripts/release.py up --release /opt/gati/releases/RELEASE
 python3 scripts/release.py verify --release /opt/gati/releases/RELEASE --running
 ```
 
-Without `--edge`, activation starts only the private stack. Operational secrets live
+Without `--edge`, activation starts only the private stack and refuses to proceed
+if that project's tunnel is already running. Verification and activation also reject
+an omitted dedicated worker that is still running. Stop an unwanted service
+explicitly; Compose does not stop services merely because a profile was omitted.
+Operational secrets live
 in `/opt/gati/releases/.gati-production-runtime`, mode 0700, shared by releases under
 that parent directory. Store configuration and credential mount paths remain stable
 across releases, avoiding an unnecessary Valkey restart. Do not edit immutable

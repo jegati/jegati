@@ -380,6 +380,13 @@ Local automated hardening commands and their exact scope are now documented in [
 
 ## Deployment preparation implementation — 2026-09-14
 
+Security gate update: the [final local security review](reports/security-2026-09-14.md)
+found unresolved advisories in the pinned web runtime and additional tunnel package
+findings. Public launch remains on hold pending runtime remediation/triage, fresh
+image scans, rebuilt release verification and the existing independent/host/edge
+gates. The ordered remediation-to-pilot plan is in that report; prior local scale
+and deployment rehearsal passes are not dependency vulnerability clearance.
+
 Implemented measured rank-cursor/cell-refresh/reachability optimizations, direct
 worker deadline monitoring, API-only and worker roles, two-replica Caddy rehearsal,
 built production images and bounded private Compose resources. Configuration keeps
