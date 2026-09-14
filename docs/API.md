@@ -29,6 +29,10 @@ The client generates the capability; only its SHA-256 hash is stored. Create acc
 exactly `cell`, `radius_km`, `availability_minutes` in an application/json object.
 Unknown/duplicate/null/coerced fields, coordinates, unsupported grid/radii/durations,
 extra JSON documents and oversized bodies are rejected. No raw token/hash is echoed.
+`internal/httpapi/strict_json.go` supplies the shared exact-object parser. Endpoint
+handlers retain media-type/body-size, authorization/rate and domain checks in their
+original order. `strict_json_test.go` covers duplicate/escaped names, missing/null
+fields, wrong types, ordering, trailing input and reader limits across schemas.
 
 Successful create returns status 200 with coarse cell, radius, duration, state and
 server-authoritative `created_at`/`expires_at` Unix milliseconds. Identical retries do

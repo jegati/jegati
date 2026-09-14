@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"mime"
 	"net/http"
@@ -84,37 +83,7 @@ func (s signalAPI) push(w http.ResponseWriter, r *http.Request) {
 	}{expiry})
 }
 func readPush(reader io.Reader) (notification.Registration, error) {
-	invalid := errors.New("invalid subscription body")
-	dec := json.NewDecoder(reader)
-	opening, e := dec.Token()
-	if e != nil || opening != json.Delim('{') {
-		return notification.Registration{}, invalid
-	}
-	fields := map[string]json.RawMessage{}
-	allowed := map[string]bool{"revision": true, "binding": true, "endpoint": true, "p256dh": true, "auth": true, "expires_at": true}
-	for dec.More() {
-		key, e := dec.Token()
-		if e != nil {
-			return notification.Registration{}, invalid
-		}
-		name, ok := key.(string)
-		if !ok || !allowed[name] || fields[name] != nil {
-			return notification.Registration{}, invalid
-		}
-		var value json.RawMessage
-		if dec.Decode(&value) != nil || string(value) == "null" {
-			return notification.Registration{}, invalid
-		}
-		fields[name] = value
-	}
-	closing, e := dec.Token()
-	if e != nil || closing != json.Delim('}') || dec.Decode(new(any)) != io.EOF || len(fields) != len(allowed) {
-		return notification.Registration{}, invalid
-	}
-	raw, _ := json.Marshal(fields)
-	var value notification.Registration
-	if json.Unmarshal(raw, &value) != nil {
-		return value, invalid
-	}
-	return value, nil
+	var request notification.Registration
+	err := readStrictObject(reader, &request, "revision", "binding", "endpoint", "p256dh", "auth", "expires_at")
+	return request, err
 }

@@ -1254,3 +1254,25 @@ An earlier small success-fixture run used 80 people despite its output directory
 name audit-baseline-3000; do not mistake that directory for the 3,000-person run.
 Next: consolidate strict JSON parsing, compare malformed/valid input behavior,
 remove confirmed dead code and reconcile current audit/status documentation.
+
+## Auditability cleanup: shared strict JSON parser — 2026-09-14
+
+Willingness, join/preview, going/decline, arrival and push now share one small
+exact-object reader. Endpoint-owned media type/body limit, auth/rate ordering,
+domain validation and atomic storage transitions are unchanged. Duplicate names
+(including escaped equivalents), unknown/case-variant fields, nulls, missing fields,
+wrong types and trailing documents remain rejected. Join no longer reserializes
+its willingness fields through a second separate parser.
+
+Validation: the three existing parser schemas passed the new malformed/valid
+matrix before refactoring. A temporary differential fuzz harness compared old
+parsers with the replacements: 798,358 executions in 31 seconds, identical
+accept/reject decisions and accepted values. The duplicate legacy implementations
+were removed after comparison. Permanent matrix coverage includes single-field
+arrival/intent schemas and reader limits. The new round-trip fuzz target passed
+511,121 executions in 31 seconds and is included in make test-fuzz.
+Go HTTP race tests, make test-store, make simulate with live fixed-clock journey
+checks (reports/local/audit-parser-journey), and make test passed afterward.
+Full real-publisher browser and final seeded population checks are running; their
+results are not yet counted as passed. Next: dead-code/configuration clarity and
+current audit/status documentation, then record the final regression evidence.

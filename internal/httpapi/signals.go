@@ -3,7 +3,6 @@ package httpapi
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"github.com/jegati/jegati/internal/worker"
 	"io"
@@ -157,50 +156,8 @@ func (s signalAPI) create(w http.ResponseWriter, r *http.Request) {
 }
 func readCreate(body io.Reader) (createRequest, error) {
 	var request createRequest
-	dec := json.NewDecoder(body)
-	token, err := dec.Token()
-	if err != nil || token != json.Delim('{') {
-		return request, errors.New("object required")
-	}
-	fields := map[string]json.RawMessage{}
-	for dec.More() {
-		key, err := dec.Token()
-		if err != nil {
-			return request, err
-		}
-		name, ok := key.(string)
-		if !ok {
-			return request, errors.New("invalid field")
-		}
-		if _, duplicate := fields[name]; duplicate {
-			return request, errors.New("duplicate field")
-		}
-		if name != "cell" && name != "radius_km" && name != "availability_minutes" {
-			return request, errors.New("unknown field")
-		}
-		var raw json.RawMessage
-		if err := dec.Decode(&raw); err != nil {
-			return request, err
-		}
-		if string(raw) == "null" {
-			return request, errors.New("null forbidden")
-		}
-		fields[name] = raw
-	}
-	if _, err := dec.Token(); err != nil {
-		return request, err
-	}
-	if _, err := dec.Token(); err != io.EOF {
-		return request, errors.New("trailing input")
-	}
-	if len(fields) != 3 {
-		return request, errors.New("missing fields")
-	}
-	data, _ := json.Marshal(fields)
-	if err := json.Unmarshal(data, &request); err != nil {
-		return request, err
-	}
-	return request, nil
+	err := readStrictObject(body, &request, "cell", "radius_km", "availability_minutes")
+	return request, err
 }
 func (s signalAPI) status(w http.ResponseWriter, r *http.Request) {
 	hash, ok := s.authorized(w, r)

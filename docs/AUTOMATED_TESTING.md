@@ -12,7 +12,7 @@ is needed for the clean-export build rehearsal; other helpers use the standard l
 | `make test-store` | Restricted real-store behavior, state model, rollover, push outage/fanout; seconds |
 | `make test-monitor` | Private socket, suppression, retention, concurrency and collector checks |
 | `python3 -m unittest discover -s scripts -p 'test_*.py'` | Collector and synthetic load evidence rejection checks |
-| `make test-fuzz` | Four native fuzz targets, 30 seconds each by default |
+| `make test-fuzz` | Five native fuzz targets, including strict request round trips, 30 seconds each by default |
 | `make test-browser` | Chromium journeys, optional push fixtures, accessibility and resilience; about one minute |
 | `make test-browser-matrix` | Core, accessibility and resilience in Firefox then WebKit; separate stores, a few minutes |
 | `make test-full-journey` | Actual production matching, arrival and delayed publisher, public map, private preview, late join; up to 20 minutes |

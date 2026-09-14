@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/jegati/jegati/internal/store"
-	"io"
 	"mime"
 	"net/http"
 	"strconv"
@@ -78,23 +77,14 @@ func (s signalAPI) arrival(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 415)
 		return
 	}
-	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, int64(s.config.Limits.MaxBodyBytes)))
-	first, e := dec.Token()
-	if e != nil || first != json.Delim('{') {
+	var request struct {
+		Cell string `json:"cell"`
+	}
+	if readStrictObject(http.MaxBytesReader(w, r.Body, int64(s.config.Limits.MaxBodyBytes)), &request, "cell") != nil {
 		writeError(w, 400)
 		return
 	}
-	key, e := dec.Token()
-	var cellID string
-	if e != nil || key != "cell" || dec.Decode(&cellID) != nil {
-		writeError(w, 400)
-		return
-	}
-	last, e := dec.Token()
-	if e != nil || last != json.Delim('}') || dec.Decode(new(any)) != io.EOF {
-		writeError(w, 400)
-		return
-	}
+	cellID := request.Cell
 	cell, e := s.grid.Parse(cellID)
 	if e != nil {
 		writeError(w, 400)

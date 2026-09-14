@@ -1,7 +1,6 @@
 package httpapi
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/jegati/jegati/internal/geography"
@@ -73,23 +72,15 @@ func (s signalAPI) changeIntent(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 415)
 		return
 	}
-	var id string
-	dec := json.NewDecoder(http.MaxBytesReader(w, r.Body, int64(s.config.Limits.MaxBodyBytes)))
-	opening, e := dec.Token()
-	if e != nil || opening != json.Delim('{') {
+	var request struct {
+		GatheringID string `json:"gathering_id"`
+	}
+	err = readStrictObject(http.MaxBytesReader(w, r.Body, int64(s.config.Limits.MaxBodyBytes)), &request, "gathering_id")
+	if err != nil || !gatheringID.MatchString(request.GatheringID) {
 		writeError(w, 400)
 		return
 	}
-	key, e := dec.Token()
-	if e != nil || key != "gathering_id" || dec.Decode(&id) != nil || !gatheringID.MatchString(id) {
-		writeError(w, 400)
-		return
-	}
-	closing, e := dec.Token()
-	if e != nil || closing != json.Delim('}') || dec.Decode(new(any)) != io.EOF {
-		writeError(w, 400)
-		return
-	}
+	id := request.GatheringID
 	value, e := s.store.Status(r.Context(), hash)
 	if e != nil {
 		s.fail(w, e)
@@ -161,40 +152,13 @@ func (s signalAPI) join(w http.ResponseWriter, r *http.Request) {
 }
 
 func readJoin(body io.Reader) (string, createRequest, error) {
-	dec := json.NewDecoder(body)
-	opening, e := dec.Token()
-	if e != nil || opening != json.Delim('{') {
+	var request struct {
+		createRequest
+		GatheringID string `json:"gathering_id"`
+	}
+	err := readStrictObject(body, &request, "cell", "radius_km", "availability_minutes", "gathering_id")
+	if err != nil || !gatheringID.MatchString(request.GatheringID) {
 		return "", createRequest{}, errors.New("invalid join request")
 	}
-	fields := map[string]json.RawMessage{}
-	for dec.More() {
-		key, e := dec.Token()
-		if e != nil {
-			return "", createRequest{}, errors.New("invalid join request")
-		}
-		name, ok := key.(string)
-		if !ok || fields[name] != nil {
-			return "", createRequest{}, errors.New("invalid join request")
-		}
-		var value json.RawMessage
-		if dec.Decode(&value) != nil {
-			return "", createRequest{}, errors.New("invalid join request")
-		}
-		fields[name] = value
-	}
-	if _, e = dec.Token(); e != nil || dec.Decode(new(any)) != io.EOF {
-		return "", createRequest{}, errors.New("invalid join request")
-	}
-	var id string
-	if json.Unmarshal(fields["gathering_id"], &id) != nil || !gatheringID.MatchString(id) {
-		return "", createRequest{}, errors.New("invalid join request")
-	}
-	delete(fields, "gathering_id")
-	payload, _ := json.Marshal(fields)
-	input, e := readCreate(bytes.NewReader(payload))
-	if e != nil {
-		return "", createRequest{}, errors.New("invalid join request")
-	}
-
-	return id, input, nil
+	return request.GatheringID, request.createRequest, nil
 }
