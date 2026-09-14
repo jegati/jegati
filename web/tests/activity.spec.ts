@@ -179,3 +179,96 @@ for (const existing of [false, true]) test(`private preview cancellation, offlin
   expect(await page.evaluate(() => sessionStorage.getItem('gati-session-v2'))).toBe(initial);
   expect(previews).toBe(2); expect(writes).toBe(0);
 });
+
+test('ended gatherings are labeled and leave the live map without changing released buckets', async ({ page, request }) => {
+  const config = await (await request.get('/api/config')).json();
+  const grid: Grid = await (await request.get('/api/geography')).json();
+  const ratio = 1000 / grid.size_meters; grid.size_meters = 1000; grid.lon_step *= ratio; grid.lat_step *= ratio;
+  const now = Date.now(), cell = cellAt(grid, 19.818, 41.327)!;
+  const first = 'd'.repeat(32), keeper = 'e'.repeat(32);
+  const release = { version: 1, id: 'ended-fixture', config_sha256: config.sha256, grid, observed_from: now - 600000, observed_until: now - 600000, release_at: now - 1000, expires_at: now + 60000, areas: [{ cell, willing: 50 }], gatherings: [
+    { id: first, cell, state: 'jemi_ketu', ends_at: now + 10000, going: 50, here: 20 },
+    { id: keeper, cell, state: 'jemi_gati', ends_at: now + 20000, going: 20 },
+  ] };
+  let calls = 0, writes = 0;
+  page.on('request', r => { if (r.method() !== 'GET') writes++; });
+  await page.route('**/api/activity/latest', route => { calls++; return route.fulfill({ json: release }); });
+  await page.clock.install({ time: now }); await page.goto('/');
+  await expect(page.locator('#map')).toHaveAttribute('data-activity', release.id);
+  await page.locator('#activity-layer').selectOption('gatherings');
+  await page.getByRole('button', { name: 'Shiko zonën në hartë' }).first().click();
+  const canvas = page.locator('#map canvas');
+  await page.clock.fastForward(11000);
+  const card = page.locator(`[data-gathering="${first}"]`);
+  await expect(card).toContainText('Takimi përfundoi.');
+  await expect(card).toContainText('50+');
+  await expect(card.getByRole('button', { name: 'Takimi ka përfunduar' })).toBeDisabled();
+  await expect(page.locator(`[data-gathering="${keeper}"]`)).toHaveAttribute('data-state', 'open');
+  // The other live gathering retains the shared cell until its own deadline.
+  await page.locator('#activity-all').click(); await canvas.click();
+  await expect(page.locator('#activity-selection')).toHaveText('Takimet në zonën e zgjedhur');
+  await page.clock.fastForward(10000);
+  await expect(page.locator('.public-gathering[data-state="ended"]')).toHaveCount(2);
+  await page.locator('#activity-all').click();
+  await expect(async () => { await page.locator('#activity-all').click(); await canvas.click(); await expect(page.locator('#activity-selection')).toHaveText('Takimet në zonat e publikuara'); }).toPass();
+  expect(calls).toBe(1); expect(writes).toBe(0);
+  await expect(page.locator('#map')).toHaveAttribute('data-activity', release.id);
+});
+
+test('presence renewal is explicit, checks fresh device location and preserves session expiry', async ({ page, context, request }) => {
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ latitude: 41.327, longitude: 19.818, accuracy: 20 });
+  const grid: Grid = await (await request.get('/api/geography')).json();
+  const now = Date.now(), cell = cellAt(grid, 19.818, 41.327)!;
+  const stored = { token: 'F'.repeat(43), expires: now + 1800000, confirmed: true, request: { cell, radius_km: 3, availability_minutes: 30 } };
+  await page.addInitScript(value => {
+    sessionStorage.setItem('gati-session-v2', JSON.stringify(value));
+    const original = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
+    (window as any).fixes = 0;
+    // Native geolocation timestamps use real time; align only the test callback
+    // timestamp with Playwright's accelerated clock, retaining the device fix.
+    navigator.geolocation.getCurrentPosition = (success, error, options) => {
+      (window as any).fixes++;
+      return original(position => success({ coords: position.coords, timestamp: Date.now() } as GeolocationPosition), error, options);
+    };
+  }, stored);
+  const signal = { ...stored.request, created_at: now, expires_at: stored.expires, state: 'here', arrival_until: now + 900000, invitation: { id: 'f'.repeat(32), intersection: { id: 'node/test-renewal', label: 'Kryqëzim për provë', point: [19.818, 41.327] }, ends_at: stored.expires, state: 'jemi_ketu' } };
+  await page.route('**/api/signal', route => route.fulfill({ json: signal }));
+  let issued = 0, claims = 0, nonce: string | undefined;
+  await page.route('**/api/arrival-renewal-nonce', route => {
+    issued++; nonce = route.request().headers()['x-gati-arrival-nonce'];
+    expect(route.request().headers().authorization).toBe(`Bearer ${stored.token}`);
+    expect(route.request().postData()).toBeNull();
+    return route.fulfill({ json: { expires_at: now + 900000 } });
+  });
+  await page.route('**/api/arrival-renewal', async route => {
+    claims++; expect(route.request().headers()['x-gati-arrival-nonce']).toBe(nonce);
+    expect(route.request().postDataJSON()).toEqual({ cell });
+    // Retry after a failed location claim uses the same short-lived challenge,
+    // with a fresh device fix for each explicit press.
+    if (claims === 1) { await route.fulfill({ status: 409, json: { error: 'Provo përsëri.' } }); return; }
+    signal.arrival_until = now + 1680000;
+    await route.fulfill({ json: signal });
+  });
+  await page.clock.install({ time: now }); await page.goto('/');
+  await expect(page.locator('#active-title')).toHaveText('JAM KËTU.');
+  await expect(page.locator('#renew-arrival')).toBeHidden();
+  await page.clock.fastForward(780001);
+  await expect(page.getByRole('button', { name: 'JAM ENDE KËTU' })).toBeVisible();
+  expect(issued).toBe(0); expect(claims).toBe(0);
+  expect(await page.evaluate(() => (window as any).fixes)).toBe(0);
+  await page.locator('#renew-arrival').click();
+  await expect(page.locator('#status')).toContainText('Prania nuk u rikonfirmua');
+  await expect(page.locator('#active-title')).toHaveText('JAM KËTU.');
+  await page.locator('#renew-arrival').click();
+  await expect(page.locator('#status')).toHaveText('Prania jote u rikonfirmua përkohësisht.');
+  await expect(page.locator('#renew-arrival')).toBeHidden();
+  expect(issued).toBe(1); expect(claims).toBe(2);
+  expect(await page.evaluate(() => (window as any).fixes)).toBe(2);
+  expect(JSON.parse((await page.evaluate(() => sessionStorage.getItem('gati-session-v2')))!).expires).toBe(stored.expires);
+  // A confirmation already capped at the final deadline has no renewal button.
+  signal.arrival_until = stored.expires;
+  await page.reload(); await page.clock.fastForward(910000);
+  await expect(page.locator('#renew-arrival')).toBeHidden();
+  expect(issued).toBe(1); expect(claims).toBe(2);
+});

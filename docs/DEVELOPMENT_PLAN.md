@@ -14,6 +14,12 @@ specifies the public release contract, notification lifecycle, commit sequence a
 acceptance gates. Use PROGRESS.md for actual completion evidence.
 
 
+Accepted lifecycle update: [decision 0014](decisions/0014-bounded-presence-renewal.md)
+adds bounded gathering metadata cleanup, deadline-based ended public presentation,
+and explicit **JAM ENDE KËTU** renewal in the last two minutes of presence freshness.
+Renewal rechecks fresh coarse device location and keeps one contribution within the
+original deadlines. Willingness/gathering extension and relocation remain deferred.
+
 Status: architecture and milestone plan. Implementation has started; consult PROGRESS.md for completed functionality and validation. This document describes intended behavior, not evidence that every protection already exists.
 
 Read [AGENTS.md](../AGENTS.md) for development instructions and
@@ -124,7 +130,7 @@ Maintain one annotated `config/gati.yaml` with a typed schema and a read-only, n
 
 ```yaml
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 8
+schema_version: 9
 profile: production
 availability:
   minimum_minutes: 30
@@ -153,6 +159,7 @@ arrivals:
   confirmation_count: 20
   confirmation_stability_seconds: 10
   freshness_minutes: 15
+  renewal_window_seconds: 120
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:

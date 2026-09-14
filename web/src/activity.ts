@@ -51,6 +51,8 @@ export class ActivityView {
   render() {
     const r = this.release && this.release.expires_at > Date.now() ? this.release : null;
     const own = this.own();
+    const now = Date.now();
+    const liveGatherings = r?.gatherings.filter(g => g.ends_at > now) ?? [];
     el('nearby-statistics').hidden = !own.cell;
     el('activity-time').textContent = r ? `Vëzhguar më ${new Date(r.observed_from).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}–${new Date(r.observed_until).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit', hour12: false })}. Shifrat publikohen me vonesë.` : 'Ende nuk ka të dhëna të publikuara. Kjo nuk do të thotë që nuk ka aktivitet.';
     let nearby = '';
@@ -64,7 +66,7 @@ export class ActivityView {
     const event = r?.gatherings.find(g => g.id === own.gathering);
     el('going-count').textContent = `Kanë zgjedhur të shkojnë: ${bucket(event?.going)}`;
     el('here-count').textContent = `Kanë konfirmuar mbërritjen: ${bucket(event?.here)}`;
-    const renderKey = `${r?.id ?? ''}:${this.selectedCell}:${navigator.onLine}:${r?.gatherings.map(g => Date.now() + this.cutoffMinutes * 60000 < g.ends_at).join(',')}`;
+    const renderKey = `${r?.id ?? ''}:${this.selectedCell}:${navigator.onLine}:${r?.gatherings.map(g => `${now + this.cutoffMinutes * 60000 < g.ends_at}:${g.ends_at <= now}`).join(',')}`;
     if (this.rendered !== renderKey) {
       this.rendered = renderKey;
       const list = el('activity-gatherings'); list.replaceChildren();
@@ -74,11 +76,13 @@ export class ActivityView {
       for (const g of r?.gatherings ?? []) {
         if (this.selectedCell && g.cell !== this.selectedCell) continue;
         const card = document.createElement('article'); card.className = 'public-gathering'; card.dataset.gathering = g.id;
-        const title = document.createElement('h3'); title.textContent = g.state === 'jemi_ketu' ? 'JEMI KËTU.' : 'JEMI GATI.';
+        const ended = g.ends_at <= now;
+        card.dataset.state = ended ? 'ended' : 'open';
+        const title = document.createElement('h3'); title.textContent = ended ? 'Takimi përfundoi.' : g.state === 'jemi_ketu' ? 'JEMI KËTU.' : 'JEMI GATI.';
         const text = document.createElement('p'); text.textContent = `Kanë zgjedhur të shkojnë: ${bucket(g.going)} · Kanë konfirmuar mbërritjen: ${bucket(g.here)}`;
         const area = document.createElement('button'); area.type = 'button'; area.textContent = 'Shiko zonën në hartë';
         area.onclick = () => { const corners = polygon(r!.grid, g.cell); this.map?.fitBounds([corners[0], corners[2]], { padding: 40, maxZoom: 14, duration: 0 }); this.selectedCell = g.cell; this.rendered = ''; this.render(); };
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = 'Dua të bashkohem';
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = ended ? 'Takimi ka përfunduar' : 'Dua të bashkohem';
         button.disabled = !navigator.onLine || Date.now() + this.cutoffMinutes * 60000 >= g.ends_at;
         button.onclick = () => { if (this.release && this.release.expires_at > Date.now() && navigator.onLine && Date.now() + this.cutoffMinutes * 60000 < g.ends_at) this.join(g); };
         card.append(title, text, area, button); list.append(card);
@@ -86,12 +90,12 @@ export class ActivityView {
       if (!list.children.length) { const p = document.createElement('p'); p.textContent = 'Nuk ka takime të publikuara për këtë pamje.'; list.append(p); }
     }
     if (!this.map?.isStyleLoaded()) return;
-    const drawKey = `${r?.id ?? 'empty'}:${this.layer}`;
+    const drawKey = `${r?.id ?? 'empty'}:${this.layer}:${liveGatherings.map(g => g.id).join(',')}`;
     if (this.drawn === drawKey) return; this.drawn = drawKey;
     const cells = new Map<string, number>();
     if (r) {
       if (this.layer === 'willingness') for (const a of r.areas) cells.set(a.cell, a.willing);
-      else for (const g of r.gatherings) cells.set(g.cell, Math.max(cells.get(g.cell) ?? 0, g.going ?? g.here ?? 1));
+      else for (const g of liveGatherings) cells.set(g.cell, Math.max(cells.get(g.cell) ?? 0, g.going ?? g.here ?? 1));
     }
     const features = [...cells].map(([cell, value]) => ({ type: 'Feature' as const, properties: { cell, bucket: value }, geometry: { type: 'Polygon' as const, coordinates: [polygon(r!.grid, cell)] } }));
     const data = { type: 'FeatureCollection' as const, features };

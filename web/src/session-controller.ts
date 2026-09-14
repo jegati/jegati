@@ -20,10 +20,11 @@ interface SessionState {
   here: boolean;
   arrivalUntil: number;
   nonceSeconds: number;
+  renewalWindowSeconds: number;
   currentGrid: Grid | undefined;
   locationMaxAccuracy: number;
   locationMaxAge: number;
-  pendingNonce: { token: string; expires: number; issued: boolean } | null;
+  pendingNonce: { token: string; expires: number; issued: boolean; renewal: boolean } | null;
   invitation: Invitation | null;
   going: boolean;
 }
@@ -42,7 +43,7 @@ export function createSessionController(effects: Effects) {
   const state: SessionState = {
     session: sessions.restore(), busy: false, operations: 0, cancelling: false,
     pollSeconds: 30, nextPoll: 0, failures: 0,
-    here: false, arrivalUntil: 0, nonceSeconds: 120,
+    here: false, arrivalUntil: 0, nonceSeconds: 120, renewalWindowSeconds: 120,
     currentGrid: undefined, locationMaxAccuracy: 100, locationMaxAge: 60,
     pendingNonce: null, invitation: null, going: false,
   };
@@ -114,15 +115,23 @@ export function createSessionController(effects: Effects) {
     state.invitation = signal.invitation ?? null; state.going = signal.state === 'going' || signal.state === 'here';
     state.here = signal.state === 'here'; state.arrivalUntil = signal.arrival_until ?? 0;
   }
-  async function arrive() {
+  function canRenew() {
+    return !!(state.here && state.session && state.invitation && state.arrivalUntil > Date.now()
+      && state.arrivalUntil <= Date.now() + state.renewalWindowSeconds * 1000
+      && state.arrivalUntil < Math.min(state.session.expires, state.invitation.ends_at));
+  }
+  function arrive() { return confirmArrival(false); }
+  function renewArrival() { return confirmArrival(true); }
+  async function confirmArrival(renewal: boolean) {
     if (state.busy || !state.session || !state.invitation || !state.currentGrid) return;
+    if (renewal && !canRenew()) return;
     const owner = state.session.token; begin();
     try {
-      if (!state.pendingNonce || state.pendingNonce.expires <= Date.now()) state.pendingNonce = { token: sessions.randomToken(), expires: Date.now() + state.nonceSeconds * 1000, issued: false };
+      if (!state.pendingNonce || state.pendingNonce.expires <= Date.now() || state.pendingNonce.renewal !== renewal) state.pendingNonce = { token: sessions.randomToken(), expires: Date.now() + state.nonceSeconds * 1000, issued: false, renewal };
       const nonce = state.pendingNonce;
       const headers = { 'X-Gati-Arrival-Nonce': nonce.token };
       if (!nonce.issued) {
-        const issued = await request('POST', '/api/arrival-nonce', undefined, headers);
+        const issued = await request('POST', renewal ? '/api/arrival-renewal-nonce' : '/api/arrival-nonce', undefined, headers);
         if (!issued.ok) throw new Error('unavailable');
         const challenge = await issued.json();
         if (!Number.isFinite(challenge.expires_at) || challenge.expires_at <= Date.now()) throw new Error('expired challenge');
@@ -131,12 +140,12 @@ export function createSessionController(effects: Effects) {
       if (state.session?.token !== owner) return;
       const { cell } = await locateCell(state.currentGrid, state.locationMaxAccuracy, state.locationMaxAge);
       if (state.session?.token !== owner) return;
-      const response = await request('POST', '/api/arrival', { cell }, headers);
+      const response = await request('POST', renewal ? '/api/arrival-renewal' : '/api/arrival', { cell }, headers);
       if (!response.ok) throw new Error('unavailable');
       if (state.session?.token !== owner) return;
       applySignal(await response.json()); state.pendingNonce = null;
-      message('Mbërritja u konfirmua përkohësisht.');
-    } catch { if (state.session?.token === owner) message('Mbërritja nuk u konfirmua. Kontrollo vendndodhjen dhe provo përsëri pranë pikës së takimit.'); }
+      message(renewal ? 'Prania jote u rikonfirmua përkohësisht.' : 'Mbërritja u konfirmua përkohësisht.');
+    } catch { if (state.session?.token === owner) message(renewal ? 'Prania nuk u rikonfirmua. Konfirmimi i mëparshëm vlen deri në afatin e tij. Kontrollo vendndodhjen dhe provo përsëri.' : 'Mbërritja nuk u konfirmua. Kontrollo vendndodhjen dhe provo përsëri pranë pikës së takimit.'); }
     finally { finish(); }
   }
   async function retract() {
@@ -156,5 +165,5 @@ export function createSessionController(effects: Effects) {
     if (state.session && state.session.confirmed && !document.hidden && Date.now() >= state.nextPoll) void sync();
     if (state.session) render();
   }
-  return { state, begin, finish, end, sync, intent, cancelWillingness, arrive, retract, tick };
+  return { state, begin, finish, end, sync, intent, cancelWillingness, arrive, renewArrival, canRenew, retract, tick };
 }

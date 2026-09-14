@@ -1,6 +1,6 @@
 # Matching parameters: current implementation reference
 
-Checked against schema 8 and the implementation on 2026-09-13. Values below are
+Checked against schema 9 and the implementation on 2026-09-14. Values below are
 the current operating settings, not recommendations inferred from the experiments. Bounds
 are validation choices, not privacy guarantees. Cross-field checks can reject
 combinations even when each value is individually within its range.
@@ -155,3 +155,10 @@ retry attempts within `queue_ttl_seconds` (300 maximum). Existing
 between new notifications: the default is max(300, ceil(3600/6)) = 600 seconds.
 Opting out and back in cannot reset it. A stable changed state waits for this gap
 before its queue TTL begins; intermediate states may coalesce.
+
+
+Presence renewal (schema 9): `arrivals.renewal_window_seconds` defaults to 120,
+accepts positive seconds up to 300 and strictly below the freshness duration.
+It sets when a confirmed participant can explicitly press JAM ENDE KËTU with a
+fresh device fix. Renewal retains one contribution and cannot extend the original
+willingness/gathering deadlines. It shares `limits.arrival_requests_per_signal_window`.

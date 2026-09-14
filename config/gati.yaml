@@ -1,5 +1,5 @@
 # Public functional settings. No secrets. See docs/CONFIGURATION.md.
-schema_version: 8
+schema_version: 9
 profile: production
 availability:
   minimum_minutes: 30
@@ -28,6 +28,7 @@ arrivals:
   confirmation_count: 20
   confirmation_stability_seconds: 10
   freshness_minutes: 15
+  renewal_window_seconds: 120
   nonce_seconds: 120
   allowed_cell_neighbor_rings: 0
 public_activity:

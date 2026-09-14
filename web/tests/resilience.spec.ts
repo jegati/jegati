@@ -37,7 +37,7 @@ test('startup failure still expires a restored session without authenticated req
   expect(authenticated).toBe(0);
 });
 
-test('cancellation during a delayed arrival challenge prevents location and arrival submission', async ({ page }) => {
+for (const renewal of [false, true]) test(`cancellation during a delayed arrival challenge prevents location and arrival submission (renewal=${renewal})`, async ({ page }) => {
   const now = Date.now();
   const restored = { token: 'F'.repeat(43), expires: now + 1800000, confirmed: true, request: { cell: 'tirana-v1:100:55:55', radius_km: 3, availability_minutes: 30 } };
   await page.addInitScript(value => {
@@ -47,19 +47,19 @@ test('cancellation during a delayed arrival challenge prevents location and arri
   }, restored);
   await page.route('**/api/signal', route => route.request().method() === 'DELETE'
     ? route.fulfill({ status: 204 })
-    : route.fulfill({ json: { ...restored.request, created_at: now, expires_at: restored.expires, state: 'going', invitation: { id: 'f'.repeat(32), ends_at: restored.expires, state: 'jemi_gati', intersection: { id: 'synthetic', label: 'Kryqëzim për provë', point: [19.818, 41.327] } } } }));
+    : route.fulfill({ json: { ...restored.request, created_at: now, expires_at: restored.expires, state: renewal ? 'here' : 'going', arrival_until: renewal ? now + 120000 : 0, invitation: { id: 'f'.repeat(32), ends_at: restored.expires, state: 'jemi_gati', intersection: { id: 'synthetic', label: 'Kryqëzim për provë', point: [19.818, 41.327] } } } }));
   let release!: () => void, challenged!: () => void;
   const requested = new Promise<void>(resolve => { challenged = resolve; });
   const held = new Promise<void>(resolve => { release = resolve; });
-  await page.route('**/api/arrival-nonce', async route => {
+  await page.route(renewal ? '**/api/arrival-renewal-nonce' : '**/api/arrival-nonce', async route => {
     challenged(); await held;
     await route.fulfill({ json: { expires_at: now + 120000 } });
   });
   let arrivals = 0;
-  page.on('request', request => { if (request.url().endsWith('/api/arrival')) arrivals++; });
+  page.on('request', request => { if (request.url().endsWith(renewal ? '/api/arrival-renewal' : '/api/arrival')) arrivals++; });
   await page.goto('/');
-  await expect(page.locator('#arrive')).toBeVisible();
-  await page.locator('#arrive').click(); await requested;
+  await expect(page.locator(renewal ? '#renew-arrival' : '#arrive')).toBeVisible();
+  await page.locator(renewal ? '#renew-arrival' : '#arrive').click(); await requested;
   await page.locator('#cancel').click();
   await expect(page.locator('#status')).toHaveText('Gatishmëria u mbyll.');
   release();

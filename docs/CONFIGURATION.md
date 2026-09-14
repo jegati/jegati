@@ -1,7 +1,7 @@
 # Functional configuration
 
 `config/gati.yaml` is the complete production-default document. `internal/config`
-is its authoritative typed schema and validation policy (schema version 8).
+is its authoritative typed schema and validation policy (schema version 9).
 Every field is required, including explicit zero/false values. Unknown or duplicate
 keys, aliases, nulls, coercion from strings to numbers, extra documents and files
 above 64 KiB are rejected. No field accepts credentials. The optional push contact is an explicit public
@@ -17,7 +17,7 @@ Public activity and optional session push settings are active. Daily summaries a
 area follows/alerts remain unfinished; fields alone do not establish a feature.
 
 These fields are reserved and have no runtime behavior today. They remain in
-schema 8 for compatibility; their presence and validation do not implement the
+schema 9 for compatibility; their presence and validation do not implement the
 associated requirement:
 
 | Reserved setting | Current limitation |
@@ -116,3 +116,14 @@ concurrency, transport timeout and retry bounds. Enabled production configuratio
 rejects the localhost contact placeholder. VAPID service keys stay outside YAML in
 an ignored mounted file. See [NOTIFICATIONS.md](NOTIFICATIONS.md) for local setup,
 provider privacy limits and the distinction between fixture and device verification.
+
+
+## Schema 9 presence renewal
+
+`arrivals.renewal_window_seconds` defaults to 120. It must be positive, at most
+300, and strictly less than `freshness_minutes * 60`. It controls how soon before
+presence expiry **JAM ENDE KËTU** becomes available. Each explicit renewal needs a
+new challenge and fresh device fix; it can refresh presence for up to the existing
+freshness duration, bounded by the original session and gathering deadlines.
+No setting here extends willingness or gathering duration. Both renewal endpoints
+share the existing arrival request budget. See decision 0014.

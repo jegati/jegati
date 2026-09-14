@@ -1,5 +1,9 @@
 # Gathering and willingness lifecycle review — 2026-09-14
 
+Historical review: the three approved follow-ups are now covered by
+[decision 0014](decisions/0014-bounded-presence-renewal.md). See PROGRESS for current
+implementation and test evidence. The findings below describe the pre-change code.
+
 This review answers the user's lifecycle questions against the current source and
 config. It does not authorize or implement a changed product lifecycle. Existing
 regression evidence is in reports/auditability-followup-2026-09-14.md; no new runtime

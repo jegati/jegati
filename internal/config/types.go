@@ -1,7 +1,7 @@
 // Package config owns the public, versioned functional configuration.
 package config
 
-const SchemaVersion = 8
+const SchemaVersion = 9
 
 type Config struct {
 	Limits         Limits         `yaml:"limits" json:"limits"`
@@ -45,6 +45,7 @@ type Matching struct {
 }
 
 type Arrivals struct {
+	RenewalWindowSeconds         int `yaml:"renewal_window_seconds" json:"renewal_window_seconds"`
 	ConfirmationCount            int `yaml:"confirmation_count" json:"confirmation_count"`
 	ConfirmationStabilitySeconds int `yaml:"confirmation_stability_seconds" json:"confirmation_stability_seconds"`
 	FreshnessMinutes             int `yaml:"freshness_minutes" json:"freshness_minutes"`

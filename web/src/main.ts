@@ -47,6 +47,8 @@ function invitationView() {
   el('collective-title').textContent = state.invitation.state === 'jemi_ketu' ? 'JEMI KËTU.' : 'JEMI GATI.';
   el<HTMLButtonElement>('arrive').hidden = !state.going || state.here;
   el<HTMLButtonElement>('arrive').disabled = state.busy;
+  el<HTMLButtonElement>('renew-arrival').hidden = !controller.canRenew();
+  el<HTMLButtonElement>('renew-arrival').disabled = state.busy || !navigator.onLine;
   el<HTMLButtonElement>('retract').hidden = !state.here;
   el<HTMLButtonElement>('retract').disabled = state.busy;
   el('arrival-status').textContent = state.here ? `Mbërritja jote është konfirmuar për rreth ${Math.max(1, Math.ceil((state.arrivalUntil - Date.now()) / 60000))} minuta të tjera.` : state.going ? 'Kur të mbërrish, konfirmo me vendndodhjen një herë.' : '';
@@ -155,6 +157,7 @@ async function loadPreview(id: string, candidate: sessions.Session, expires: num
 retry.onclick = () => { void sync(true); };
 cancel.onclick = controller.cancelWillingness;
 el<HTMLButtonElement>('arrive').onclick = controller.arrive;
+el<HTMLButtonElement>('renew-arrival').onclick = controller.renewArrival;
 el<HTMLButtonElement>('retract').onclick = controller.retract;
 el<HTMLButtonElement>('going').onclick = () => { void intent('going'); };
 el<HTMLButtonElement>('decline').onclick = () => { void intent('decline'); };
@@ -163,10 +166,11 @@ async function start() {
   const [configResponse, gridResponse] = await Promise.all(['/api/config', '/api/geography'].map(url => fetch(url, { credentials: 'omit', cache: 'no-store' })));
   if (!configResponse.ok || !gridResponse.ok) throw new Error('unavailable');
   const configuration = await configResponse.json();
-  if (configuration.schema_version !== 8) throw new Error('unsupported schema');
+  if (configuration.schema_version !== 9) throw new Error('unsupported schema');
   const config = configuration.config, grid: Grid = await gridResponse.json();
   state.pollSeconds = config.notifications.foreground_poll_seconds;
-  state.nonceSeconds = config.arrivals.nonce_seconds; state.currentGrid = grid;
+  state.nonceSeconds = config.arrivals.nonce_seconds;
+  state.renewalWindowSeconds = config.arrivals.renewal_window_seconds; state.currentGrid = grid;
   state.locationMaxAccuracy = config.geography.location_max_accuracy_meters;
   state.locationMaxAge = config.geography.location_fix_max_age_seconds;
   for (const minutes of config.availability.choices_minutes) duration.add(new Option(`${minutes} minuta`, String(minutes)));

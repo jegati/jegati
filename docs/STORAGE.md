@@ -95,7 +95,7 @@ rejection. No arrival/member counts exist yet.
 ## Temporary arrival lifecycle
 
 `arrival-nonce:<capability-hash>` contains nonce hash, gathering ID, expiry and used
-flag, at most 120 seconds and never beyond session/gathering expiry. A used nonce
+flag, renewal mode and current member binding, at most 120 seconds and never beyond session/gathering expiry. A used nonce
 is a short-lived replay tombstone; cancellation removes it. It cannot restore a
 retracted arrival. Arrival confirmation stores only an expiry and private member
 reference in the session, with no arrival coordinates or coarse-cell history.
@@ -103,6 +103,12 @@ reference in the session, with no arrival coordinates or coarse-cell history.
 members scored by freshness deadline (maximum 15 minutes, bounded by session and
 gathering). One credential has at most one live member. Removal on cancel, decline,
 switch and retraction is atomic; deadline-aware reads ignore expired scores.
+
+Explicit early renewal changes the same live member's score atomically, preserving
+an uninterrupted stability cohort and one contribution. The renewal challenge also
+expires no later than the previous arrival deadline. The member can persist across
+renewals only within the original session/gathering; there is no renewal history.
+Retraction followed by an ordinary arrival instead creates a new member.
 
 `presence:<gathering-id>` holds only the temporary stable confirmation cohort,
 with TTL bounded by stability plus twice the reconciliation interval and by the

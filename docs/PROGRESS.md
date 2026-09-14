@@ -8,8 +8,10 @@ entries below are dated historical evidence, not competing current instructions.
 
 ## Current task and authorization
 
-Both authorized auditability cleanup batches are complete locally, with tests and
-incremental commits, while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
+Both auditability cleanup batches are complete. The user subsequently authorized
+three lifecycle priorities: expired gathering metadata cleanup, ended public views
+and explicit early presence renewal. They are implemented locally; final regression
+runs are being recorded below while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
 OVHcloud + Cloudflare Free. Exact host sizing/OS, SSH, zone activation and private
 reporting/alert channels remain unverified. Preserve commands.txt. Do not request
 provider/identity decisions again; no remote Git push is authorized.
@@ -69,19 +71,18 @@ production-image rehearsal sequentially. `make simulate-population` uses current
 settings; `make load` and monitored component benchmarks also exist. All are local
 synthetic checks, not remote deployment or external push evidence.
 
-Both cleanup batches are complete; no product behavior/defaults were changed.
-A subsequent [lifecycle review](LIFECYCLE_REVIEW.md) found a retention follow-up:
-expired gathering index entries are filtered but not explicitly pruned, and stale
-session gathering references can persist until reassignment/session expiry. Add
-keeper/churn regression coverage and bounded cleanup before longer-lived workflows.
-The public renderer can retain ended gatherings in an unexpired delayed snapshot;
-joining is disabled, but explicit ended-state handling is a usability follow-up.
-`make test-planner-replay` adds an exact planner regression without issuing
-credentials or changing ordinary simulation behavior. Hosting work still needs
-the delivered server's nonsecret connection details and privately arranged
-SSH/Cloudflare access. Prepare and audit a fresh exact release before activation;
-the older runtime audit does not cover the new source. Keep optional push off
-until provider/device verification.
+The approved lifecycle priorities are implemented: bounded gathering-index and
+session-link cleanup, ended public cards/map cells, and **JAM ENDE KËTU** renewal
+with fresh device location during the last 120 seconds of presence freshness.
+Schema 9 exposes `arrivals.renewal_window_seconds`. Renewal preserves one counted
+contribution, stability and the original session/gathering deadlines; willingness
+extension, gathering extension and destination relocation remain deferred.
+See [decision 0014](decisions/0014-bounded-presence-renewal.md). Final population and
+production-image rehearsal evidence is being collected before closing this batch.
+Hosting work still needs the delivered server's nonsecret connection details and
+privately arranged SSH/Cloudflare access. Prepare and audit a fresh exact release
+before activation; the older runtime audit does not cover this source. Keep
+optional push off until provider/device verification.
 Historical entries follow; their old next-action lists are superseded by this one.
 
 ## Milestone 04 evidence
@@ -1421,3 +1422,38 @@ The mutation rereads current state, preserving any newer assignment and original
 willingness expiry. Tests cover repeated expiry with a live keeper, stale links
 without client polling, and delayed cleanup after reassignment. `make test-store`
 passed the real Valkey/race store, HTTP, notification and worker packages.
+
+
+## Lifecycle presence and presentation implementation — 2026-09-14
+
+Implemented schema 9 early presence renewal using mode/member-bound challenges,
+the existing one-shot coarse device fix and rate budgets. Renewal atomically
+updates one uninterrupted contribution and does not extend willingness/gathering
+expiry. Ended public cards retain labeled historical buckets until snapshot
+expiry; ended gatherings leave the map layer without hiding another live gathering
+in the same cell. Product, API, storage, configuration and threat docs now describe
+these boundaries. No credentials, push, deployment or new dependency was required.
+
+Validation completed so far:
+
+- `make test-store`: disposable Valkey race tests passed, including renewal replay,
+  one-count/stability preservation, early rejection, expired challenges, missing
+  contributions, retraction/cancellation and the cleanup keeper/churn regressions.
+- `OUTPUT=reports/local/lifecycle-simulation make simulate`: passed the 40-person
+  scenario plus fixed-clock store/HTTP integration, including the new exact renewal
+  window, wrong-location/body rejection, endpoint separation and deadline cap.
+- `make test-browser OUTPUT=reports/local/lifecycle-browser-2`: 39 Chromium tests
+  passed (1.1 minutes). The first run passed 37/38; the new test's native location
+  timestamp was real while its browser clock advanced 13 minutes. The test adapter
+  now aligns its timestamp to the simulated clock; production validation unchanged.
+- `make test-planner-replay`: passed (34.02 seconds). The first comparison detected
+  the expected schema/config hash change. All other fixture fields, inputs and
+  eight matching checkpoints were equal; only that reviewed hash was updated.
+- `make test`: passed Go race/unit tests, simulation-build tests, vet and TypeScript;
+  environment-gated integration checks are counted only under their commands above.
+- Changed arrival Lua fragments passed StyLua 2.3.0 syntax/AST verification and
+  token comparison during formatting; real-store tests passed afterward.
+
+Next: finish the already-running 3,000-person response simulation/checker and
+production-image rehearsal, record exact evidence and make the final local commit.
+No public activation or new capacity claim follows from these regression checks.

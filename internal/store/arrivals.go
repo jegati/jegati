@@ -27,7 +27,18 @@ if s.arrival_until and s.arrival_until <= now then
   end
   redis.call('SET', KEYS[1], cjson.encode(s), 'KEEPTTL')
 end
-if s.state ~= 'going' or (s.arrival_until or 0) > now then
+local renewal = tonumber(ARGV[3]) > 0
+if renewal then
+  if
+    s.state ~= 'here'
+    or not s._arrival_member
+    or (s.arrival_until or 0) <= now
+    or s.arrival_until > now + tonumber(ARGV[3])
+    or s.arrival_until >= math.min(s.expires_at, s._gathering_until)
+  then
+    return 'CONFLICT'
+  end
+elseif s.state ~= 'going' or (s.arrival_until or 0) > now then
   return 'CONFLICT'
 end
 local event = redis.call('GET', 'gati:gathering:' .. s._gathering)
@@ -38,21 +49,47 @@ local old = redis.call('GET', KEYS[2])
 if old then
   local nonce = cjson.decode(old)
   if nonce.hash == ARGV[1] then
-    if nonce.gathering ~= s._gathering or nonce.used or nonce.expires_at <= now then
+    if
+      nonce.gathering ~= s._gathering
+      or nonce.used
+      or nonce.expires_at <= now
+      or (nonce.renewal or false) ~= renewal
+      or (renewal and nonce.member ~= s._arrival_member)
+    then
       return 'GONE'
     end
     return old
   end
 end
 local expiry = math.min(now + tonumber(ARGV[2]), s.expires_at, s._gathering_until)
-local nonce =
-  cjson.encode({ hash = ARGV[1], gathering = s._gathering, expires_at = expiry, used = false })
+if renewal then
+  expiry = math.min(expiry, s.arrival_until)
+end
+local nonce = cjson.encode({
+  hash = ARGV[1],
+  gathering = s._gathering,
+  expires_at = expiry,
+  used = false,
+  renewal = renewal,
+  member = renewal and s._arrival_member or nil,
+})
 redis.call('SET', KEYS[2], nonce, 'PX', expiry - now)
 return nonce
 `)
 
 func (s *Store) IssueArrivalNonce(ctx context.Context, hash, nonceHash string, ttlMS int64) (int64, error) {
-	raw, e := issueNonce.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash}, nonceHash, ttlMS).Text()
+	return s.issueArrivalNonce(ctx, hash, nonceHash, ttlMS, 0)
+}
+
+func (s *Store) IssueArrivalRenewalNonce(ctx context.Context, hash, nonceHash string, ttlMS, windowMS int64) (int64, error) {
+	if windowMS <= 0 {
+		return 0, ErrConflict
+	}
+	return s.issueArrivalNonce(ctx, hash, nonceHash, ttlMS, windowMS)
+}
+
+func (s *Store) issueArrivalNonce(ctx context.Context, hash, nonceHash string, ttlMS, windowMS int64) (int64, error) {
+	raw, e := issueNonce.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash}, nonceHash, ttlMS, windowMS).Text()
 	if e != nil {
 		return 0, errors.New("arrival challenge unavailable")
 	}
@@ -91,25 +128,48 @@ if
 then
   return 'GONE'
 end
+local renewal = tonumber(ARGV[5]) > 0
+if (nonce.renewal or false) ~= renewal then
+  return 'GONE'
+end
 if nonce.used then
   if
     s.state == 'here'
     and (s.arrival_until or 0) > now
-    and s._arrival_member == ARGV[4] .. '|' .. ARGV[1]
+    and s._arrival_member == (nonce.member or ARGV[4] .. '|' .. ARGV[1])
   then
     return raw
   end
   return 'GONE'
 end
-if s.state ~= 'going' or (s.arrival_until or 0) > now then
-  return 'CONFLICT'
-end
-if s._arrival_member then
-  redis.call('ZREM', KEYS[4], s._arrival_member)
-end
 local expiry = math.min(now + tonumber(ARGV[2]), s.expires_at, g.ends_at)
+if renewal then
+  if
+    s.state ~= 'here'
+    or not nonce.member
+    or s._arrival_member ~= nonce.member
+    or (s.arrival_until or 0) <= now
+    or s.arrival_until > now + tonumber(ARGV[5])
+    or expiry <= s.arrival_until
+  then
+    return 'CONFLICT'
+  end
+  local score = redis.call('ZSCORE', KEYS[4], s._arrival_member)
+  if not score or tonumber(score) <= now then
+    return 'CONFLICT'
+  end
+  -- Same uninterrupted contribution: update its score, preserving a pending
+  -- stability cohort. No remove/add gap and no second counted arrival.
+elseif s.state ~= 'going' or (s.arrival_until or 0) > now then
+  return 'CONFLICT'
+else
+  if s._arrival_member then
+    redis.call('ZREM', KEYS[4], s._arrival_member)
+  end
+  s._arrival_member = ARGV[4] .. '|' .. ARGV[1]
+end
 s.arrival_until = expiry
-s._arrival_member = ARGV[4] .. '|' .. ARGV[1]
+nonce.member = s._arrival_member
 s.state = 'here'
 nonce.used = true
 redis.call('SET', KEYS[2], cjson.encode(nonce), 'KEEPTTL')
@@ -122,7 +182,18 @@ return cjson.encode(s)
 `)
 
 func (s *Store) ConfirmArrival(ctx context.Context, hash, nonceHash string, g Gathering, freshnessMS int64) (Signal, error) {
-	raw, e := confirmArrival.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash, keyPrefix + "gathering:" + g.ID, keyPrefix + "arrivals:" + g.ID}, nonceHash, freshnessMS, g.Intersection.ID, hash).Text()
+	return s.confirmArrival(ctx, hash, nonceHash, g, freshnessMS, 0)
+}
+
+func (s *Store) RenewArrival(ctx context.Context, hash, nonceHash string, g Gathering, freshnessMS, windowMS int64) (Signal, error) {
+	if windowMS <= 0 {
+		return Signal{}, ErrConflict
+	}
+	return s.confirmArrival(ctx, hash, nonceHash, g, freshnessMS, windowMS)
+}
+
+func (s *Store) confirmArrival(ctx context.Context, hash, nonceHash string, g Gathering, freshnessMS, windowMS int64) (Signal, error) {
+	raw, e := confirmArrival.Run(ctx, s.Client, []string{keyPrefix + "s:" + hash, keyPrefix + "arrival-nonce:" + hash, keyPrefix + "gathering:" + g.ID, keyPrefix + "arrivals:" + g.ID}, nonceHash, freshnessMS, g.Intersection.ID, hash, windowMS).Text()
 	if e != nil {
 		return Signal{}, errors.New("arrival confirmation unavailable")
 	}

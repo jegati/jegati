@@ -67,7 +67,7 @@ bin/gati-simulate -target "http://127.0.0.1:$api_port" -scenario "simulation/sce
 
 kill "$api_pid";wait "$api_pid";api_pid=""
 if [[ "${INTEGRATION_CHECKS:-1}" == 1 ]]; then
-GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -p 1 -tags simulation -count=1 ./internal/store ./internal/httpapi -run "TestSimulationClockAndNamespace|TestSimulatedContinuousActivationAndLateAdmission|TestKnownColludingInvitationInference"
+GATI_SIM_INTEGRATION=1 GATI_TEST_ADDR="$store_address" GATI_TEST_PASSWORD_FILE="$repo_dir/.runtime/simulation/app-password" go test -race -p 1 -tags simulation -count=1 ./internal/store ./internal/httpapi -run "TestSimulatedArrivalRenewal|TestSimulationClockAndNamespace|TestSimulatedContinuousActivationAndLateAdmission|TestKnownColludingInvitationInference"
 
 fi
 

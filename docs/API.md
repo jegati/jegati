@@ -6,7 +6,7 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | Route | Behavior |
 | --- | --- |
 | `GET /healthz` | API process health (does not prove every dependency or privacy control) |
-| `GET /api/config` | Nonsecret functional config, schema version 8, canonical SHA-256 |
+| `GET /api/config` | Nonsecret functional config, schema version 9, canonical SHA-256 |
 | `GET /api/geography` | Public fixed grid bounds/steps for client-side coarsening |
 | `GET /api/map/roads` | Cacheable first-party public OSM road geometry, with ETag |
 | `POST /api/signals` | Create or identically retry this capability's willingness |
@@ -22,6 +22,8 @@ are issued in URLs. Authenticated responses are `Cache-Control: no-store`.
 | `POST /api/join` | Atomically create/reuse willingness and admit a recipient |
 | `POST /api/arrival-nonce` | Issue an expiring arrival challenge for a going session |
 | `POST /api/arrival` | Confirm a fresh coarse arrival; idempotent nonce replay |
+| `POST /api/arrival-renewal-nonce` | Issue a challenge during the configured early-renewal window for a fresh here session |
+| `POST /api/arrival-renewal` | Refresh the existing presence contribution with a fresh coarse claim |
 | `DELETE /api/arrival` | Retract arrival, retaining going intent and willingness |
 
 Participant routes require `Authorization: Bearer <base64url-encoded 32 random bytes>`.
@@ -73,6 +75,13 @@ The own-session view includes `state: here` and `arrival_until` while fresh. A
 gathering becomes `jemi_ketu` after configured stable presence; it resets if current
 accepted arrivals fall below threshold. Internal nonce/member/cohort data is never
 returned. Wrong-area claims are 409; unavailable/expired/used-retracted claims 410.
+
+Renewal uses the same authorization headers, empty issuance body and strict
+`{cell}` claim shape. Its challenge is mode-bound and cannot outlive the previous
+confirmation. It needs a still-live contribution within the configured renewal
+window and cannot extend session/gathering deadlines. Early or nonextendable
+renewal is 409; invalid/expired challenges are 410. Retries do not extend freshness.
+All arrival routes share the same rate budgets and private response allowlists.
 
 ## Public activity (schema 7)
 

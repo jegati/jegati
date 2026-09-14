@@ -42,6 +42,13 @@ Declining/cancelling is neutral, easy and never guilt-inducing.
   marked JEMI KËTU. They do not need to have been counted in the initial activation.
 - Arrival uses a fresh coarse location claim and **JAM KËTU**. Enough accepted
   arrivals produce **JEMI KËTU**. Individual arrivals are never public.
+- A currently confirmed participant may explicitly press **JAM ENDE KËTU** shortly
+  before presence expiry, with a fresh device fix and challenge. This refreshes one
+  contribution within the original session/gathering deadlines; it never extends
+  willingness, changes destination or automatically keeps a gathering alive.
+- Ended public gatherings are labeled from their released deadline and removed
+  from the live gathering map layer; their historical buckets expire with the
+  snapshot. Expired gathering metadata is pruned in bounded cleanup/reconciliation.
 - The requested independence of arrivals is a security goal, not a solved property:
   the current design establishes distinct credentials, not distinct humans.
 

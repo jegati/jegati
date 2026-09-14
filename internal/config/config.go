@@ -225,7 +225,7 @@ func (c Config) Validate(allowSimulation bool) error {
 	if r.ConfirmationCount > 500 {
 		return errors.New("arrival threshold exceeds bounded confirmation cohort")
 	}
-	if r.FreshnessMinutes > 15 || r.NonceSeconds > 120 || r.NonceSeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= m.LateJoinMinRemainingMinutes*60 || r.AllowedCellNeighborRings > 1 {
+	if r.RenewalWindowSeconds > 300 || r.RenewalWindowSeconds >= r.FreshnessMinutes*60 || r.FreshnessMinutes > 15 || r.NonceSeconds > 120 || r.NonceSeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= r.FreshnessMinutes*60 || r.ConfirmationStabilitySeconds >= m.LateJoinMinRemainingMinutes*60 || r.AllowedCellNeighborRings > 1 {
 		return errors.New("arrival lifetime or geography outside bounds")
 	}
 	if p.AreaSizeMeters < 1000 || p.AreaSizeMeters > 5000 || p.AreaSizeMeters < g.CellSizeMeters || p.AreaSizeMeters%g.CellSizeMeters != 0 || p.CaptureMaxSeconds > 30 || p.CaptureMaxSeconds >= p.ReleaseSeconds || p.MaxSnapshotBytes < 1024 {

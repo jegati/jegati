@@ -361,3 +361,22 @@ production-stack rehearsal passed, with no monitoring alerts in the full browser
 journey. This evidence does not change the threat assumptions or renew the older
 exact-release audit. An isolated injected-push browser timeout and successful
 repeats are documented; actual device/provider delivery remains a separate gate.
+
+
+### Bounded early presence renewal (decision 0014, schema 9)
+
+Explicit renewal uses a new mode/member-bound challenge and the existing coarse
+location checks and rate budgets. It atomically updates one current contribution,
+with no new coordinates, permanent identifier, location history or public count
+query. The same member can persist through renewals until the original session or
+gathering ends; compromise can link those temporary actions. Lost-response retries
+cannot keep extending freshness; cancelled, retracted, expired or missing members
+cannot be restored through renewal. Normal re-arrival starts a new stability member.
+This does not prove physical presence or human independence.
+
+Bounded cleanup now prunes the kept-alive gathering index and clears expired
+session links on reads/reconciliation. Cleanup lag includes gathering deadlines.
+Public ended-state rendering uses existing released deadlines and leaves bucket
+values unchanged. External historical copies remain outside deletion guarantees.
+See the lifecycle implementation report for actual regression evidence; these
+changes require a fresh exact release audit before public activation.

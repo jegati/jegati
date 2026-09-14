@@ -58,12 +58,18 @@ func (s signalAPI) arrival(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 401)
 		return
 	}
-	if r.URL.Path == "/api/arrival-nonce" {
+	renewal := r.URL.Path == "/api/arrival-renewal" || r.URL.Path == "/api/arrival-renewal-nonce"
+	if r.URL.Path == "/api/arrival-nonce" || r.URL.Path == "/api/arrival-renewal-nonce" {
 		if r.ContentLength != 0 {
 			writeError(w, 400)
 			return
 		}
-		expiry, e := s.store.IssueArrivalNonce(r.Context(), hash, nonce, int64(s.config.Arrivals.NonceSeconds)*1000)
+		var expiry int64
+		if renewal {
+			expiry, e = s.store.IssueArrivalRenewalNonce(r.Context(), hash, nonce, int64(s.config.Arrivals.NonceSeconds)*1000, int64(s.config.Arrivals.RenewalWindowSeconds)*1000)
+		} else {
+			expiry, e = s.store.IssueArrivalNonce(r.Context(), hash, nonce, int64(s.config.Arrivals.NonceSeconds)*1000)
+		}
 		if e != nil {
 			s.fail(w, e)
 			return
@@ -106,7 +112,11 @@ func (s signalAPI) arrival(w http.ResponseWriter, r *http.Request) {
 		writeError(w, 409)
 		return
 	}
-	value, e = s.store.ConfirmArrival(r.Context(), hash, nonce, g, int64(s.config.Arrivals.FreshnessMinutes)*60000)
+	if renewal {
+		value, e = s.store.RenewArrival(r.Context(), hash, nonce, g, int64(s.config.Arrivals.FreshnessMinutes)*60000, int64(s.config.Arrivals.RenewalWindowSeconds)*1000)
+	} else {
+		value, e = s.store.ConfirmArrival(r.Context(), hash, nonce, g, int64(s.config.Arrivals.FreshnessMinutes)*60000)
+	}
 	if e != nil {
 		s.fail(w, e)
 		return
