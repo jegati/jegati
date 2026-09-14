@@ -58,7 +58,7 @@ api_pid=$!
 ready=0
 for _ in {1..2400};do
   if ! kill -0 "$api_pid" 2>/dev/null;then cat "$run_output/startup.log";exit 1;fi
-  if rg -q 'GATI API started.' "$run_output/startup.log";then ready=1;break;fi
+  if grep -q 'GATI API started.' "$run_output/startup.log";then ready=1;break;fi
   sleep .05
 done
 if [[ "$ready" != 1 ]];then printf "Simulation API readiness timed out.\n";exit 1;fi
