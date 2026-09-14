@@ -29,7 +29,7 @@ fi
 printf 'Preparing %s for GATI deployment user %s.\n' "${PRETTY_NAME:-$ID}" "$deploy_user"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y --no-install-recommends ca-certificates curl gnupg openssh-server python3 tar gzip
+apt-get install -y --no-install-recommends ca-certificates curl gnupg openssh-server python3 tar gzip xz-utils
 
 # Docker's repository supplies the engine and Compose plugin. The key is stored
 # in a root-readable keyring rather than installed into the legacy apt keychain.

@@ -11,6 +11,10 @@ and runs the repository's host preflight and immutable activation checks. It doe
 not use a container registry. The VPS receives the release and audit evidence,
 not the Git checkout. A deployment is rejected if the release revision, image
 identities, audit, host controls, or tunnel credential do not match.
+It is also rejected unless the exact commit already has a successful `local
+verification` workflow run; verification and activation cannot race for a new
+deploy-only commit. After successful runtime verification, `/opt/gati/current` is
+atomically updated for the prepared monitoring service templates.
 
 ## One-time values
 
@@ -38,6 +42,15 @@ email alerts are separate: install `/etc/gati/alerts.env` on the VPS from
 password, sender and project recipient. The application can run without that
 optional alert service.
 
+Cold deployment runners and hosts have a two-hour workflow allowance for pinned
+build tools, image construction and scanning, transfer and activation. A rerun of
+the same revision re-verifies and reuses its existing complete immutable release;
+it refuses a partial release/audit pair for manual inspection. This does not make
+a different revision an automatic rollback.
+Before those expensive steps, the workflow verifies SSH host identity and checks
+the VPS architecture, required commands, Docker access, GATI directory access,
+memory/disk availability, swap/hibernation controls and fixed-network conflicts.
+
 ## First VPS preparation
 
 Copy and run [`scripts/vps-bootstrap.sh`](../scripts/vps-bootstrap.sh) from the
@@ -56,6 +69,8 @@ ports remain private because Cloudflare Tunnel connects outbound. Disable swap,
 hibernation, core dumps and provider RAM snapshots, and ensure `/opt/gati` is
 writable by the deployment user. The workflow's `scripts/release.py preflight`
 checks the settings it can observe and refuses public activation otherwise.
+The bootstrap also installs `xz-utils`, required when the pinned user-local Node
+archive is unpacked on a minimal Ubuntu or Debian host.
 
 After the first successful run, inspect the release manifest, audit JSON, running
 image IDs, container mounts and Cloudflare response headers independently. Keep the

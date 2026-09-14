@@ -13,6 +13,16 @@ bare Docker TCP accept. Both `make simulate` scenarios passed locally afterward,
 including their race-enabled integration packages. Re-run the GitHub workflow on
 the corrective commit before creating the deploy branch.
 
+The next real runner passed both simulations and the population scenario, then
+exposed a five-second Vite log-text readiness assumption inside `audit-local`.
+The smoke check now polls the actual HTTP endpoints for up to 60 seconds while
+requiring their processes to remain alive; three focused runs and the full local
+audit passed. A deployment-environment sweep also fixed the remote checksum working
+directory, minimal-host `xz` prerequisite, same-revision retry, stable current-release
+link and cold-run timeout. Deployment now requires a successful verification for
+the exact SHA and checks SSH, architecture, tools, Docker, memory/disk, swap/resume,
+directory access and fixed subnet conflicts before expensive release work.
+
 ## Current task and authorization
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with

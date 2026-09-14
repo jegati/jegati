@@ -18,16 +18,21 @@ async function freePort() {
 const port = await freePort();
 const api = spawn('./bin/gati', ['-listen', `127.0.0.1:${port}`, '-config', 'internal/config/testdata/default.yaml'], { stdio: ['ignore', 'pipe', 'inherit'] });
 let web;
-let startup = '';
-api.stdout.on('data', (chunk) => { startup += chunk; });
-try {
-  for (let i = 0; i < 100 && !startup.includes('API started'); i++) {
-    if (api.exitCode !== null) throw new Error('API exited before readiness');
-    await delay(50);
+api.stdout.resume();
+async function waitForHttp(child, url, label) {
+  for (let attempt = 0; attempt < 600; attempt++) {
+    if (child.exitCode !== null) throw new Error(`${label} exited before readiness`);
+    try {
+      const response = await fetch(url);
+      if (response.ok) return response;
+    } catch {}
+    await delay(100);
   }
-  assert.ok(startup.includes('API started'), 'API did not start');
+  throw new Error(`${label} did not become HTTP-ready`);
+}
+try {
   const base = `http://127.0.0.1:${port}`;
-  const health = await fetch(`${base}/healthz`);
+  const health = await waitForHttp(api, `${base}/healthz`, 'API');
   assert.equal(health.status, 200);
   assert.equal((await health.json()).stage, 'willingness');
   const response = await fetch(`${base}/api/config`);
@@ -45,14 +50,9 @@ try {
   web = spawn(process.execPath, ['web/node_modules/vite/bin/vite.js', 'web', '--host', '127.0.0.1', '--port', String(webPort)], {
     env: { ...process.env, GATI_API_PROXY: base }, stdio: ['ignore', 'pipe', 'inherit'],
   });
-  let webStartup = '';
-  web.stdout.on('data', (chunk) => { webStartup += chunk; });
-  for (let i = 0; i < 100 && !webStartup.includes('Local:'); i++) {
-    if (web.exitCode !== null) throw new Error('Vite exited before readiness');
-    await delay(50);
-  }
-  assert.ok(webStartup.includes('Local:'), 'Vite did not start');
-  const html = await (await fetch(`http://127.0.0.1:${webPort}/`)).text();
+  web.stdout.resume();
+  const ready = await waitForHttp(web, `http://127.0.0.1:${webPort}/`, 'Vite');
+  const html = await ready.text();
   assert.ok(html.includes('lang="sq"') && html.includes('A JE GATI?'), 'Albanian client shell missing');
   const proxied = await fetch(`http://127.0.0.1:${webPort}/api/config`);
   assert.equal(proxied.status, 200);
