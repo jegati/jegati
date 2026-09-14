@@ -7,6 +7,8 @@ import statistics
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 LABELS = {
+    "30000-5pct-reaction10": "30 000 · 5% · bashkime 10%",
+    "10000-3pct-clustered-reaction10": "10 000 · 3% · grumbullime · bashkime 10%",
     "3000-1pct": "3 000 · 1% · 1 km",
     "3000-5pct": "3 000 · 5% · 1 km",
     "10000-3pct-no-reaction": "10 000 · 3% · pa bashkime nga harta",
@@ -86,8 +88,21 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report", type=pathlib.Path)
     parser.add_argument("output", type=pathlib.Path)
+    parser.add_argument("--supplement", type=pathlib.Path, action="append", default=[])
     args = parser.parse_args()
     report = json.loads(args.report.read_text())
+    source_keys = ("study_sha256", "source_revision", "source_dirty", "wall_seconds")
+    report["source_studies"] = [{k: report[k] for k in source_keys}]
+    for path in args.supplement:
+        extra = json.loads(path.read_text())
+        summarize(extra)
+        if any(
+            extra[k] != report[k]
+            for k in ("kind", "config_sha256", "map_sha256", "source_revision")
+        ):
+            raise ValueError("supplement has incompatible implementation inputs")
+        report["results"].extend(extra["results"])
+        report["source_studies"].append({k: extra[k] for k in source_keys})
     rows = summarize(report)
     args.output.mkdir(parents=True, exist_ok=False)
     summary = {
@@ -103,6 +118,7 @@ def main():
         )
     }
     summary["scenarios"] = rows
+    summary["source_studies"] = report["source_studies"]
     (args.output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     markdown = [
         "| Skenari | Mesatarisht GATI bazë | Takime të formuara | Arritën JEMI KËTU | Orë me ≥1 JEMI KËTU | Qeliza me JEMI KËTU |",
@@ -112,7 +128,8 @@ def main():
 
         def cell(key, divisor=1):
             m = row["metrics"][key]
-            return f"{m['median'] / divisor:.1f} ({m['minimum'] / divisor:.1f}–{m['maximum'] / divisor:.1f})"
+            precision = 2 if divisor != 1 else 1
+            return f"{m['median'] / divisor:.{precision}f} ({m['minimum'] / divisor:.{precision}f}–{m['maximum'] / divisor:.{precision}f})"
 
         markdown.append(
             "| "

@@ -1,0 +1,51 @@
+{
+  "config_sha256": "e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7",
+  "study_sha256": "b7b55aa1e14cf895f99561506effb8c08ed48c3555780791378cb5ea604f6cfe",
+  "source_revision": "7dfeba7bad65a6b5c2b5a4b68e34839e35d990a7\n",
+  "source_dirty": true,
+  "wall_seconds": 77.255371258,
+  "comparisons": [
+    {
+      "name": "30000-3pct",
+      "seed": 42,
+      "step30": {
+        "gatherings_ever_confirmed": 58,
+        "minutes_any_confirmed": 251.5,
+        "confirmed_cells": 4
+      },
+      "step15": {
+        "gatherings_ever_confirmed": 74,
+        "minutes_any_confirmed": 230.75,
+        "confirmed_cells": 5
+      }
+    },
+    {
+      "name": "30000-5pct",
+      "seed": 42,
+      "step30": {
+        "gatherings_ever_confirmed": 1829,
+        "minutes_any_confirmed": 688.5,
+        "confirmed_cells": 109
+      },
+      "step15": {
+        "gatherings_ever_confirmed": 2093,
+        "minutes_any_confirmed": 693.25,
+        "confirmed_cells": 106
+      }
+    },
+    {
+      "name": "10000-3pct-clustered",
+      "seed": 42,
+      "step30": {
+        "gatherings_ever_confirmed": 465,
+        "minutes_any_confirmed": 696,
+        "confirmed_cells": 16
+      },
+      "step15": {
+        "gatherings_ever_confirmed": 537,
+        "minutes_any_confirmed": 696.75,
+        "confirmed_cells": 16
+      }
+    }
+  ]
+}

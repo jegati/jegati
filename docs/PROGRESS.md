@@ -1905,3 +1905,47 @@ checks passed. First attempt `outreach-api-control` failed startup and is not ev
 Next: complete focused tool checks, commit the tools, run the full matrix and
 finer-time-step sensitivity, inspect the browser artifacts, and write the pitch
 with measured outcomes (including zero-gathering cases). No remote push/deployment.
+
+## Outreach materials and completed Tirana day study — 2026-09-14
+
+Completed 27 main day scenarios (nine cases × seeds42/43/44), six lower-reaction
+runs and three finer-step checks using model commit7dfeba7 and current config hash
+ e1c698921caf6151fe6f6f2ad245a8529caa8829b88176848d18656b94ce1ff7.
+No app behavior, thresholds, user interface or participant storage changes.
+Source-dirty metadata reflects the preserved manual About edit and report files.
+
+Deliverables: `docs/outreach/PITCH.sq.md` (short Albanian prelaunch message, measured
+optional paragraph, launch wording), `RESULTS.md`, methodology and sanitized full
+summary/timing JSON; editable studies in `simulation/studies/`. Standalone offline
+map/timeline/comparison: `reports/local/gati-pitch/index.html`; four labeled map PNGs
+and `GATI-simulime-Tirane.pdf` in its `media/`. No external asset requests. Raw final
+runs remain in reports/local/tirana-day-final.json, tirana-reaction-sensitivity.json
+and tirana-day-15s.json. Generated visuals are local artifacts, not app assets.
+
+Findings: 3k/5% and10k/3% uniform audiences produce no gatherings at1km in all three
+seeds. 30k/3% with25% conversion among eligible hourly map viewers yields3.88–4.68h
+with some confirmed gathering, in3–8 public cells. 30k/5% reaches11.48–11.63h, but
+reactive sessions raise mean total active to~15% of the audience, not just5%.
+Clustered10k/3% is stronger locally but reaches~20% mean total active with reaction.
+Median invitation lifetime is only~15min; many distinct short-lived invitations
+account for large event totals. Wide3km radius increases invitations much more
+than successful arrival. These are uncalibrated model outcomes, not forecasts or
+actual users; no claim of human usability or automatic citywide mobilization.
+
+Validation: make test-daystudy (Go race + two Python checks), Go vet, simulation/
+matching/activity/geography race regression packages passed. Positive API/Valkey
+control:80 accepted/invited/arrived,39 late admissions,5 arrival replays,80 verified
+expiries,1 confirmed gathering; config/funnel report checker passed. The final
+Chromium artifact check passed desktop1280/mobile390, all main selected scenario
+seeds, scenario/seed/layer/time controls, empty case, no page errors/external requests
+or page overflow; exported PNG/PDF inspected. Earlier image export selector/mobile
+layout failures were corrected and rerun. Timing sensitivity changes individual
+confirmed-event counts14–28%; durations are more stable in stronger cases. Main
+model208.07s, lower-reaction72.06s, finer-step77.26s exclude index initialization and
+are not server benchmarks. No real push delivery or real-person study performed.
+
+User's uncommitted web/index.html edit remains untouched. Existing two overnight
+lifecycle labs were still running when inspected; this study does not certify their
+completion. Next: user can review/share outreach files; publishing current source,
+public alpha deployment, real-phone verification and any gathering-lifetime product
+decision remain separate work. No remote push, deployment or messages sent.

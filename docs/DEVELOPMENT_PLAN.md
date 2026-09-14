@@ -323,6 +323,11 @@ Include city center clusters, Lake Park, sparse outskirts, radius/grid boundarie
 
 Reports include configuration/hash/seed, synthetic ground-truth people versus accepted credentials, activations, late admissions/rejections, intersection choice and selection latency, missed compatible groups, false activations under attack, suppressions, delivery delay, load/error rates, peak memory and expiry behavior. This makes the limits of “independent arrivals” observable. Publish synthetic reports freely; real production sessions must not become fixtures.
 
+Day-long outreach illustrations now have a separate offline model reusing the
+production planner and aggregate builder; see [method](outreach/METHOD.md) and
+[measured results](outreach/RESULTS.md). Keep these hypothetical behavioral outcomes
+distinct from API/Valkey, load and human usability evidence.
+
 ## 9. Ordered, reviewable commits
 
 Each numbered item is an intended commit-sized milestone. Split one if review becomes unwieldy; keep code, relevant tests and documentation together. Implementation follows this order, and each commit must leave existing local startup/checks usable. Consult PROGRESS.md and git history for completed work; this table describes intended deliverables, not completion evidence.

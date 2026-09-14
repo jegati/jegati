@@ -11,12 +11,16 @@ From the repository root, with the pinned toolchain (`source scripts/env.sh`):
 ```sh
 go test -race ./internal/simulation -run TestDay -count=1
 go run ./cmd/daystudy -output reports/local/tirana-day.json
-python3 scripts/render-daystudy.py reports/local/tirana-day.json reports/local/tirana-day
+go run ./cmd/daystudy -study simulation/studies/tirana-reaction-sensitivity.json -output reports/local/tirana-reaction.json
+go run ./cmd/daystudy -study simulation/studies/tirana-day-15s.json -output reports/local/tirana-fine.json
+python3 scripts/render-daystudy.py reports/local/tirana-day.json reports/local/tirana-day --supplement reports/local/tirana-reaction.json
+node scripts/check-daystudy.mjs reports/local/tirana-day/index.html reports/local/tirana-day-media
 ```
 
 Choose a new output filename for every run; the CLI refuses to overwrite evidence.
 Edit `simulation/studies/tirana-day.json` for behavioral assumptions and seeds.
-Application rules still come from `config/gati.yaml`. No credentials, network
+The two additional study files specify lower reactive joining and finer time
+resolution; they do not override application settings. Application rules still come from `config/gati.yaml`. No credentials, network
 endpoint, store, device location or third-party map service is used by this model.
 An independent short API/Valkey control uses `make simulate-population
 SCENARIO=tirana-success`; it is separate evidence, not an end-to-end day study.
