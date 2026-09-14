@@ -77,7 +77,7 @@ if [[ -z "${GATI_SSH_PUBLIC_KEY:-}" ]]; then
   printf 'Paste the deployment public key (one line), then press Enter:\n'
   read -r GATI_SSH_PUBLIC_KEY
 fi
-if [[ ! "$GATI_SSH_PUBLIC_KEY" =~ ^ssh-(ed25519|rsa|ecdsa)-[^[:space:]]+[[:space:]]+[^[:space:]]+ ]]; then
+if [[ ! "$GATI_SSH_PUBLIC_KEY" =~ ^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp(256|384|521))[[:space:]]+[A-Za-z0-9+/]+={0,3}([[:space:]]+.*)?$ ]]; then
   printf 'The supplied value does not look like an OpenSSH public key.\n' >&2
   exit 1
 fi
