@@ -50,7 +50,8 @@ or remote operations are performed by this preparation package.
 ## Operator monitoring and activation
 
 See MONITORING.md for the prepared systemd collector and optional alert sender.
-Choose and privately configure the delivery endpoint. Establish an independently
+Email to the project mailbox is selected; fill the private SMTP settings described
+in MONITORING.md. No address or credentials belong in deployment source. Establish an independently
 observed host/tunnel availability check: an alert process on a dead VPS cannot send.
 No such external service is configured or claimed here.
 

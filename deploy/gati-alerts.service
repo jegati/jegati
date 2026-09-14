@@ -8,7 +8,7 @@ StartLimitBurst=3
 [Service]
 Type=simple
 WorkingDirectory=/opt/gati/current
-ExecStart=/usr/bin/python3 /opt/gati/current/scripts/ops_alerts.py --monitor-file /run/gati-monitor/api.json --webhook-file /etc/gati/alerts.json
+ExecStart=/usr/bin/python3 /opt/gati/current/scripts/ops_alerts.py --monitor-file /run/gati-monitor/api.json --email-env-file /etc/gati/alerts.env
 Restart=on-failure
 RestartSec=30
 UMask=0077

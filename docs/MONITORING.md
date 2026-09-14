@@ -97,12 +97,15 @@ and no redirect following or environment proxy. Sender failure cannot block GATI
 Privately create /etc/gati/alerts.json, owned by the sender user, mode 0600, with
 exactly url (HTTPS endpoint) and authorization (header value, or an empty string).
 Do not paste either value in chat, Git, shell arguments or environment variables.
-This is a generic JSON receiver contract, not a built-in Slack/Telegram/SMTP client.
+This webhook path is a generic JSON receiver contract, without built-in
+Slack/Telegram formatting; the separate email adapter is described below.
 Review the chosen receiver/provider and retention before enabling it. Keep endpoint
 URL/query secrets private even if a receiver uses no Authorization header.
 
 Prepared service files are deploy/gati-monitor.service and deploy/gati-alerts.service.
-They assume the current immutable release is linked at /opt/gati/current and the
+The default sender service uses the private email configuration described below.
+For webhook delivery, replace its --email-env-file argument with --webhook-file
+and the private JSON path. They assume the current immutable release is linked at /opt/gati/current and the
 combined process container is gati-production-api-1. The collector writes to a
 0700 /run/gati-monitor directory with 0600 files; sender state remains in RAM. The
 host root/Docker operator is trusted, as with existing release administration. A
@@ -113,8 +116,61 @@ are not installed on the workstation by this change.
 Run make test-ops-alerts for a local TLS receiver exercising failure/retry/recovery,
 redirection rejection, fixed payloads and credentials-file permissions. Tests make
 no external requests and use an ephemeral certificate. OpenSSL is the test-only
-certificate prerequisite. The notification destination and actual delivery remain
-pending operator selection/private credentials. Missing/stale collector files alert
+certificate prerequisite. Actual delivery remains pending private credentials; email is now the selected
+channel as described below. Missing/stale collector files alert
 as monitor_unavailable; the sender's own process health also needs host supervision.
 A complete VPS/network outage cannot be reported by a process on that VPS: configure
 an independently observed availability check when hosting and alert channels exist.
+
+
+## Email alerts (selected delivery channel)
+
+The operator selected the project mailbox. Its address is configured only in the
+private delivery file, not in the alert source or service template. The existing
+public project contact elsewhere in the website is separate from this setting.
+The recipient mailbox and the authenticated sending account can be different;
+use an SMTP sender address permitted by the sending provider.
+
+Copy deploy/alerts.env.example to .env.ops-alerts for local use (already ignored)
+or /etc/gati/alerts.env on the host, owned by the sender user and mode 0600. A local
+file with the project recipient was prepared; other values are placeholders. Do not
+commit this file, source it in a shell, or paste SMTP credentials into chat. The
+sender reads it directly; secrets are not exported into the process environment.
+Only KEY=VALUE, optional matching outer quotes and full-line comments are accepted;
+values are literal, with no shell/variable expansion or inline comments. Unknown,
+duplicate, missing or empty settings are rejected. Restart the sender after edits.
+
+| Setting | Meaning |
+| --- | --- |
+| GATI_ALERT_TO | One recipient email address |
+| GATI_ALERT_FROM | Sender address permitted by the SMTP account |
+| GATI_SMTP_HOST | SMTP hostname |
+| GATI_SMTP_PORT | Provider's submission port, usually 587 or 465 |
+| GATI_SMTP_TLS | starttls (usually 587) or ssl (usually 465); no plaintext fallback |
+| GATI_SMTP_USERNAME | SMTP account username |
+| GATI_SMTP_PASSWORD | Dedicated SMTP/app password from the sender provider |
+
+Run locally only after completing the private settings:
+
+```sh
+python3 scripts/ops_alerts.py --monitor-file /path/to/private/monitor.json --email-env-file .env.ops-alerts
+```
+
+The production gati-alerts.service template now selects --email-env-file
+/etc/gati/alerts.env. The webhook option remains available; both cannot be selected
+at once. No SMTP daemon, new dependency, client-facing endpoint or participant email
+collection is introduced. SMTP authentication follows verified TLS; missing STARTTLS
+or a failed certificate aborts before credentials or messages are sent. The SMTP
+hello uses a fixed non-identifying hostname; debug/protocol logging stays disabled.
+Each network operation has a five-second timeout. Existing debounce, retry, reminder
+and recovery rules apply. Only fixed health labels/state enter the message body.
+The SMTP sender and mailbox provider see normal mail/network metadata and may retain
+messages; this is not end-to-end encrypted mail. SMTP acceptance does not guarantee
+inbox delivery, and a lost acknowledgment can cause a duplicate on retry.
+
+make test-ops-alerts exercises both real local SMTP TLS modes with an ephemeral
+certificate, certificate rejection, failed submission/retry/recovery, missing TLS,
+private-file validation and payload restrictions, as well as the webhook tests.
+Actual mailbox delivery requires privately supplied SMTP settings and is not yet
+verified. Services are prepared, not installed. The same-host outage limitation
+still applies; the main app and its optional participant push remain unchanged.

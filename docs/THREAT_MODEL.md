@@ -404,3 +404,19 @@ or human independence, and open-source inspection from verified remote operation
 The expandable explanation retains inference, network/operator and optional-push
 limits and states that no independent audit has occurred. Browser navigation,
 session preservation and accessibility checks are recorded in PROGRESS.
+
+
+## Optional operator email delivery (2026-09-14)
+
+A separate local sender reads a private mode-0600 .env file and the existing bounded
+health document. Only fixed labels/state are mailed, never participant data or
+monitor documents. Verified implicit TLS or mandatory STARTTLS precedes SMTP auth;
+no plaintext downgrade, debug transcript or machine-derived EHLO identifier.
+Credentials are read as literal data without shell expansion or environment export.
+The sender provider sees SMTP credentials/sender/recipient and connection metadata;
+mail providers can retain these operational messages. SMTP TLS is transport security,
+not end-to-end encryption or inbox delivery proof. Lost acceptance acknowledgments
+may duplicate alerts. Retry/debounce coalesces current health without a disk queue.
+Same-host failure cannot report the host's complete outage. Local synthetic SMTP
+TLS, rejection, retry, payload and file-permission tests cover these controls;
+actual provider delivery remains unverified until private credentials are supplied.

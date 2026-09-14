@@ -132,7 +132,7 @@ test-lifecycle-smoke:
 test-lifecycle-overnight:
 	CGO_ENABLED=0 python3 scripts/lifecycle_run.py --hours "$(or $(HOURS),8)" --output "$(or $(OUTPUT),reports/local/lifecycle-overnight-$(shell date -u +%Y%m%dT%H%M%S))"
 test-ops-alerts:
-	python3 -m unittest discover -s scripts -p 'test_ops_alerts.py'
+	python3 -m unittest discover -s scripts -p 'test_ops*.py'
 
 .PHONY: test-browser-matrix
 test-browser-matrix:

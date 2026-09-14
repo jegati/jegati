@@ -46,8 +46,8 @@ def current_alerts(path, now):
         return ("monitor_unavailable",)
 
 
-def webhook_config(path):
-    # Keep URL/query secrets and authorization outside argv, env, logs and Git.
+def read_private_config(path):
+    # Keep secrets outside argv, process environment, logs and Git.
     flags = os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK
     with os.fdopen(os.open(path, flags), "r") as stream:
         st = os.fstat(stream.fileno())
@@ -57,8 +57,15 @@ def webhook_config(path):
             or st.st_mode & 0o077
             or st.st_uid != os.geteuid()
         ):
-            raise ValueError("webhook config must be private and owned by this user")
-        value = json.loads(stream.read(4097))
+            raise ValueError("config must be private and owned by this user")
+        raw = stream.read(4097)
+        if len(raw) > 4096:
+            raise ValueError("oversized private config")
+        return raw
+
+
+def webhook_config(path):
+    value = json.loads(read_private_config(path))
     if set(value) != {"url", "authorization"} or not all(
         isinstance(v, str) for v in value.values()
     ):
@@ -142,13 +149,22 @@ class Dispatcher:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--monitor-file", type=pathlib.Path, required=True)
-    parser.add_argument("--webhook-file", type=pathlib.Path, required=True)
+    delivery = parser.add_mutually_exclusive_group(required=True)
+    delivery.add_argument("--webhook-file", type=pathlib.Path)
+    delivery.add_argument("--email-env-file", type=pathlib.Path)
     args = parser.parse_args()
     try:
-        config = webhook_config(args.webhook_file)
+        if args.email_env_file:
+            from ops_email import email_config, send_email
+
+            config = email_config(args.email_env_file)
+            deliver = lambda payload: send_email(config, payload)
+        else:
+            config = webhook_config(args.webhook_file)
+            deliver = lambda payload: send_webhook(config, payload)
     except (OSError, ValueError, TypeError):
-        raise SystemExit("Cannot read private webhook configuration.") from None
-    dispatcher = Dispatcher(lambda payload: send_webhook(config, payload))
+        raise SystemExit("Cannot read private alert configuration.") from None
+    dispatcher = Dispatcher(deliver)
     while True:
         result = dispatcher.step(
             current_alerts(args.monitor_file, time.time()), time.monotonic()

@@ -1767,3 +1767,36 @@ no external messages, service installation, DNS change, push or deployment occur
 Next action: inspect the overnight result; with delivered VPS and private access,
 follow ALPHA_DEPLOYMENT.md/DEPLOYMENT.md for actual host/Cloudflare/TLS/cache checks.
 Real-device/independent-review gaps remain; no separate volunteer stage is required.
+
+
+## Project email operational alerts — 2026-09-14
+
+The user selected email delivery with the address outside source. Added an SMTP
+adapter selected by --email-env-file, retaining the mutually exclusive webhook
+option. Recipient, permitted sender, server/port/TLS mode and SMTP credentials are
+literal values in a private same-user mode-0600 file, not exported environment.
+Created ignored .env.ops-alerts with the project recipient and placeholder sender
+settings; no existing private file was overwritten. Committed example contains
+only synthetic addresses. The production service template now reads /etc/gati/alerts.env.
+
+Verified implicit TLS or mandatory STARTTLS precedes authentication. Fixed health
+labels/state only, non-identifying SMTP hello, no protocol logs; existing debounce,
+retry, reminders and recovery remain shared. Documented mailbox/provider retention,
+transport-only encryption, possible duplicate delivery and same-host outage limits.
+No new dependency, app UI/config/participant behavior or participant email storage.
+
+Validation: all 45 Python guard tests passed, including nine email/webhook cases.
+Local SMTP receivers exercised both TLS modes, default-trust certificate rejection,
+failed submission/retry/recovery and allowed message bodies. Other cases reject
+missing TLS before authentication, sensitive payloads, unsafe file modes/symlinks,
+malformed settings and secret-bearing CLI diagnostics. Initial email assertion
+expected LF; corrected to normalize SMTP's CRLF wire format. Both systemd templates
+passed systemd-analyze verify. Git confirms .env.ops-alerts is ignored.
+
+No real SMTP connection/email or service installation occurred. Next: fill the
+private file with the sending provider's SMTP credentials and allowed sender,
+then verify actual mailbox delivery. Do not paste secrets into chat or source.
+The immutable 6efad34 deployment artifact predates this adapter; prepare/audit a
+new artifact before deploying the updated operator service. The overnight API run
+continues unaffected and has exercised renewal/public releases; final eight-hour
+expiry/drift gates remain pending in reports/local/jamgati-alpha-overnight/lifecycle.json.

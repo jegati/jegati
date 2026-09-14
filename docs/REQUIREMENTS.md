@@ -182,3 +182,7 @@ request location, collect reports in the app or attach session data to external
 links. Project email and optional public GitHub reports disclose their external
 identity/retention boundaries. Monitoring delivery is optional operator tooling,
 uses fixed health labels only, and requires a privately chosen destination.
+
+Operational alert delivery is selected as email to a privately configured project
+mailbox. Recipient/sender and SMTP credentials stay in a private untracked .env file,
+not alert source. This introduces no participant email collection.
