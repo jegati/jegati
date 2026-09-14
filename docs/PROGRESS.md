@@ -10,8 +10,8 @@ entries below are dated historical evidence, not competing current instructions.
 
 Both auditability cleanup batches are complete. The user subsequently authorized
 three lifecycle priorities: expired gathering metadata cleanup, ended public views
-and explicit early presence renewal. They are implemented locally; final regression
-runs are being recorded below while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
+and explicit early presence renewal. They are implemented locally and the regression checks passed, with evidence
+recorded below, while OVHcloud provisions the VPS. jamgati.com is the chosen domain; the accepted route is
 OVHcloud + Cloudflare Free. Exact host sizing/OS, SSH, zone activation and private
 reporting/alert channels remain unverified. Preserve commands.txt. Do not request
 provider/identity decisions again; no remote Git push is authorized.
@@ -77,8 +77,8 @@ with fresh device location during the last 120 seconds of presence freshness.
 Schema 9 exposes `arrivals.renewal_window_seconds`. Renewal preserves one counted
 contribution, stability and the original session/gathering deadlines; willingness
 extension, gathering extension and destination relocation remain deferred.
-See [decision 0014](decisions/0014-bounded-presence-renewal.md). Final population and
-production-image rehearsal evidence is being collected before closing this batch.
+See [decision 0014](decisions/0014-bounded-presence-renewal.md) and the completed
+[lifecycle test report](reports/lifecycle-2026-09-14.md).
 Hosting work still needs the delivered server's nonsecret connection details and
 privately arranged SSH/Cloudflare access. Prepare and audit a fresh exact release
 before activation; the older runtime audit does not cover this source. Keep
@@ -1454,6 +1454,19 @@ Validation completed so far:
 - Changed arrival Lua fragments passed StyLua 2.3.0 syntax/AST verification and
   token comparison during formatting; real-store tests passed afterward.
 
-Next: finish the already-running 3,000-person response simulation/checker and
-production-image rehearsal, record exact evidence and make the final local commit.
-No public activation or new capacity claim follows from these regression checks.
+Completed in `be1077c` (cleanup) and `5ced2db` (renewal/ended views). Final response
+simulation and checker passed: all 3,000 credentials accepted, 1,929 distinct
+credentials invited, 1,743 chose to go, 1,179 arrived; 53 gatherings/36 confirmed,
+24 joins after JEMI KËTU, 456 cancellations + 2,544 verified expiries. Driver wall
+time was 230.7 seconds. The unchanged driver covers ordinary arrival/re-arrival;
+new tests above cover explicit early renewal.
+
+The production-image/two-API/Caddy rehearsal passed in 75.03 seconds excluding
+builds. It observed one transient proxy 5xx during forced replica termination and
+then recovered. Exact scope, first-run test fixes, hashes and remaining limits are
+in [the lifecycle report](reports/lifecycle-2026-09-14.md). No public activation,
+new capacity measurement or independent release audit occurred.
+
+Next: wait for the delivered VPS connection details and privately arranged access;
+prepare and audit a fresh exact release before public activation. Local work in
+this approved lifecycle batch is complete. Preserve untracked commands.txt.

@@ -21,7 +21,11 @@ willingness APIs and the Albanian browser participation flow. The UI supports
 one-action JAM GATI with required one-shot device location, availability/radius choices,
 reload recovery and cancellation. Continuous matching, automatic crossroad
 invitations, going/decline, late admission and temporary arrival confirmation are
-implemented. Delayed aggregate statistics and a cell-only public activity map now
+implemented. **JAM ENDE KËTU** allows explicit renewal near presence expiry,
+with a fresh device fix and the original session/gathering deadlines preserved.
+Ended gatherings are labeled and removed from the gathering map layer; expired
+metadata is pruned. See [lifecycle boundaries](docs/decisions/0014-bounded-presence-renewal.md).
+Delayed aggregate statistics and a cell-only public activity map now
 work locally, including explicit joining from map entries. Public cells default to
 1 km; private matching remains 100 m. Eligible users can preview a private destination
 before committing. [Optional background push](docs/NOTIFICATIONS.md) is implemented
