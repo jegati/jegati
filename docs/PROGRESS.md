@@ -10,8 +10,10 @@ entries below are dated historical evidence, not competing current instructions.
 
 Latest launch direction: direct public alpha, no separate volunteer stage, with
 later improvements based on optional sanitized feedback and private health metrics
-(decision 0015). Device presets (105 checks) and refreshed Firefox/WebKit checks (32 each) passed;
-next is a clean exact-release audit/reproduction/rollback refresh.
+(decision 0015). Device presets (105 checks), refreshed Firefox/WebKit checks (32 each), exact-image
+audit, two clean builds and compatible rollback all passed; see the final refresh
+entry and reports/alpha-refresh-2026-09-14.md. Actual alpha presentation/feedback
+instructions and private alert routing remain pre-activation work.
 Actual hosting/edge access is still pending. No participant tracking is authorized.
 
 Publication preparation is complete: project email/domain/provider associations
@@ -50,7 +52,7 @@ provider/identity decisions again; no remote Git push is authorized.
 | 12 — 100k capacity | Measured locally; deployment capacity unverified | reports/scaling-2026-09-14.md: component and mixed-load measurements; not a VPS or 1M-user guarantee |
 | 13 — Deployment | Local production/rollback rehearsals implemented | API/worker roles, trusted ingress, private Compose, runbook; actual OVH/Cloudflare/TLS/host checks remain |
 | 14 — Verifiable releases | Local artifact/runtime verification implemented | Exact image audits/SBOMs, two clean same-host builds, served-asset/runtime comparisons; independent build/signature/host evidence remains |
-| 15 — Independent audit/pilot | Not performed | Requires external review, delivered host, actual edge/device checks and capped pilot |
+| 15 — Public alpha / independent review | Not deployed/reviewed | Direct alpha selected (0015); actual host/edge checks and alert routing pending; independent and real-device gaps remain disclosed |
 
 Runtime remediation passed locally on 06fa798 with two exact unused-code exceptions
 expiring 2026-10-14; see RUNTIME_SECURITY and reports/runtime-remediation-2026-09-14.md.
@@ -1652,3 +1654,27 @@ Next in this authorized batch: commit source, export a localhost rehearsal relea
 scan all exact images, reproduce clean builds and exercise compatible rollback.
 Realistic maximum-lifetime overnight churn is outside this requested batch and
 remains untested. No remote push, DNS change, deployment or volunteer recruitment.
+
+
+## Completed exact-release refresh — 2026-09-14
+
+Source e5a374d exports a localhost release with manifest SHA256
+2f4cc2f99ece22c281c0c0211774591a4bf404f9f135cc624773410234adca8a.
+All four image audits and three Go binary scans passed with zero unresolved findings;
+two existing scoped advisory exceptions remain and expire 2026-10-14. Exact-release
+freshness/identity/exception verification passed. Two clean builds match each other
+and all three runtime binaries/seven browser assets in the audited release.
+
+Compatible release activation/rollback and served-asset/config verification passed
+in 136.06s, including unexpected-network rejection and preserved store/session/expiry.
+This is identical-code/config rollback, not migration or actual OVH/Cloudflare.
+Detailed results, corrected initial device-test assumptions, hashes, scanner dates,
+remaining limits and exact local artifact locations are in
+[the refresh report](reports/alpha-refresh-2026-09-14.md) and its sanitized JSON.
+
+This requested device/two-refresh batch is complete; no application runtime or
+manual HTML copy changed. Publication/whitespace guards pass; no remote push or
+public deployment occurred. Next: delivered host/access, actual host/edge checks,
+alpha label/optional sanitized feedback instructions and private operational alerts;
+prepare jamgati.com artifacts with a fresh exact audit before activation. No separate
+volunteer stage. Real-device, independent-review and overnight-lifetime gaps remain.

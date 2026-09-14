@@ -1,0 +1,173 @@
+{
+  "source_revision": "e5a374dd4972370c839b3ce43b588e9d93f314d2",
+  "release_manifest_sha256": "2f4cc2f99ece22c281c0c0211774591a4bf404f9f135cc624773410234adca8a",
+  "public_host": "localhost",
+  "device_tests": {
+    "Pixel 7 Chromium": 35,
+    "iPhone 13 WebKit": 35,
+    "iPad Mini WebKit": 35
+  },
+  "desktop_tests": {
+    "Firefox": 32,
+    "WebKit": 32
+  },
+  "image_audit": {
+    "passed": true,
+    "scanned_at": "2026-09-14T12:19:25.207449+00:00",
+    "scanner": {
+      "Version": "0.74.0",
+      "VulnerabilityDB": {
+        "Version": 2,
+        "NextUpdate": "2026-09-15T01:15:36.636778479Z",
+        "UpdatedAt": "2026-09-14T01:15:36.63677888Z",
+        "DownloadedAt": "2026-09-14T03:10:51.184807266Z"
+      }
+    },
+    "images": {
+      "api": {
+        "image_id": "sha256:76f5bc796c0d036ad617c41782896d880c11273bc318c2b09286625cd32babbe",
+        "accepted_findings": [
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "2c1a060249b836687d7af1cffd35e2fae9df58a9fae6486db47509adcb79a405",
+        "binary_scan_passed": true
+      },
+      "web": {
+        "image_id": "sha256:21a00e2ffa24a889dffb3fd666fbe5d6148f8ec39a23c4c28cfb15555e99b68c",
+        "accepted_findings": [
+          {
+            "id": "GHSA-gcjh-h69q-9w9g",
+            "package": "github.com/google/cel-go",
+            "version": "v0.28.1",
+            "fixed": "0.29.0",
+            "severity": "MEDIUM",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GHSA-gcjh-h69q-9w9g",
+              "package": "github.com/google/cel-go",
+              "version": "v0.28.1",
+              "services": [
+                "web"
+              ],
+              "reason": "Caddy uses CEL matching, but does not call ext.NativeTypes or ext.ParseStructTag. The minimal image has no affected binary symbols. CEL 0.29/0.30 change interpreter APIs and cannot directly replace this dependency without a Caddy compatibility update. Review on any module/config change.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-6094"
+            }
+          },
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "d9e84314255cd1b9b56149f2c4f14152699d4fb09ec3828df10d73cc0fccfd28",
+        "binary_scan_passed": true
+      },
+      "tunnel": {
+        "image_id": "sha256:4aadca3ea3cd33bf15eb9b1de8edae1f014434c7dfb62d987c76ad9a69cbdde2",
+        "accepted_findings": [
+          {
+            "id": "GO-2026-5932",
+            "package": "golang.org/x/crypto",
+            "version": "v0.57.0",
+            "fixed": null,
+            "severity": "UNKNOWN",
+            "exception": {
+              "reviewed": "2026-09-14",
+              "expires": "2026-10-14",
+              "owner": "GATI maintainer",
+              "id": "GO-2026-5932",
+              "package": "golang.org/x/crypto",
+              "version": "v0.57.0",
+              "services": [
+                "api",
+                "web",
+                "tunnel"
+              ],
+              "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+              "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+            }
+          }
+        ],
+        "unresolved_findings": [],
+        "binary_sha256": "e363c0a5795373726f98315070f4d30b0839b44af0ab992c1312361a321dee2d",
+        "binary_scan_passed": true
+      },
+      "valkey": {
+        "image_id": "sha256:a0dbf4c1d5708782907c10e2c72deff317518518b5288a58416981d9db95d30b",
+        "accepted_findings": [],
+        "unresolved_findings": []
+      }
+    }
+  },
+  "reproduction": {
+    "equal": true,
+    "runtime_binary_sha256": {
+      "api": "2c1a060249b836687d7af1cffd35e2fae9df58a9fae6486db47509adcb79a405",
+      "web": "d9e84314255cd1b9b56149f2c4f14152699d4fb09ec3828df10d73cc0fccfd28",
+      "tunnel": "e363c0a5795373726f98315070f4d30b0839b44af0ab992c1312361a321dee2d"
+    },
+    "browser_asset_count": 7,
+    "both_builds_match_exact_release": true
+  },
+  "limits": [
+    "browser presets and synthetic GPS, not Android/iOS devices",
+    "same-host clean builds, not independent review",
+    "localhost release, not actual Cloudflare/OVH deployment",
+    "no realistic maximum-lifetime overnight run or refreshed capacity claim"
+  ],
+  "rollback": {
+    "synthetic": true,
+    "source_revision": "e5a374dd4972370c839b3ce43b588e9d93f314d2",
+    "checks": [
+      "immutable release verification and actual combined-role activation",
+      "unexpected live network attachment rejected, restored topology accepted",
+      "served browser assets and effective config hash match",
+      "two compatible release-directory switches preserve store identity/start time and live capability",
+      "return to first release preserves original expiry and cancellation works"
+    ],
+    "wall_seconds": 136.06,
+    "scope": "same-code/config local rollback mechanics; no schema migration, external host, real Cloudflare or public publication"
+  }
+}
