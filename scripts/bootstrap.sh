@@ -36,6 +36,12 @@ if [[ ! -x "$gati_tools/buildx-$GATI_BUILDX_VERSION/docker-buildx" ]]; then
   mkdir -p "$gati_tools/buildx-$GATI_BUILDX_VERSION"
   install -m 755 "$staging/docker-buildx" "$gati_tools/buildx-$GATI_BUILDX_VERSION/docker-buildx"
 fi
+if [[ ! -x "$gati_tools/trivy-$GATI_TRIVY_VERSION/trivy" ]]; then
+  fetch "https://github.com/aquasecurity/trivy/releases/download/v$GATI_TRIVY_VERSION/trivy_${GATI_TRIVY_VERSION}_Linux-64bit.tar.gz" trivy.tar.gz "$GATI_TRIVY_SHA256"
+  tar -xzf "$staging/trivy.tar.gz" -C "$staging" trivy
+  mkdir -p "$gati_tools/trivy-$GATI_TRIVY_VERSION"
+  install -m 755 "$staging/trivy" "$gati_tools/trivy-$GATI_TRIVY_VERSION/trivy"
+fi
 # Docker discovers CLI plugins here. Preserve any separately managed installation.
 gati_plugin_dir="${DOCKER_CONFIG:-$HOME/.docker}/cli-plugins"
 mkdir -p "$gati_plugin_dir"

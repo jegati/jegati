@@ -1,0 +1,14 @@
+package PACKAGE
+
+import (
+ "testing"
+ "github.com/getsentry/sentry-go"
+)
+
+func TestGATINoCrashReporting(t *testing.T) {
+ t.Setenv("SENTRY_DSN", "https://synthetic@example.invalid/1")
+ if sentry.CurrentHub().Client()!=nil {t.Fatal("Sentry client initialized before explicit setup")}
+ if err:=gatiSentryDisabled(sentry.ClientOptions{Dsn:"https://synthetic@example.invalid/1"});err!=nil {t.Fatal(err)}
+ if sentry.CurrentHub().Client()!=nil {t.Fatal("GATI initialized a crash-reporting client")}
+ if sentry.CaptureMessage("synthetic GATI privacy test")!=nil {t.Fatal("crash reporting accepted an event")}
+}

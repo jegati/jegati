@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY cmd ./cmd
 COPY internal ./internal
-RUN CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags="-s -w" -o /gati ./cmd/gati
+RUN CGO_ENABLED=0 go build -trimpath -buildvcs=false -o /gati ./cmd/gati
 
 FROM scratch
 COPY --from=build /gati /gati

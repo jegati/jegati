@@ -1,0 +1,11 @@
+{
+  "Path": "github.com/cloudflare/cloudflared",
+  "Version": "v0.0.0-20260910205223-f11dea9cb707",
+  "Sum": "h1:K6+hRRs5RDxsUKtA2mq1sAm4GjKgA34ZjAxIhATGt+c=",
+  "GoModSum": "h1:o49m6fKE5JPF2NEy4BURyC4Q/6tcL3K+9vCO/UJ/O9U=",
+  "Origin": {
+    "VCS": "git",
+    "URL": "https://github.com/cloudflare/cloudflared",
+    "Hash": "f11dea9cb7079e90a982c1a2d5548ab40847fdcf"
+  }
+}

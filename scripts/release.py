@@ -4,7 +4,7 @@
 Never uploads source, creates accounts, opens host ports or handles remote login.
 The operator chooses the machine; --edge is the explicit public-tunnel action.
 """
-import argparse, hashlib, io, json, os, pathlib, re, subprocess, tarfile, tempfile
+import argparse, datetime, hashlib, io, json, os, pathlib, re, subprocess, tarfile, tempfile
 ROOT=pathlib.Path(__file__).resolve().parent.parent
 
 def run(*args,**kw):return subprocess.check_output(args,**kw).decode().strip()
@@ -29,13 +29,13 @@ def prepare(root,host):
  root.mkdir(parents=True)
  with tarfile.open(fileobj=io.BytesIO(archive)) as tar:tar.extractall(root,filter='data')
  (root/'source.tar').write_bytes(archive)
- refs={'api':'gati-api:release-'+revision[:12],'web':'gati-web:release-'+revision[:12]}
- (root/'deployment.env').write_text(f'GATI_API_IMAGE={refs["api"]}\nGATI_WEB_IMAGE={refs["web"]}\nGATI_PUBLIC_HOST={host}\n')
+ refs={name:'gati-'+name+':release-'+revision[:12] for name in ['api','web','tunnel']}
+ (root/'deployment.env').write_text(f'GATI_API_IMAGE={refs["api"]}\nGATI_WEB_IMAGE={refs["web"]}\nGATI_TUNNEL_IMAGE={refs["tunnel"]}\nGATI_PUBLIC_HOST={host}\n')
  with (root/'build.log').open('wb') as log:
-  subprocess.run(['docker-compose','--env-file',str(root/'deployment.env'),'-f',str(root/'compose.production.yaml'),'build','api','web'],cwd=root,env={**os.environ,'GATI_API_IMAGE':refs['api'],'GATI_WEB_IMAGE':refs['web'],'GATI_PUBLIC_HOST':host},stdout=log,stderr=log,check=True)
+  subprocess.run(['docker-compose','--env-file',str(root/'deployment.env'),'-f',str(root/'compose.production.yaml'),'build','api','web','tunnel'],cwd=root,env={**os.environ,'GATI_API_IMAGE':refs['api'],'GATI_WEB_IMAGE':refs['web'],'GATI_TUNNEL_IMAGE':refs['tunnel'],'GATI_PUBLIC_HOST':host},stdout=log,stderr=log,check=True)
  images={k:{'reference':ref,'image_id':run('docker','image','inspect','--format','{{.Id}}',ref)} for k,ref in refs.items()}
  upstream=dict(line.split('=',1) for line in (root/'deploy/images.env').read_text().splitlines() if line and not line.startswith('#'))
- for service,key in [('valkey','GATI_VALKEY_IMAGE'),('tunnel','GATI_CLOUDFLARED_IMAGE')]:
+ for service,key in [('valkey','GATI_VALKEY_IMAGE')]:
   ref=upstream[key]
   try:identity=run('docker','image','inspect','--format','{{.Id}}',ref)
   except subprocess.CalledProcessError:
@@ -52,9 +52,15 @@ def prepare(root,host):
   try:run('docker','cp',container+':/gati',str(pathlib.Path(d)/'gati-container'))
   finally:run('docker','rm',container)
   api_binary_hash=digest(pathlib.Path(d)/'gati-container')
+  binary_hashes={'api':api_binary_hash}
+  for name,path in [('web','/usr/bin/caddy'),('tunnel','/usr/local/bin/cloudflared')]:
+   container=run('docker','create','--network','none',refs[name])
+   try:run('docker','cp',container+':'+path,str(pathlib.Path(d)/name))
+   finally:run('docker','rm',container)
+   binary_hashes[name]=digest(pathlib.Path(d)/name)
  run('docker','save','-o',str(root/'images.tar'),*[image['reference'] for image in images.values()])
  immutable={str(p.relative_to(root)):digest(p) for p in sorted(root.rglob('*')) if p.is_file() and p.name!='build.log'}
- manifest={'version':1,'source_revision':revision,'config_sha256':digest(root/'config/gati.yaml'),'effective_config_sha256':hashlib.sha256(effective_raw.encode()).hexdigest(),'push_enabled':effective['notifications']['push_enabled'],'api_binary_sha256':api_binary_hash,'images':images,'browser_assets':assets,'files':immutable,'scope':'source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation'}
+ manifest={'version':1,'source_revision':revision,'config_sha256':digest(root/'config/gati.yaml'),'effective_config_sha256':hashlib.sha256(effective_raw.encode()).hexdigest(),'push_enabled':effective['notifications']['push_enabled'],'api_binary_sha256':api_binary_hash,'runtime_binary_sha256':binary_hashes,'images':images,'browser_assets':assets,'files':immutable,'scope':'source/files and local image identities; served asset comparison and privileged host inspection are separate checks; no remote honesty attestation'}
  (root/'release.json').write_text(json.dumps(manifest,indent=2)+'\n')
  (root/'release.sha256').write_text(digest(root/'release.json')+'  release.json\n')
  print('Prepared local release',revision,'manifest SHA256',digest(root/'release.json'))
@@ -142,7 +148,23 @@ def verify_running(root,project,manifest,replicas,edge=False):
    seen.append(service)
  print('Verified local running services:',', '.join(seen),'; remote honesty and edge behavior are not established.')
 
-def activate(root,project,manifest,replicas,edge,current=None):
+def verify_audit(root,manifest,path,now=None):
+ if path is None:raise ValueError('public activation requires --audit with a fresh exact-release image audit')
+ audit=json.loads(path.read_text());now=now or datetime.datetime.now(datetime.timezone.utc)
+ scanned=datetime.datetime.fromisoformat(audit['scanned_at'])
+ if scanned.tzinfo is None or not 0<=(now-scanned).total_seconds()<=86400:raise ValueError('image audit is stale or future-dated; rescan the release')
+ if audit.get('passed') is not True or audit.get('release_manifest_sha256')!=digest(root/'release.json'):raise ValueError('image audit failed or belongs to another release')
+ if set(audit['images'])!=set(manifest['images']):raise ValueError('image audit is incomplete')
+ if set(manifest.get('runtime_binary_sha256',{}))!=set(manifest['images'])&{'api','web','tunnel'}:raise ValueError('release lacks runtime binary identities; prepare a new release')
+ for name,image in manifest['images'].items():
+  entry=audit['images'][name]
+  if entry['image_id']!=image['image_id'] or entry['unresolved_findings']:raise ValueError('image audit identities or findings differ')
+  if name in manifest.get('runtime_binary_sha256',{}):
+   if entry.get('binary_scan_passed') is not True or entry.get('binary_sha256')!=manifest['runtime_binary_sha256'][name]:raise ValueError('runtime binary audit is incomplete')
+  for accepted in entry['accepted_findings']:
+   if datetime.date.fromisoformat(accepted['exception']['expires'])<now.date():raise ValueError('image audit exception expired; rescan the release')
+
+def activate(root,project,manifest,replicas,edge,current=None,audit=None):
  runtime=runtime_dir(root,project)
  if current:
   previous=verify_files(current)
@@ -150,6 +172,7 @@ def activate(root,project,manifest,replicas,edge,current=None):
   if runtime_dir(current,project)!=runtime:raise ValueError('rollback releases must share the same parent and stable operational directory')
  verify_service_selection(root,project,replicas,edge)
  if edge:
+  verify_audit(root,manifest,audit)
   if not preflight():raise ValueError('host preflight failed')
   if not (runtime/'tunnel-token').is_file():raise ValueError('named tunnel credential must be provisioned privately on the host')
   if 'GATI_PUBLIC_HOST=localhost\n' in (root/'deployment.env').read_text():raise ValueError('public deployment needs a real hostname release')
@@ -168,7 +191,7 @@ def activate(root,project,manifest,replicas,edge,current=None):
  verify_running(root,project,manifest,replicas,edge)
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('action',choices=['prepare','verify','up','rollback','preflight']);p.add_argument('--release',type=pathlib.Path);p.add_argument('--current',type=pathlib.Path);p.add_argument('--public-host',default='localhost');p.add_argument('--project',default='gati-production');p.add_argument('--replicas',type=int,choices=[1,2],default=1);p.add_argument('--edge',action='store_true');p.add_argument('--running',action='store_true');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('action',choices=['prepare','verify','up','rollback','preflight']);p.add_argument('--release',type=pathlib.Path);p.add_argument('--current',type=pathlib.Path);p.add_argument('--audit',type=pathlib.Path);p.add_argument('--public-host',default='localhost');p.add_argument('--project',default='gati-production');p.add_argument('--replicas',type=int,choices=[1,2],default=1);p.add_argument('--edge',action='store_true');p.add_argument('--running',action='store_true');a=p.parse_args()
  if not re.fullmatch(r'[a-z][a-z0-9-]{1,63}',a.project):raise ValueError('invalid project name')
  if a.action=='preflight':raise SystemExit(0 if preflight() else 1)
  if a.release is None:p.error('--release is required')
@@ -180,7 +203,7 @@ def main():
   else:print('Release file hashes verified. Compare release.sha256 through an independent channel.')
  elif a.action=='rollback':
   if a.current is None:p.error('rollback requires --current for compatibility and operational secrets')
-  activate(root,a.project,manifest,a.replicas,a.edge,a.current.resolve())
- else:activate(root,a.project,manifest,a.replicas,a.edge)
+  activate(root,a.project,manifest,a.replicas,a.edge,a.current.resolve(),a.audit)
+ else:activate(root,a.project,manifest,a.replicas,a.edge,audit=a.audit)
 
 if __name__=='__main__':main()

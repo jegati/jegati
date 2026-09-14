@@ -89,14 +89,14 @@ IDs before use. Upstream images are pinned and included in the image archive.
 `build.log` is diagnostic output, excluded from the file manifest; review it before
 publication. Source/dependency/map licenses remain in the exported repository.
 
-`reproduce-build` compares the native API, an API built with the Dockerfile's strip
-flags (`gati-container`) and browser assets from two clean exports
-with independent compilation caches on the same host/toolchain. It does not prove
-cross-platform reproducibility, identical OCI metadata or a remote operator's honesty.
-Compare `gati-container` to `api_binary_sha256` extracted from the actual release
-image. Image IDs can differ because of OCI/build timestamps even when that executable
-is byte-identical. A host auditor can extract `/gati` from the running container and
-compare it too; this still does not prove the process or host is honest.
+`reproduce-build` compares API, Caddy, cloudflared and browser assets from two clean
+exports with independent compilation caches. All Go images now retain symbols so
+binary vulnerability scans can distinguish linked functions from module inventory.
+Compare the three executable hashes with `runtime_binary_sha256` in release.json;
+`api_binary_sha256` remains as a compatibility field. OCI image IDs can differ
+because of build metadata even when executable bytes match. This is same-host
+reproduction, not independent-host validation or remote operator attestation.
+See [runtime auditing](RUNTIME_SECURITY.md) for locked source, patch and SBOM details.
 Use `python3 scripts/verify-public.py --release /PATH/RELEASE --url https://gati.example`
 to compare served browser bytes and the advertised config hash against a separately
 obtained release. Disable content rewriting at the edge. A privileged
@@ -144,10 +144,11 @@ service `http://web:8080`. Set a final unmatched-hostname rule to 404. Provision
 connector token privately as `.gati-production-runtime/tunnel-token`; it must be
 readable by the container UID but protected by the 0700 host parent. Never paste
 tokens into chat, commit them or put them on command lines. Quick tunnels are not
-the supported production path. Then, only after authorization and edge review:
+the supported production path. Then, only after authorization, a passing exact-release image audit no older than
+24 hours, and edge review:
 
 ```sh
-python3 scripts/release.py up --release /opt/gati/releases/RELEASE --edge
+python3 scripts/release.py up --release /opt/gati/releases/RELEASE --edge --audit /opt/gati/audits/RELEASE/audit.json
 python3 scripts/release.py verify --release /opt/gati/releases/RELEASE --running --edge
 ```
 

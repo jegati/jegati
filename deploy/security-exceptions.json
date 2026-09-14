@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "exceptions": [
+    {
+      "reviewed": "2026-09-14",
+      "expires": "2026-10-14",
+      "owner": "GATI maintainer",
+      "id": "GO-2026-5932",
+      "package": "golang.org/x/crypto",
+      "version": "v0.57.0",
+      "services": [
+        "api",
+        "web",
+        "tunnel"
+      ],
+      "reason": "The advisory affects the deprecated openpgp package, which is not imported by these entrypoints. No affected symbols are linked. Other x/crypto packages remain required.",
+      "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-5932"
+    },
+    {
+      "reviewed": "2026-09-14",
+      "expires": "2026-10-14",
+      "owner": "GATI maintainer",
+      "id": "GHSA-gcjh-h69q-9w9g",
+      "package": "github.com/google/cel-go",
+      "version": "v0.28.1",
+      "services": [
+        "web"
+      ],
+      "reason": "Caddy uses CEL matching, but does not call ext.NativeTypes or ext.ParseStructTag. The minimal image has no affected binary symbols. CEL 0.29/0.30 change interpreter APIs and cannot directly replace this dependency without a Caddy compatibility update. Review on any module/config change.",
+      "evidence": "Source govulncheck and mandatory exact-image binary scan; https://pkg.go.dev/vuln/GO-2026-6094"
+    }
+  ]
+}

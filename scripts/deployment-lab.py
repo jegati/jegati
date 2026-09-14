@@ -71,13 +71,15 @@ def run(out):
    command('node',str(ROOT/'scripts/deployment-browser.mjs'),f'http://localhost:{port}',cwd=ROOT)
    checks.append('Chromium runs the built client through production CSP/proxy: map loads, device-derived willingness, status and cancellation')
    # Use a local Host-preserving adapter for the reusable journey helper.
+   transient_proxy_failures=[]
    def api(method,path,cap=None,data=None,nonce=None,network='198.51.100.40'):
     headers={'X-Gati-Lab-IP':network}
     if cap:headers['Authorization']='Bearer '+cap
     if data is not None:headers['Content-Type']='application/json'
     if nonce:headers['X-Gati-Arrival-Nonce']=nonce
     s,h,b=request(method,path,headers,json.dumps(data) if data is not None else None)
-    return s,json.loads(b) if b else None
+    if s>=500:transient_proxy_failures.append(s)
+    return s,json.loads(b) if b and h.get('Content-Type','').startswith('application/json') else None
    config=api('GET','/api/config')[1]['config'];caps=[token() for _ in range(config['matching']['activation_count'])]
    body={'cell':'tirana-v1:100:55:55','radius_km':3,'availability_minutes':30}
    for cap in caps:assert api('POST','/api/signals',cap,body)[0]==200
@@ -91,8 +93,10 @@ def run(out):
    assert api('DELETE','/api/arrival',caps[0])[0]==200
    assert api('POST','/api/arrival',caps[0],arrival,nonce)[0]==410
    command('docker','stop',ids['api'][0]);eventually(lambda:api('GET','/api/signal',caps[0])[0]==200,20)
-   assert api('DELETE','/api/signal',caps[0])[0]==204
-   assert api('GET','/api/signal',caps[0])[0]==410
+   # Docker DNS can still include the stopped replica for five seconds. A
+   # successful GET need not mean the next request selects the surviving peer.
+   eventually(lambda:api('DELETE','/api/signal',caps[0])[0]==204,20)
+   eventually(lambda:api('GET','/api/signal',caps[0])[0]==410,20)
    checks.append('two API replicas plus one worker: real activation/going, concurrent arrival retry, replay rejection, surviving API after one replica stops')
    apiMetrics=snapshot('/run/ops/gati.sock',ids['api'][1]);workerMetrics=snapshot('/run/ops/gati.sock',ids['worker'][0])
    assert set(apiMetrics['workers'])=={'view'} and {'matcher','publisher','cleanup'}<=set(workerMetrics['workers'])
@@ -102,7 +106,7 @@ def run(out):
    s,_,_=request('POST','/api/signals',{'Authorization':'Bearer '+token(),'Content-Type':'application/json','X-Gati-Lab-IP':'198.51.100.200','CF-Connecting-IP':'198.51.100.201','X-Gati-Client-IP':'198.51.100.201','X-Forwarded-For':'198.51.100.201'},json.dumps(body));assert s==429
    assert api('POST','/api/signals',token(),body,network='198.51.100.201')[0]==200
    checks.append('shared per-network admission limit survives replicas and forged forwarding headers; another network retains admission')
-   report={'synthetic':True,'checks':checks,'wall_seconds':round(time.time()-started,2),'scope':'local production images and Caddy with a fake loopback connector; no Cloudflare, real TLS/device/push or VPS capacity test'}
+   report={'synthetic':True,'checks':checks,'transient_proxy_5xx_during_failover':len(transient_proxy_failures),'wall_seconds':round(time.time()-started,2),'scope':'local production images and Caddy with a fake loopback connector; no Cloudflare, real TLS/device/push or VPS capacity test'}
    (out/'deployment.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
   finally:
    subprocess.run(['docker','rm','-f',connector],stdout=log,stderr=log)

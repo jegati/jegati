@@ -12,9 +12,9 @@ with tempfile.TemporaryDirectory(prefix='gati-reproduce-') as d:
   with tarfile.open(fileobj=io.BytesIO(archive)) as tar:tar.extractall(checkout,filter='data')
   with (out/f'build-{n}.log').open('wb') as log:
    env={**os.environ,'CGO_ENABLED':'0','GOCACHE':str(checkout/'.go-build-cache')}
-   for args in [('go','mod','verify'),('go','build','-trimpath','-buildvcs=false','-o','gati','./cmd/gati'),('go','build','-trimpath','-buildvcs=false','-ldflags=-s -w','-o','gati-container','./cmd/gati'),('npm','--prefix','web','ci','--ignore-scripts','--no-audit','--no-fund'),('npm','--prefix','web','run','build')]:
+   for args in [('go','mod','verify'),('go','build','-trimpath','-buildvcs=false','-o','gati','./cmd/gati'),('go','build','-trimpath','-buildvcs=false','-o','gati-container','./cmd/gati'),('npm','--prefix','web','ci','--ignore-scripts','--no-audit','--no-fund'),('npm','--prefix','web','run','build'),('python3','scripts/build-runtimes.py','--output','runtimes')]:
     subprocess.run(args,cwd=checkout,env=env,stdout=log,stderr=log,check=True)
-  files=[checkout/'gati',checkout/'gati-container',*(checkout/'web/dist').rglob('*')]
+  files=[checkout/'gati',checkout/'gati-container',checkout/'runtimes/caddy',checkout/'runtimes/cloudflared',*(checkout/'web/dist').rglob('*')]
   manifests.append({str(f.relative_to(checkout)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(files) if f.is_file()})
   if n==0:
    (out/'go-modules.jsonl').write_bytes(run('go','list','-m','-json','all',cwd=checkout))

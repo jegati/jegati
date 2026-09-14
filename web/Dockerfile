@@ -5,13 +5,24 @@ RUN npm ci --ignore-scripts --no-audit --no-fund
 COPY web/ ./
 RUN npm run build
 
-FROM caddy:2.11.4-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
-# Port 8080 needs no capability. Upstream's file capability otherwise prevents
-# exec when the production container drops ALL capabilities.
-RUN setcap -r /usr/bin/caddy
+FROM golang:1.27.1-bookworm@sha256:648f440f42a0958804efb24df176f806f9d353b41f1c0627f666428e40310f6b AS proxy
+WORKDIR /src
+COPY deploy/caddy/go.mod deploy/caddy/go.sum ./
+RUN go mod download all && go mod verify
+COPY deploy/caddy/ ./
+COPY scripts/runtimeprep/main.go scripts/runtimeprep/licenses.go /tools/runtimeprep/
+RUN CGO_ENABLED=0 go build -mod=readonly -trimpath -buildvcs=false -o /caddy .
+RUN go run /tools/runtimeprep/*.go licenses /licenses
+
+FROM scratch
+COPY --from=proxy /caddy /usr/bin/caddy
+COPY --from=proxy /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=proxy /licenses /licenses
+COPY LICENSE /licenses/GATI-LICENSE
 COPY --from=build /src/web/dist /srv
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
 ENV XDG_CONFIG_HOME=/tmp/config XDG_DATA_HOME=/tmp/data
 USER 10001:10001
 EXPOSE 8080
-CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+ENTRYPOINT ["/usr/bin/caddy"]
+CMD ["run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]

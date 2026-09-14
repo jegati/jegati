@@ -137,6 +137,12 @@ test-pressure:
 .PHONY: production-build test-deployment
 production-build:
 	$(COMPOSE) -f compose.production.yaml config --quiet
-	$(COMPOSE) -f compose.production.yaml build api web
+	$(COMPOSE) -f compose.production.yaml build api web tunnel
 test-deployment: production-build
 	python3 scripts/deployment-lab.py --output "$(or $(OUTPUT),reports/local/deployment-$(shell date -u +%Y%m%dT%H%M%S))"
+
+.PHONY: test-runtimes audit-images
+test-runtimes:
+	python3 scripts/build-runtimes.py --test --output "$(or $(OUTPUT),reports/local/runtime-check-$(shell date -u +%Y%m%dT%H%M%S))"
+audit-images:
+	python3 scripts/audit-images.py --release "$(RELEASE)" --output "$(or $(OUTPUT),reports/local/image-audit-$(shell date -u +%Y%m%dT%H%M%S))"

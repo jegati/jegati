@@ -1102,3 +1102,36 @@ build/scan/rehearse a new immutable artifact. Only afterward proceed to independ
 review and a chosen domain/VPS, privately arranged SSH/Cloudflare authentication,
 security-reporting and alert channels, actual host/edge/device gates and explicit
 public authorization. Preserve unrelated commands.txt.
+
+
+## Runtime remediation in progress — 2026-09-14
+
+User authorized proceeding with review remediation. Added locked Caddy and verified
+cloudflared source builds using Go 1.27.1 and patched Go dependencies, scratch
+runtimes, dependency license preservation and symbol retention for precise binary
+scanning. Cloudflared's four Sentry initializers are disabled by a checked patch;
+source tests confirm no client/event even with a synthetic DSN. Caddy now contains
+only modules required by the reviewed Caddyfile and a fixed loopback health probe.
+
+Added full image/SBOM auditing with exact, expiring package exceptions, unconditional
+Go binary checks and a fresh-audit public activation gate. Release manifests now
+record API/proxy/tunnel executable hashes; clean reproduction includes all three.
+CEL's direct upgrade broke upstream interpreter APIs; kept its locked version with
+an unused-function exception pending symbol verification, rather than changing the
+interpreter behavior. Raw failures and corrected builds are retained locally.
+
+Validation so far: patched access/tunnel privacy tests, source vulnerability scans,
+Caddy health tests, Python audit/release guards and an initial actual production
+browser/two-API rehearsal passed (72.0s). The final symbol-retaining images and
+compression patch are undergoing scans and the final production rehearsal. Next:
+commit tested source, prepare/scan/rehearse a new exact release and compare clean
+builds before claiming the runtime remediation complete. No remote action taken;
+keep commands.txt untouched. See RUNTIME_SECURITY.md and decision 0013.
+
+The locked source runtime tests and final production browser/two-API rehearsal now
+pass (71.88s, two observed transient 5xx responses during deliberate replica loss,
+followed by successful bounded retry/cancellation). The harness now handles plain
+proxy errors and does not mistake one successful request for complete DNS recovery.
+Application tests/audits, fresh store race integrations and 25 Python tests pass.
+Next is the exact committed artifact audit/reproduction; local pre-export scans
+have only the scoped CEL/OpenPGP package findings and no affected binary symbols.

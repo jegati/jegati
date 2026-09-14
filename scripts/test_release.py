@@ -1,6 +1,6 @@
-import copy,hashlib,json,pathlib,tempfile,unittest
+import copy,datetime,hashlib,json,pathlib,tempfile,unittest
 from unittest.mock import patch
-from release import verify_files,activate,runtime_dir,verify_runtime_shape,verify_service_selection
+from release import verify_files,activate,runtime_dir,verify_runtime_shape,verify_service_selection,verify_audit
 
 class ReleaseTests(unittest.TestCase):
  def test_existing_acl_changes_are_rejected_without_rewrite(self):
@@ -66,5 +66,21 @@ class RuntimeTests(unittest.TestCase):
  def test_selected_services_are_not_treated_as_orphans(self):
   with patch('release.compose') as command:
    verify_service_selection(pathlib.Path('/release'),'test',2,True);command.assert_not_called()
+
+class AuditGateTests(unittest.TestCase):
+ def test_public_activation_requires_exact_fresh_complete_audit(self):
+  with tempfile.TemporaryDirectory() as directory:
+   root=pathlib.Path(directory);(root/'release.json').write_text('{}')
+   manifest={'images':{'api':{'image_id':'sha256:image'}},'runtime_binary_sha256':{'api':'binary'}}
+   now=datetime.datetime(2026,9,14,tzinfo=datetime.timezone.utc)
+   audit={'passed':True,'scanned_at':now.isoformat(),'release_manifest_sha256':hashlib.sha256(b'{}').hexdigest(),'images':{'api':{'image_id':'sha256:image','binary_sha256':'binary','binary_scan_passed':True,'unresolved_findings':[],'accepted_findings':[]}}}
+   path=root/'audit.json';path.write_text(json.dumps(audit));verify_audit(root,manifest,path,now)
+   with self.assertRaises(ValueError):verify_audit(root,manifest,None,now)
+   for change in [{'passed':False},{'scanned_at':(now-datetime.timedelta(days=2)).isoformat()},{'scanned_at':(now+datetime.timedelta(hours=1)).isoformat()},{'release_manifest_sha256':'other'},{'images':{}}]:
+    path.write_text(json.dumps({**audit,**change}))
+    with self.assertRaises(ValueError):verify_audit(root,manifest,path,now)
+   for change in [{'image_id':'other'},{'binary_sha256':'other'},{'binary_scan_passed':False},{'unresolved_findings':['new']},{'accepted_findings':[{'exception':{'expires':'2026-09-13'}}]}]:
+    changed=copy.deepcopy(audit);changed['images']['api'].update(change);path.write_text(json.dumps(changed))
+    with self.assertRaises(ValueError):verify_audit(root,manifest,path,now)
 
 if __name__=='__main__':unittest.main()
