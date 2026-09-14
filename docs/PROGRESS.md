@@ -71,6 +71,11 @@ by formatting/refactoring tests.
 
 ## Working commands and next action
 
+Local browser preview refreshed on 2026-09-14 from `0abbb6a`:
+http://127.0.0.1:5173/ (About: /#rreth-nesh). The detached `gati` development
+Compose stack is running on loopback; stop it with `make down`. This is not a
+public deployment. Verify running state again when resuming.
+
 Start with [AUDIT](AUDIT.md) for source→storage→test links and [DEVELOPMENT](DEVELOPMENT.md)
 for setup. `make audit-local` includes real Valkey integrations; plain `make test`
 does not. `make audit-journeys` runs Chromium, real delayed publication and the local
@@ -1523,3 +1528,21 @@ Requirements and plan now record the approved public purpose, superseding the
 purpose-copy exclusion from the earlier usability batch. README and THREAT_MODEL
 are consistent. Next: prepare a fresh audited release once VPS/access is ready;
 this About request is complete locally. Keep commands.txt untouched.
+
+
+## Local browser deployment of About — 2026-09-14
+
+At the user's request, refreshed the existing development stack from `0abbb6a`
+with `make secrets` and `docker-compose -f compose.yaml up -d --build api web`.
+The existing private Valkey container was retained; API/web were rebuilt and
+recreated. Services remain detached on loopback (web 5173, API 8080), with no
+public deployment, tunnel or remote push. No tools or credentials were needed.
+
+After API startup, readiness checks verified HTTP 200, schema 9 and the current
+About HTML. `make check-containers` passed API/client/config proxy, private Valkey
+networking, health and persistence checks. A fresh Chromium session against the
+actual running http://127.0.0.1:5173 verified enabled JAM GATI, rendered Tirana map,
+About navigation and no page errors; it did not enroll or request device location.
+
+Next: user can review /#rreth-nesh in their browser. The stack remains running;
+`make down` stops it. Public release still needs VPS/access and fresh release audit.
