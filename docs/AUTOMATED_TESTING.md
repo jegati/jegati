@@ -130,7 +130,10 @@ The realistic maximum-lifetime overnight scenario remains outside this batch.
 The subsequent alpha-preparation batch adds scripts/lifecycle_run.py. It owns a
 disposable API/Valkey and accepts no target URL; the API is built from the recorded
 HEAD export. Commit the driver before starting so its recorded hash/revision are
-reviewable. Production clocks/settings stay unchanged, push stays off, and synthetic
+reviewable. The Make targets set CGO_ENABLED=0 to match the release API build; use
+the same environment when invoking the Python driver directly. Compare the lab's
+binary_sha256 with the release's api_binary_sha256 before claiming an exact match.
+Production clocks/settings stay unchanged, push stays off, and synthetic
 capabilities remain in driver memory. The report records only totals and bounded
 minute samples; monitoring retains its existing one-hour rolling window.
 

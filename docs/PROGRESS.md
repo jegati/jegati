@@ -1741,3 +1741,29 @@ compiles. The actual hostname rehearsal and exact new-image audit are next and a
 not yet credited. Full overnight runner was launched separately from source dcfda14
 at reports/local/alpha-lifecycle-overnight with a temporary sleep inhibitor; its
 final status remains pending. No external alerts or remote operations performed.
+
+
+## Four alpha preparations checkpoint — 2026-09-14
+
+Alpha notice/optional feedback, tested local alert routing, and the jamgati.com
+package are prepared. Source 6efad34 release manifest:
+9965dc5223b897faf2bcfe4498e976d76c46596d247a2f9b5c2c740e00a5e52f.
+Four exact image audits passed with zero unresolved findings; two scoped exceptions
+expire 2026-10-14. Two clean builds match all three release runtime binaries and
+seven browser assets. Actual local hostname/activation/compatible rollback rehearsal
+passed in 145.38s. Exact image identity/audit freshness gates also passed.
+
+Full eight-hour run is ACTIVE at reports/local/jamgati-alpha-overnight/lifecycle.json,
+source 6efad34, expected finish 2026-09-14 23:29:05 Europe/Rome. API binary matches
+this release byte for byte. The initial default-CGO run was gracefully interrupted
+and replaced with CGO_ENABLED=0; Make lifecycle targets now document/enforce that
+build setting. A temporary process-owned sleep inhibitor is active; no permanent
+power setting changed. The driver records final status and cleans its own lab.
+Running is not passed; inspect final results before crediting renewal/expiry/drift.
+
+See [the preparation report](reports/alpha-preparation-2026-09-14.md) and sanitized
+JSON for evidence and limits. Alert channel/private endpoint selection is pending;
+no external messages, service installation, DNS change, push or deployment occurred.
+Next action: inspect the overnight result; with delivered VPS and private access,
+follow ALPHA_DEPLOYMENT.md/DEPLOYMENT.md for actual host/Cloudflare/TLS/cache checks.
+Real-device/independent-review gaps remain; no separate volunteer stage is required.

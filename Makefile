@@ -128,9 +128,9 @@ test-soak: secrets
 
 .PHONY: test-lifecycle-smoke test-lifecycle-overnight test-ops-alerts
 test-lifecycle-smoke:
-	python3 scripts/lifecycle_run.py --smoke --output "$(or $(OUTPUT),reports/local/lifecycle-smoke-$(shell date -u +%Y%m%dT%H%M%S))"
+	CGO_ENABLED=0 python3 scripts/lifecycle_run.py --smoke --output "$(or $(OUTPUT),reports/local/lifecycle-smoke-$(shell date -u +%Y%m%dT%H%M%S))"
 test-lifecycle-overnight:
-	python3 scripts/lifecycle_run.py --hours "$(or $(HOURS),8)" --output "$(or $(OUTPUT),reports/local/lifecycle-overnight-$(shell date -u +%Y%m%dT%H%M%S))"
+	CGO_ENABLED=0 python3 scripts/lifecycle_run.py --hours "$(or $(HOURS),8)" --output "$(or $(OUTPUT),reports/local/lifecycle-overnight-$(shell date -u +%Y%m%dT%H%M%S))"
 test-ops-alerts:
 	python3 -m unittest discover -s scripts -p 'test_ops_alerts.py'
 
