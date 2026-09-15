@@ -130,6 +130,11 @@ jobs:
       - name: Install the pinned build tools
         run: bash scripts/bootstrap.sh
 
+      - name: Install locked project dependencies
+        run: |
+          source scripts/env.sh
+          make deps
+
       - name: Run the local release gates in the GitHub runner
         run: |
           source scripts/env.sh
